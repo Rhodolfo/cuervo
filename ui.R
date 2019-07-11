@@ -4,7 +4,7 @@ library(shinydashboard)
 header <- dashboardHeader(
   tags$li(class = "dropdown",
           tags$li(class = "dropdown", textOutput("logged_user"), style = "padding-top: 15px; padding-bottom: 15px; padding-right: 15px; color: #66b3ff;"),
-          tags$li(class = "dropdown", actionLink("boton_login_pre", textOutput("texto_login")))
+          tags$li(class = "dropdown", actionLink("boton_login_pre",textOutput('texto_link')))
           )
 )
 
@@ -13,15 +13,12 @@ header$children[[2]]$children <-  tags$a(href='http://mycompanyishere.com',
 
 
 sidebar <- dashboardSidebar(
-
   sidebarMenu(
     id = 'menu',
-      conditionalPanel(condition = 'input.preloged == "aprovado"',
-        menuItem(
-          'Log in', 'entrada'
-        )
-      )
+    menuItem(
+      'Log in',tabName =  'entrada'
     )
+  )
 )
 
 

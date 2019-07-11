@@ -4,7 +4,7 @@ library(shinydashboard)
 shinyServer(function(input, session, output) {
   
   user <- reactiveValues(        # variables de usuario y status de logeo
-    preloged = 'noaprovado',
+    prelog = FALSE,
     logged = FALSE, 
     role = NULL,
     name = NULL
@@ -31,24 +31,34 @@ shinyServer(function(input, session, output) {
   
   ui2 <- function(){list(tabPanel(user$name),tabPanel(user$role))}    # información de log in existoso
   
-  observe({                           # observador que checa el log in
-    if (user$logged == FALSE) {
-      if (!is.null(input$boton_login)) {
-        if (input$boton_login > 0) {
-          username <- isolate(input$input_usuario)
-          Password <- isolate(input$passwd)
-          Id.username <- which(nube$usuarios$usuario == username)
-          Id.password <- which(nube$usuarios$contrasena == Password)
-          if (length(Id.username) > 0 & length(Id.password) > 0) {
-            if (Id.username == Id.password) {
-              user$logged <- TRUE
-              user$role = nube$usuarios$rol[Id.username] 
-              user$name <- nube$usuarios$nombre[Id.username] 
-            }
-          } 
+  
+  observeEvent(input$boton_login_pre,{
+    user$logged <- FALSE
+    user$role <- NULL
+    user$name <- NULL
+  })
+  
+  observeEvent(input$boton_login,{                           # observador que checa el log in
+    if(user$prelog == FALSE){
+      if (user$logged == FALSE) {
+        if (!is.null(input$boton_login)) {
+          if (input$boton_login > 0) {
+            username <- isolate(input$input_usuario)
+            Password <- isolate(input$passwd)
+            Id.username <- which(nube$usuarios$usuario == username)
+            Id.password <- which(nube$usuarios$contrasena == Password)
+            if (length(Id.username) > 0 & length(Id.password) > 0) {
+              if (Id.username == Id.password) {
+                user$logged <- TRUE
+                user$role = nube$usuarios$rol[Id.username] 
+                user$name <- nube$usuarios$nombre[Id.username]
+              }
+            } 
+          }
         }
       }
     }
+    
   })
   observe({
     if (user$logged == FALSE) {
@@ -64,21 +74,19 @@ shinyServer(function(input, session, output) {
     }
   })
   
+  
+  
   output$logged_user <- renderText({
     if(user$logged == TRUE) return(paste0('Sesión iniciada como ', user$name))
     return("")
   })
   
-  output$texto_login <- renderText({
-    if(user$logged == TRUE) return("log out")
-    return("log in")
-  })
   
-  observeEvent(input$boton_login_pre,{
-    user$preloged <- 'aprovado'
-    user$logged <- (user$logged + 1) %% 2
-  })
   
+  output$texto_link <- renderText({
+    if(user$logged == TRUE)return('log out')
+    return('')
+  })
   
   
 })
