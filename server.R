@@ -89,5 +89,51 @@ shinyServer(function(input, session, output) {
   })
   
   
+  # seguimiento de las inputs ------------------------------------------------------------------
+  
+  output$variables_boton_login_pre <- renderText({
+    paste(
+      'boton_login_pre',
+      input$boton_login_pre
+    )
+  })
+  
+  output$variables_boton_login <- renderText({
+    paste(
+      'boton_login',
+      input$boton_login
+    )
+  })
+  
+  # seguimiento de las variables reactivas ------------------------------------------------------
+  
+  output$variables_user_prelog <- renderText({
+    paste(
+      'user_prelog',
+      user$prelog
+    )
+  })
+  
+  output$variables_user_logged <- renderText({
+    paste(
+      'user_logged',
+      user$logged
+    )
+  })
+  
+  output$variables_user_role <- renderText({
+    paste(
+      'user_role',
+      user$role
+    )
+  })
+  
+  output$variables_user_name <- renderText({
+    paste(
+      'user_name',
+      user$name
+    )
+  })
+  
 })
     

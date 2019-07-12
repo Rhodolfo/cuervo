@@ -13,12 +13,21 @@ header$children[[2]]$children <-  tags$a(href='http://mycompanyishere.com',
 
 
 sidebar <- dashboardSidebar(
-  sidebarMenu(
-    id = 'menu',
-    menuItem(
-      'Log in',tabName =  'entrada'
+  conditionalPanel(condition = 'input.boton_login % 2 == 0',
+    sidebarMenu(
+      id = 'menu',
+      menuItem(
+        'Log in',tabName =  'entrada'
+      )
     )
-  )
+  ),
+  h1('variables'),
+  textOutput('variables_boton_login_pre'),
+  textOutput('variables_boton_login'),
+  textOutput('variables_user_prelog'),
+  textOutput('variables_user_logged'),
+  textOutput('variables_user_name'),
+  textOutput('variables_user_role')
 )
 
 
