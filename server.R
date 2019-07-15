@@ -6,12 +6,25 @@ shinyServer(function(input, session, output) {
   user <- reactiveValues(        # variables de usuario y status de logeo
     prelog = FALSE,
     logged = FALSE, 
-    role = NULL,
+    role = '',
     name = NULL
   ) 
   
   nube <- reactiveValues(                # datos de la nube
     usuarios = nube_cuervo_usuarios
+  )
+  
+  proceso = reactiveValues(
+    nacionales_moderno = 1,
+    nacionales_mayoreo = 1,
+    nacionales_consumo = 1,
+    usa_wine = 1,
+    usa_proximo = 1,
+    row_region1 = 1,
+    row_region2 = 1,
+    row_region3 = 1,
+    row_region4 = 1,
+    row_region5 = 1
   )
   
   ui1 <- function(){   # pantalla de logeo inicial
@@ -34,8 +47,8 @@ shinyServer(function(input, session, output) {
   
   observeEvent(input$boton_login_pre,{
     user$logged <- FALSE
-    user$role <- NULL
-    user$name <- NULL
+    user$role <- ''
+    user$name <- ''
   })
   
   observeEvent(input$boton_login,{                           # observador que checa el log in
@@ -75,6 +88,10 @@ shinyServer(function(input, session, output) {
   })
   
   
+  observeEvent(input$boton_login_pre, {
+    updateTabsetPanel(session, "menu",selected = "entrada")
+  })
+  
   
   output$logged_user <- renderText({
     if(user$logged == TRUE) return(paste0('Sesión iniciada como ', user$name))
@@ -87,6 +104,18 @@ shinyServer(function(input, session, output) {
     if(user$logged == TRUE)return('log out')
     return('')
   })
+  
+  output$esta_logeado <- reactive({
+    user$role == ''
+  })
+  
+  outputOptions(output, "esta_logeado", suspendWhenHidden = FALSE)
+  
+  output$es_administrador <- reactive({
+    user$role == 'administrador'
+  })
+  
+  outputOptions(output, "es_administrador", suspendWhenHidden = FALSE)
   
   
   # seguimiento de las inputs ------------------------------------------------------------------
@@ -134,6 +163,17 @@ shinyServer(function(input, session, output) {
       user$name
     )
   })
+  
+  
+  # gráfica de procedimiento -------------------------------------------------------------------------------------------------
+  
+  output$grafica_proceso <- renderSankeyNetwork({
+    sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", Value = "value", NodeID = "name", colourScale=my_color, LinkGroup="group", fontSize = 15)
+  }
+  )
+  
+  
+  
   
 })
     

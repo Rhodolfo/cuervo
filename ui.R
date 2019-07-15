@@ -13,11 +13,19 @@ header$children[[2]]$children <-  tags$a(href='http://mycompanyishere.com',
 
 
 sidebar <- dashboardSidebar(
-  conditionalPanel(condition = 'input.boton_login % 2 == 0',
+  conditionalPanel(condition = 'output.esta_logeado',
     sidebarMenu(
       id = 'menu',
       menuItem(
         'Log in',tabName =  'entrada'
+      )
+    )
+  ),
+  conditionalPanel(condition = 'output.es_administrador',
+    sidebarMenu(
+      id = 'menu_proceso',
+      menuItem(
+        'Proceso', tabName = 'proceso'
       )
     )
   ),
@@ -44,6 +52,16 @@ body <- dashboardBody(
     tabItem(
       'entrada',
       uiOutput('page')
+    ),
+    tabItem(
+      'proceso',
+      box(
+        title = 'Proceso',
+        solidHeader = T,
+        width = 9,
+        status = 'warning',
+        sankeyNetworkOutput('grafica_proceso')
+      )
     )
   )
 )
