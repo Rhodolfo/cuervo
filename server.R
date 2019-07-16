@@ -36,7 +36,7 @@ shinyServer(function(input, session, output) {
       ,tags$style(type="text/css", "#login {font-size:10px;
                   text-align: left;
                   position:absolute;
-                  top: 10%;
+                  top: 25%;
                   left: 50%;
                   margin-top: -10px
                   ;margin-left: -150px;}")
@@ -111,11 +111,25 @@ shinyServer(function(input, session, output) {
   
   outputOptions(output, "esta_logeado", suspendWhenHidden = FALSE)
   
+  
+  
+  
+  # activación de los diferentes tipos de usuario ----------------------------------------------
+  
   output$es_administrador <- reactive({
     user$role == 'administrador'
   })
-  
   outputOptions(output, "es_administrador", suspendWhenHidden = FALSE)
+  
+  output$es_tester <- reactive({
+    user$role == 'tester'
+  })
+  outputOptions(output, "es_tester", suspendWhenHidden = FALSE)
+  
+  output$es_servicio_cliente_nacional <- reactive({
+    user$role == 'servicio_cliente_nacional'
+  })
+  outputOptions(output, "es_servicio_cliente_nacional", suspendWhenHidden = FALSE)
   
   
   # seguimiento de las inputs ------------------------------------------------------------------
@@ -169,8 +183,11 @@ shinyServer(function(input, session, output) {
   
   output$grafica_proceso <- renderSankeyNetwork({
     sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", Value = "value", NodeID = "name", colourScale=my_color, LinkGroup="group", fontSize = 15)
-  }
-  )
+  })
+  
+  output$grafica_fill_rate <- renderHighchart({
+    funcion_grafica_fill_rate(datos_fill_rate)
+  })
   
   
   

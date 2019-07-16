@@ -1,0 +1,12 @@
+name: cuervo
+title: cuervo
+username:
+account: pelishka
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1034421
+bundleId: 2237496
+url: https://pelishka.shinyapps.io/cuervo/
+when: 1563293179.6841
+asMultiple: FALSE
+asStatic: FALSE

@@ -6,10 +6,15 @@ header <- dashboardHeader(
           tags$li(class = "dropdown", textOutput("logged_user"), style = "padding-top: 15px; padding-bottom: 15px; padding-right: 15px; color: #66b3ff;"),
           tags$li(class = "dropdown", actionLink("boton_login_pre",textOutput('texto_link')))
           )
+  
 )
 
-header$children[[2]]$children <-  tags$a(href='http://mycompanyishere.com',
+header$children[[2]]$children <-  tags$a(href='wiii',
                                            tags$img(src='logo_arena.png'))
+
+
+
+
 
 
 sidebar <- dashboardSidebar(
@@ -21,7 +26,7 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_administrador',
+  conditionalPanel(condition = 'output.es_administrador || output.es_tester',
     sidebarMenu(
       id = 'menu_proceso',
       menuItem(
@@ -29,17 +34,41 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  h1('variables'),
-  textOutput('variables_boton_login_pre'),
-  textOutput('variables_boton_login'),
-  textOutput('variables_user_prelog'),
-  textOutput('variables_user_logged'),
-  textOutput('variables_user_name'),
-  textOutput('variables_user_role')
+  conditionalPanel(condition = 'output.es_servicio_cliente_nacional || output.es_administrador || output.es_tester',
+                   sidebarMenu(
+                     id = 'menu_servicio_cliente_nacional',
+                     menuItem(
+                       'Pedidos', tabName = 'pedidos_nacional'
+                     )
+                   )
+  ),
+  conditionalPanel(condition = 'output.es_administrador || output.es_tester',
+    sidebarMenu(
+      id = 'menu_kpi',
+      menuItem(
+        'KPIs', tabName = 'kpi'
+      )
+    )
+  ),
+  conditionalPanel(condition = 'output.es_administrador',
+    sidebarMenu(
+      id = 'menu_variables',
+      h1('variables'),
+      textOutput('variables_boton_login_pre'),
+      textOutput('variables_boton_login'),
+      textOutput('variables_user_prelog'),
+      textOutput('variables_user_logged'),
+      textOutput('variables_user_name'),
+      textOutput('variables_user_role')
+    )
+  )
 )
 
 
 body <- dashboardBody(
+  
+
+  
   tags$head(tags$style(HTML('
 
 .skin-blue .main-header .logo {
@@ -62,6 +91,13 @@ body <- dashboardBody(
         status = 'warning',
         sankeyNetworkOutput('grafica_proceso')
       )
+    ),
+    tabItem(
+      'kpi',
+      highchartOutput('grafica_fill_rate')
+    ),
+    tabItem(
+      'pedidos_nacional'
     )
   )
 )
