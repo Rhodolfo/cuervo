@@ -94,7 +94,14 @@ body <- dashboardBody(
     ),
     tabItem(
       'kpi',
-      highchartOutput('grafica_fill_rate')
+      box(
+        width = 6,
+        highchartOutput('grafica_fill_rate')
+      ),
+      box(
+        width = 6,
+        leafletOutput('mapa_fill_rate')
+      )
     ),
     tabItem(
       'pedidos_nacional'

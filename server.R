@@ -3,6 +3,15 @@ library(shinydashboard)
 
 shinyServer(function(input, session, output) {
   
+  
+  # definición de las variables reactivas -------------------------------------------------------------------------------------------------
+  
+  
+  chat <- reactiveValues(     # variables para el chat
+    chat = NULL,
+    users = NULL
+  )
+  
   user <- reactiveValues(        # variables de usuario y status de logeo
     prelog = FALSE,
     logged = FALSE, 
@@ -26,6 +35,7 @@ shinyServer(function(input, session, output) {
     row_region4 = 1,
     row_region5 = 1
   )
+
   
   ui1 <- function(){   # pantalla de logeo inicial
     tagList(
@@ -189,7 +199,17 @@ shinyServer(function(input, session, output) {
     funcion_grafica_fill_rate(datos_fill_rate)
   })
   
+  # mapa de fill_rate -----------------------------------------------------------------------------------------------------------------------
   
+  output$mapa_fill_rate <- renderLeaflet({
+    leaflet(data = mexico) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      addPolygons(fillColor = ~pal(fill_rate), 
+                  fillOpacity = 0.8, 
+                  color = "#BDBDC3", 
+                  weight = 1, 
+                  popup = state_popup)
+  })
   
   
 })
