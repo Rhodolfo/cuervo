@@ -50,6 +50,14 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
+  conditionalPanel(condition = 'output.es_administrador || output.es_tester',    # visualizador de tablas
+    sidebarMenu(
+      id = 'menu_visualizador',
+      menuItem(
+        'Visualizador', tabName = 'visualizador'
+      )
+    )
+  ),
   conditionalPanel(condition = 'output.es_administrador',
     sidebarMenu(
       id = 'menu_variables',
@@ -101,6 +109,17 @@ body <- dashboardBody(
       box(
         width = 6,
         leafletOutput('mapa_fill_rate')
+      )
+    ),
+    tabItem(                            # visualizador de tablas
+      'visualizador',
+      box(
+        pickerInput(
+          inputId = 'input_visualizador_tabla',
+          label = 'Selecciona una tabla',
+          choices = 'zsdr141',
+          multiple = FALSE
+        )
       )
     ),
     tabItem(

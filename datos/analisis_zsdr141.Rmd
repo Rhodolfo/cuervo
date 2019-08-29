@@ -1,0 +1,254 @@
+---
+title: "Análisis Trackings"
+author: "Arena"
+date: "21 de agosto de 2019"
+output: html_document
+---
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE,message = FALSE)
+library(dplyr)
+library(formattable)
+library(readxl)
+library(stringr)
+library(ggplot2)
+library(reshape2)
+source('funciones.R',encoding = 'utf-8')
+track <- readRDS('track_agosto.rds')
+track_original <- read_excel('consulta_prueba.xlsm',sheet = 'RawData') %>%  #carga
+  as.data.frame %>%
+  setNames(                             #nombres
+    .,str_replace_all(names(.),' ','_')
+  )  
+```
+
+> ## Variables de localización
+
+Región y nombre no están capturadas para todos los pedidos (sólo USA). Esto sucede para los pedidos 18RTDMLE1 y los que tienen raíz JC. Es decir los que se maquilan en USA.
+
+```{r}
+options(width=10)
+track %>%
+  filter(ZnVtaCteSo == 'USA') %>%
+  group_by(Código_SAP,Zona_de_ventas,ZnVtaCteSo,ZnVtaCteDes,Región,Nombre_Región) %>%
+  summarise(conteo = n()) %>%
+  data.frame %>%
+  formattable(.,align = c('l'))
+
+
+
+```
+
+A pesar de que pareciera que los catálogos de códigos de <strong>Zona de ventas</strong>  y <strong>Región</strong> coinciden, hay conflictos entre las variables <strong>ZnVtaCteSo ZnVtaCteDes</strong> y <strong>Nombre_Región</strong>. Específicamente <strong>PUK</strong>. Eso debe corregirse en SAP asignando al código 20017 en <strong>Zona_de_ventas</strong> la etiqueta JCMD en las variables <strong>ZnVtaCteSo</strong>
+
+```{r}
+options(width=200)
+track %>%
+  group_by(Zona_de_ventas,ZnVtaCteSo,ZnVtaCteDes,Región,Nombre_Región) %>%
+  summarise(conteo = n()) %>%
+  data.frame %>%
+  formattable(.,align = c('l'))
+```
+
+> ## Clientes
+
+Las variables <strong>Cliente24</strong> y <strong>Cliente25</strong> en verdad son 2 variables diferentes? (checar el renglón 4 como ejemplo). Adicionalmente todos los registros de la variable <strong>Cliente Destinatario</strong> asociados a <strong>PROXIMO SPIRITS INC</strong> son en realidad únicos?
+
+```{r}
+track %>%
+  group_by(
+    Cliente...24,Cliente...25,Cliente_Destinatario...29,Cliente_Destinatario...30
+  ) %>%
+  summarise(
+    conteo = n()
+  ) %>%
+  data.frame %>%
+  formattable(.,align = c('l'))
+```
+
+> ## Fechas
+
+Por qué la fecha de facturación <strong>Fe_Imp.Fact.</strong> y la hora de facturación <strong>Hra_Imp.Fact</strong> se encuentran separadas siendo que se puede tener toda la info en una sola variable de fecha y hora. De hecho <strong>Hra_Imp.Fact</strong> tiene esa estructura. Adicionalmente las fechas se encuentran en diferentes formatos. Esto es más notorío dado que más del 80% de las fechas estan en el formato <strong>YYYY-MM-YY HH:MM:SS</strong>
+
+```{r}
+track_original[141:150,] %>%
+  select(
+    Fe_Imp.Fact.,Hra_Imp.Fact.
+  ) %>%
+  formattable(.,align = c('l'))
+```
+
+> ##  Coherencia de las fechas
+
+Se graficaron los procesos tomando como punto focal la fecha del pedido (día 0). Las gráficas se interpretan de la siguiente manera.
+
+*  los <strong>rectángulos</strong> acumulan el <strong>50% de las observaciones</strong>
+*  la <strong>línea vertical</strong> indica el punto en el que se acumula el 50% de las observaciones, es la <strong>mediana</strong>
+*  los <strong>bigotes</strong> que se encuentran a los lados nos indican hasta dónde se extienen el resto de las observaciones que podemos considerar como <strong>normales</strong>
+*  los <strong>puntos aislados</strong> representan a las observaciones <strong>atípicas</strong>.
+*  los <strong>puntos azules</strong> son las observaciones reales.
+
+
+
+```{r,fig.width=15}
+fechas <- track %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),ETD,ETA) %>%
+  filter(!is.na(Fecha_Fact.))
+
+funcion_graficas_coherencia_continua_fecha_preferente(fechas,'total')
+
+```
+
+El <strong>principal problema</strong> es la <strong>variabilidad</strong> en los rangos de las fechas de los procesos, un <strong>proceso estandarizado</strong> debería aparecer con <strong>rectángulos pequeños</strong> en la gráfica.
+
+```{r,fig.width=15}
+fechas <- track %>%
+  filter(ZnVtaCteSo == 'USA') %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans'),ETA,ETD) %>%
+  filter(!is.na(Fe.Orig.Pref))
+
+funcion_graficas_coherencia_continua_fecha_preferente(fechas,'USA')
+```
+
+
+Si centramos los datos de USA alrededor de la fecha preferente de entrega obtenemos algunas observaciones raras
+
+```{r}
+fechas <- track %>%
+  filter(ZnVtaCteSo == 'USA') %>%
+  select(Pedido_SAP,contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans')) %>%
+  filter(!is.na(Fe.Orig.Pref))
+
+fechas_temp <- fechas %>%
+    mutate(
+      Fecha_Carga = as.numeric(Fecha_Carga - Fe.Orig.Pref),
+      Fecha_Disponibilidad = as.numeric(Fecha_Disponibilidad - Fe.Orig.Pref),
+      Fec._Entrega_a_Cte. = as.numeric(Fec._Entrega_a_Cte. - Fe.Orig.Pref),
+      Fecha_Entrega = as.numeric(Fecha_Entrega - Fe.Orig.Pref),
+      Fecha_Planeación_Transporte = as.numeric(Fecha_Planeación_Transporte - Fe.Orig.Pref),
+      Fecha_Fact. = as.numeric(Fecha_Fact. - Fe.Orig.Pref),
+      Fecha_cruce = as.numeric(Fecha_cruce - Fe.Orig.Pref),
+      Fec._Entr._PT = as.numeric(Fec._Entr._PT - Fe.Orig.Pref),
+      Fe_Imp.Fact. = as.numeric(Fe_Imp.Fact. - Fe.Orig.Pref),
+      Fecha_Rec.BL = as.numeric(Fecha_Rec.BL- Fe.Orig.Pref),
+      Fe.Guia_Fedex = as.numeric(Fe.Guia_Fedex - Fe.Orig.Pref),
+      Fecha_de_Programación = as.numeric(Fecha_de_Programación - Fe.Orig.Pref),
+      Lib.Calidad = as.numeric(Lib.Calidad - Fe.Orig.Pref),
+      Fecha_Pedido = as.numeric(Fecha_Pedido - Fe.Orig.Pref),
+      Fecha_Captura_SAP = as.numeric(Fecha_Captura_SAP - Fe.Orig.Pref),
+      Fe.Orig.Pref = 0
+    )
+
+fechas_temp <- fechas_temp %>%
+  filter_at( .vars = 2:16, .vars_predicate =any_vars(.>0)) %>%
+  arrange(-Fecha_de_Programación,-Fecha_Entrega,-Fecha_Fact.,-Fe_Imp.Fact.)
+
+fechas_temp
+
+```
+
+
+
+
+
+```{r,fig.width=15}
+fechas <- track %>%
+  filter(ZnVtaCteSo == 'APAC') %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans')) %>%
+  filter(!is.na(Fecha_Fact.))
+
+funcion_graficas_coherencia_continua_2(fechas,'APAC')
+
+```
+
+```{r,fig.width=15}
+fechas <- track %>%
+  filter(ZnVtaCteSo == 'LATAM') %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans'),ETA,ETD) %>%
+  filter(!is.na(Fe.Orig.Pref))
+
+funcion_graficas_coherencia_continua_fecha_preferente(fechas,'LATAM')
+
+```
+
+```{r,fig.width=15}
+fechas <- track %>%
+  filter(ZnVtaCteSo == 'EMEA') %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans')) %>%
+  filter(!is.na(Fecha_Fact.))
+
+funcion_graficas_coherencia_continua_2(fechas,'EMEA')
+```
+
+```{r,fig.width=15}
+fechas <- track %>%
+  filter(ZnVtaCteSo == 'PUK') %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans')) %>%
+  filter(!is.na(Fecha_Fact.))
+
+funcion_graficas_coherencia_continua_2(fechas,'PUK')
+```
+
+Con lo anterior podemos ver que no todos los procesos se aplican en todas las regiónes
+
+*  Fecha cruce
+*  Fecha de Programación
+*  Fec. Entr. PT
+*  Fe Imp.Fact.
+*  Fecha Rec.BL
+*  Fe.Guía Fedex
+*  Fe.Orig.Pref
+*  Lib.Calidad
+
+```{r}
+fechas <- track %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans')) %>%
+  filter(!is.na(Fecha_Fact.))
+
+summary(fechas)
+```
+
+El resumen de procesos por región queda como sigue expresado como porcentaje de los pedidos que tienen información por campo.
+
+```{r}
+
+fechas2 <- track %>%
+  select(contains('Fe'),-contains('AWD'),-contains('BOOK'),contains('Lib'),-contains('Imp.Trans'),ZnVtaCteSo) %>%
+  filter(!is.na(Fecha_Fact.))
+
+fechas2 %>%
+  group_by(ZnVtaCteSo) %>%
+  summarise(
+    Fecha_Pedido = paste0(round(sum(!is.na(Fecha_Pedido))/n()*100,2),'%'),
+    Fecha_Captura_SAP = paste0(round(sum(!is.na(Fecha_Captura_SAP))/n()*100,2),'%'),
+    Fecha_Planeación_Transporte = paste0(round(sum(!is.na(Fecha_Planeación_Transporte))/n()*100,2),'%'),
+    Fecha_Disponibilidad = paste0(round(sum(!is.na(Fecha_Disponibilidad))/n()*100,2),'%'),
+    Fecha_Carga = paste0(round(sum(!is.na(Fecha_Carga))/n()*100,2),'%'),
+    Fec._Entrega_a_Cte. = paste0(round(sum(!is.na(Fec._Entrega_a_Cte.))/n()*100,2),'%'),
+    Fecha_Fact. = paste0(round(sum(!is.na(Fecha_Fact.))/n()*100,2),'%'),
+    Fec._Entr._PT = paste0(round(sum(!is.na(Fec._Entr._PT))/n()*100,2),'%'),
+    Fecha_Entrega = paste0(round(sum(!is.na(Fecha_Entrega))/n()*100,2),'%'),
+    Fe_Imp.Fact. = paste0(round(sum(!is.na(Fe_Imp.Fact.))/n()*100,2),'%'),
+    Fe.Orig.Pref = paste0(round(sum(!is.na(Fe.Orig.Pref))/n()*100,2),'%'),
+    Fecha_cruce = paste0(round(sum(!is.na(Fecha_cruce))/n()*100,2),'%'),
+    Fecha_Rec.BL = paste0(round(sum(!is.na(Fecha_Rec.BL))/n()*100,2),'%'),
+    Fe.Guia_Fedex = paste0(round(sum(!is.na(Fe.Guia_Fedex))/n()*100,2),'%'),
+    Lib.Calidad = paste0(round(sum(!is.na(Lib.Calidad))/n()*100,2),'%')
+  ) %>%
+  data.frame %>%
+  formattable(.,align = c('l'))
+```
+
+
+
+
+
+

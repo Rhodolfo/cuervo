@@ -211,6 +211,10 @@ shinyServer(function(input, session, output) {
                   popup = state_popup)
   })
   
+  # visualizador -----------------------------------------------------------------------------------------------------
+  
+  
+  
   
 })
     

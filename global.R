@@ -1,4 +1,5 @@
 library(shinydashboard)
+library(shinyWidgets)
 
 source('gs.R')
 source('proceso.R')
