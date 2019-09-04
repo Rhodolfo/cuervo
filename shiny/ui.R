@@ -111,14 +111,60 @@ body <- dashboardBody(
         leafletOutput('mapa_fill_rate')
       )
     ),
-    tabItem(                            # visualizador de tablas
+    tabItem(                            # carga de los datos
       'visualizador',
-      box(
-        pickerInput(
-          inputId = 'input_visualizador_tabla',
-          label = 'Selecciona una tabla',
-          choices = 'zsdr141',
-          multiple = FALSE
+      conditionalPanel('input.boton_siguiente_carga == 0',
+        box(
+          width = 12,
+          title = 'Preparación de los datos',
+          actionButton(
+            inputId = 'boton_carga',
+            label = 'Carga de los datos'
+          ),
+          textOutput('o_texto_carga_zsdr141')
+        )
+      ),
+      conditionalPanel('input.boton_carga == 1 & input.boton_siguiente_carga == 0',
+                       actionButton(
+                         inputId = 'boton_siguiente_carga',
+                         label = 'Siguiente'
+                       )
+      ),
+      conditionalPanel('input.boton_siguiente_carga == 1',
+        box(
+          width = 12,
+          title = 'Filtros',
+          selectizeInput(
+            'input_filtro_region',
+            'Región',
+            selected = NULL,
+            multiple = TRUE,
+            options = c('USA','bla')
+          ),
+          selectizeInput(
+            'input_filtro_fecha_original',
+            'Fecha Original de Entrega',
+            selected = NULL,
+            multiple = TRUE,
+            options = c(
+              'enero',
+              'febrero',
+              'marzo',
+              'abril',
+              'mayo',
+              'junio',
+              'julio',
+              'agosto',
+              'septiembre',
+              'octubre',
+              'noviembre',
+              'diciembre'
+            )
+          ),
+          actionButton(
+            inputId = 'boton_filtrar',
+            label = 'Filtrar'
+          )
         )
       )
     ),

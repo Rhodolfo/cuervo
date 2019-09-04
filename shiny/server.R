@@ -35,7 +35,16 @@ shinyServer(function(input, session, output) {
     row_region4 = 1,
     row_region5 = 1
   )
+  
+  tablas <- reactiveValues(
+    zsdr141 = NULL,
+    total = NULL,
+    vis = NULL
+  )
+  
 
+  # ui de login --------------------------------------------------------------
+  
   
   ui1 <- function(){   # pantalla de logeo inicial
     tagList(
@@ -211,10 +220,42 @@ shinyServer(function(input, session, output) {
                   popup = state_popup)
   })
   
-  # visualizador -----------------------------------------------------------------------------------------------------
+  # carga de los datos -----------------------------------------------------------------------------------------------------
+  
+  # tablas <- list()
+  
+  observeEvent(input$boton_carga,{
+    tablas$zsdr141 <- funcion_carga_datos('zsdr141','zsdr141')
+    tablas$total <- tablas$zsdr141
+    
+  })
+  
+  output$o_texto_carga_zsdr141 <- renderText({
+    validate(need(tablas$zsdr141,'nop'))
+    'Carga de las transacciones zsdr141 finalizada exitosamente'
+  })
+  
+  # visualización de los datos -------------------------------------------------------------------------------------------------------
   
   
+  # input <- list()
+  # input$input_filtro_fecha_original <- c('agosto','septiembre')
+  # input$input_filtro_region <- c('USA')
+  
+  observeEvent(input$boton_filtrar,{
+    f_mes_fecha_original <- sapply(input$input_filtro_fecha_original, funcion_mes_a_numero)
+    tablas$vis <- tablas$total %>%
+      mutate(
+        mes_fecha_original_preferente = month(fecha_original_preferente)
+      ) %>%
+      filter(mes_fecha_original_preferente %in% f_mes_fecha_original) %>%
+      filter(region_nombre_2 %in% input$input_filtro_region)
+  })
+  
+  
+  # usa
   
   
 })
     
+
