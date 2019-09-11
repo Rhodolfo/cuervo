@@ -37,12 +37,30 @@ shinyServer(function(input, session, output) {
   )
   
   tablas <- reactiveValues(
+    ano_mes = NULL,
     zsdr141 = NULL,
     total = NULL,
     vis = NULL
   )
   
 
+    # update de selector de fechas --------------------------------------------------------------------------------------------------
+
+  observe({
+    a <- 'ninguno'
+    if(!is.null(tablas$ano_mes)){
+     
+        a <- sort(unique(tablas$ano_mes))
+      
+    }
+    updatePickerInput(
+      session,'input_filtro_fecha_original',
+      choices = unique(as.character(a)),
+      selected = NULL
+    )
+  })
+
+  
   # ui de login --------------------------------------------------------------
   
   
@@ -197,6 +215,20 @@ shinyServer(function(input, session, output) {
     )
   })
   
+  output$variables_filtro_region <- renderText({
+    paste(
+      'filtro_region',
+      input$input_filtro_region
+    )
+  })
+  
+  output$variables_filtro_ano_mes <- renderText({
+    paste(
+      'ano_mes',
+      input$input_filtro_fecha_original
+    )
+  })
+  
   
   # gráfica de procedimiento -------------------------------------------------------------------------------------------------
   
@@ -225,8 +257,29 @@ shinyServer(function(input, session, output) {
   # tablas <- list()
   
   observeEvent(input$boton_carga,{
+    
+    oldw <- getOption("warn")
+    options(warn=-1)
+    
+    style <- isolate(input$style)
+    progress <- shiny::Progress$new(style = style)
+    progress$set(message = "Cargando zsdr141 ", value = 0)
+    
     tablas$zsdr141 <- funcion_carga_datos('zsdr141','zsdr141')
-    tablas$total <- tablas$zsdr141
+    
+    tablas$zsdr141 <- funcion_ano_mes(tablas$zsdr141)
+    
+    progress$set(message = "Cargando zsdr159 ", value = 0.5)
+    
+    tablas$zsdr159 <- funcion_carga_datos('zsdr159','zsdr159')
+    
+    tablas$zsdr159 <- funcion_ano_mes(tablas$zsdr159)
+    
+    progress$set(message = "Carga finalizada ", value = 1)
+    
+    tablas$ano_mes <- base::intersect(unique(tablas$zsdr141$ano_mes),unique(tablas$zsdr159$ano_mes))
+    
+    options(warn = oldw)
     
   })
   
@@ -235,7 +288,12 @@ shinyServer(function(input, session, output) {
     'Carga de las transacciones zsdr141 finalizada exitosamente'
   })
   
-  # visualización de los datos -------------------------------------------------------------------------------------------------------
+  output$o_texto_carga_zsdr159 <- renderText({
+    validate(need(tablas$zsdr159,'nop'))
+    'Carga de las transacciones zsdr151 finalizada exitosamente'
+  })
+  
+  # filtro de los datos -------------------------------------------------------------------------------------------------------
   
   
   # input <- list()
@@ -243,17 +301,54 @@ shinyServer(function(input, session, output) {
   # input$input_filtro_region <- c('USA')
   
   observeEvent(input$boton_filtrar,{
-    f_mes_fecha_original <- sapply(input$input_filtro_fecha_original, funcion_mes_a_numero)
-    tablas$vis <- tablas$total %>%
-      mutate(
-        mes_fecha_original_preferente = month(fecha_original_preferente)
-      ) %>%
-      filter(mes_fecha_original_preferente %in% f_mes_fecha_original) %>%
-      filter(region_nombre_2 %in% input$input_filtro_region)
+    
+    if(input$input_filtro_region == 'Doméstico'){
+      tablas$vis <- tablas$zsdr159
+    }
+    if(input$input_filtro_region == 'USA'){
+      tablas$vis <- tablas$zsdr141 %>%
+        dplyr::filter(!is.na(region_nombre)) %>%
+        dplyr::filter(region_nombre == 'USA')
+    }
+    if(input$input_filtro_region == 'Resto del mundo'){
+      tablas$vis <- tablas$zsdr141 %>%
+        dplyr::filter(!is.na(region_nombre)) %>%
+        dplyr::filter(region_nombre %in% c('APAC','EMEA','LATAM','PUK','JCMD'))
+    }
+    
+    tablas$vis <- tablas$vis %>%
+      filter(ano_mes %in% input$input_filtro_fecha_original)
   })
   
   
-  # usa
+  # completo
+  
+  output$output_tabla_completo <- renderFormattable({
+    
+    nona <- function(a){
+      return(!is.na(a))
+    }
+    
+    f_completo <- tablas$vis %>%
+      mutate_all(.funs = nona) %>%
+      summarise_all(.funs = sum)
+    
+   f_completo <- f_completo / nrow(tablas$vis)  
+   
+  
+   f_completo <- f_completo %>%
+     select(-contains('ex_fecha_'),-contains('ex_liberacion_calidad'))
+   
+   f_completo_arreglado <- data.frame(variable = names(f_completo), porcentaje = unlist(f_completo[1,]))
+   
+   
+   f_completo_arreglado <- f_completo_arreglado %>%
+     filter(!(variable %in% c('ano','mes','ano_mes')))
+    
+   f_completo_arreglado %>%
+     formattable
+    
+  })
   
   
 })

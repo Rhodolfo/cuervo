@@ -67,7 +67,9 @@ sidebar <- dashboardSidebar(
       textOutput('variables_user_prelog'),
       textOutput('variables_user_logged'),
       textOutput('variables_user_name'),
-      textOutput('variables_user_role')
+      textOutput('variables_user_role'),
+      textOutput('variables_filtro_region'),
+      textOutput('variables_filtro_ano_mes')
     )
   )
 )
@@ -121,7 +123,8 @@ body <- dashboardBody(
             inputId = 'boton_carga',
             label = 'Carga de los datos'
           ),
-          textOutput('o_texto_carga_zsdr141')
+          textOutput('o_texto_carga_zsdr141'),
+          textOutput('o_texto_carga_zsdr159')
         )
       ),
       conditionalPanel('input.boton_carga == 1 & input.boton_siguiente_carga == 0',
@@ -134,36 +137,46 @@ body <- dashboardBody(
         box(
           width = 12,
           title = 'Filtros',
-          selectizeInput(
-            'input_filtro_region',
-            'Región',
-            selected = NULL,
-            multiple = TRUE,
-            options = c('USA','bla')
-          ),
-          selectizeInput(
-            'input_filtro_fecha_original',
-            'Fecha Original de Entrega',
-            selected = NULL,
-            multiple = TRUE,
-            options = c(
-              'enero',
-              'febrero',
-              'marzo',
-              'abril',
-              'mayo',
-              'junio',
-              'julio',
-              'agosto',
-              'septiembre',
-              'octubre',
-              'noviembre',
-              'diciembre'
-            )
-          ),
+          div(style="display:inline-block",width = 100,
+              pickerInput(
+                'input_filtro_region',
+                'Región',
+                selected = NULL,
+                multiple = FALSE,
+                choices = c(
+                  'USA',
+                  'Doméstico',
+                  'Resto del mundo'
+                )
+              )
+            ),
+          div(style="display:inline-block",
+              pickerInput(
+                'input_filtro_fecha_original',
+                'Fecha Original de Entrega',
+                selected = NULL,
+                multiple = TRUE,
+                choices = c(
+                  'ninguno'
+                )
+              )
+            ),
           actionButton(
             inputId = 'boton_filtrar',
             label = 'Filtrar'
+          )
+        ),
+        tabBox(
+          title = 'análisis',
+          id = 'tabset1',
+          tabPanel(
+            'datos_completos',
+            'datos completos',
+            formattableOutput('output_tabla_completo')
+          ),
+          tabPanel(
+            'tiempo_de_los_procesos',
+            'tiempo de los procesos'
           )
         )
       )

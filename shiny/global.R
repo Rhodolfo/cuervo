@@ -3,6 +3,10 @@ library(shinyWidgets)
 library(readr)
 library(readxl)
 library(ggplot2)
+library(lubridate)
+library(formattable)
+library(plyr)
+library(dplyr)
 
 
 source('gs.R', encoding = "UTF-8")
