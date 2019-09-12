@@ -26,7 +26,7 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_administrador || output.es_tester',
+  conditionalPanel(condition = 'output.es_administrador',
     sidebarMenu(
       id = 'menu_proceso',
       menuItem(
@@ -34,7 +34,7 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_servicio_cliente_nacional || output.es_administrador || output.es_tester',
+  conditionalPanel(condition = 'output.es_servicio_cliente_nacional || output.es_administrador',
                    sidebarMenu(
                      id = 'menu_servicio_cliente_nacional',
                      menuItem(
@@ -42,7 +42,7 @@ sidebar <- dashboardSidebar(
                      )
                    )
   ),
-  conditionalPanel(condition = 'output.es_administrador || output.es_tester',
+  conditionalPanel(condition = 'output.es_administrador',
     sidebarMenu(
       id = 'menu_kpi',
       menuItem(
@@ -169,6 +169,7 @@ body <- dashboardBody(
         tabBox(
           title = 'análisis',
           id = 'tabset1',
+          width = 12,
           tabPanel(
             'datos_completos',
             'datos completos',
@@ -176,7 +177,8 @@ body <- dashboardBody(
           ),
           tabPanel(
             'tiempo_de_los_procesos',
-            'tiempo de los procesos'
+            'tiempo de los procesos',
+            plotOutput('output_grafica_tiempo1')
           )
         )
       )

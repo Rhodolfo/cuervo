@@ -1,4 +1,4 @@
-library(stringr)
+
 
 
 
@@ -12,6 +12,8 @@ library(stringr)
 funcion_carga_datos <- function(p_carpeta,p_tipo){
   f_archivos <- list.files(paste0('datos/',p_carpeta))
   f_lista <- list()
+  
+  
   for(i in 1:length(f_archivos)){
     f_lista[[i]] <- read_excel(paste0('datos/',p_carpeta,'/',f_archivos[i]))
     
@@ -407,8 +409,4 @@ funcion_ano_mes <- function(p_tabla){
       )
     return(f_tabla)
 }
-
-# funcion determinar mes --------------------
-
-
 

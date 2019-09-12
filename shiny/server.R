@@ -258,6 +258,9 @@ shinyServer(function(input, session, output) {
   
   observeEvent(input$boton_carga,{
     
+    
+
+    
     oldw <- getOption("warn")
     options(warn=-1)
     
@@ -317,7 +320,7 @@ shinyServer(function(input, session, output) {
     }
     
     tablas$vis <- tablas$vis %>%
-      filter(ano_mes %in% input$input_filtro_fecha_original)
+    filter(ano_mes %in% input$input_filtro_fecha_original)
   })
   
   
@@ -348,6 +351,26 @@ shinyServer(function(input, session, output) {
    f_completo_arreglado %>%
      formattable
     
+  })
+  
+  output$output_grafica_tiempo1 <- renderPlot({
+    
+    p_compresion <- FALSE
+    p_fecha_focal <- 'fecha_pedido'
+    if(input$input_filtro_region == 'Doméstico'){
+      p_fecha_focal = 'fecha_creacion_min'
+      p_compresion <- TRUE
+    }
+    
+    oldw <- getOption("warn")
+    options(warn=-1)
+    
+    g <- funcion_grafica_tiempos_grande(tablas$vis, p_fecha_focal, p_compresion, 'días', 'tablas (con diferentes grados de información')
+    
+    options(warn = oldw)
+    
+    
+    g
   })
   
   
