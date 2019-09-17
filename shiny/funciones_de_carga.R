@@ -22,7 +22,7 @@ funcion_carga_datos <- function(p_carpeta,p_tipo){
     }
     
     if(p_tipo == 'zsdr159'){
-      f_lista[[i]] <- funcion_limpieza_zsdr159(f_lista[[i]])
+      f_lista[[i]] <- funcion_limpieza_zsdr159(f_lista[[i]]) %>% data.frame
     }
     
     
@@ -31,9 +31,9 @@ funcion_carga_datos <- function(p_carpeta,p_tipo){
   
   
   
-  f_condensado <- do.call('rbind',f_lista)
-  f_condensado <- as.data.frame(f_condensado)
-  return(f_condensado)
+  f_lista <- do.call('rbind',f_lista)
+  f_lista <- as.data.frame(f_lista)
+  return(f_lista)
 }
 
 # función para limpiar la tabla zsdr141 -------------------------------

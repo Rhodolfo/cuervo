@@ -36,11 +36,16 @@ shinyServer(function(input, session, output) {
     row_region5 = 1
   )
   
+  varios <- reactiveValues(
+    checador_filtro1 = 0
+  )
+  
   tablas <- reactiveValues(
     ano_mes = NULL,
     zsdr141 = NULL,
     total = NULL,
-    vis = NULL
+    vis = NULL,
+    vis_pa = NULL
   )
   
 
@@ -49,12 +54,29 @@ shinyServer(function(input, session, output) {
   observe({
     a <- 'ninguno'
     if(!is.null(tablas$ano_mes)){
-     
         a <- sort(unique(tablas$ano_mes))
-      
     }
     updatePickerInput(
       session,'input_filtro_fecha_original',
+      choices = unique(as.character(a)),
+      selected = NULL
+    )
+  })
+  
+  observe({
+    a <- 'ninguno'
+    if(!is.null(tablas$ano_mes)){
+      if(input$input_filtro_region_pa == 'Doméstico'){
+        a <- funcion_extrae_fechas(tablas$zsdr159) %>% names
+      }
+      if(input$input_filtro_region_pa %in% c('USA','Resto del mundo')){
+        a <- funcion_extrae_fechas(tablas$zsdr141) %>% names
+      }
+     
+    }
+   
+    updatePickerInput(
+      session,'input_fecha_final_pa_141',
       choices = unique(as.character(a)),
       selected = NULL
     )
@@ -230,27 +252,27 @@ shinyServer(function(input, session, output) {
   })
   
   
-  # gráfica de procedimiento -------------------------------------------------------------------------------------------------
+  # # gráfica de procedimiento -------------------------------------------------------------------------------------------------
+  # 
+  # output$grafica_proceso <- renderSankeyNetwork({
+  #   sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", Value = "value", NodeID = "name", colourScale=my_color, LinkGroup="group", fontSize = 15)
+  # })
+  # 
+  # output$grafica_fill_rate <- renderHighchart({
+  #   funcion_grafica_fill_rate(datos_fill_rate)
+  # })
   
-  output$grafica_proceso <- renderSankeyNetwork({
-    sankeyNetwork(Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget", Value = "value", NodeID = "name", colourScale=my_color, LinkGroup="group", fontSize = 15)
-  })
-  
-  output$grafica_fill_rate <- renderHighchart({
-    funcion_grafica_fill_rate(datos_fill_rate)
-  })
-  
-  # mapa de fill_rate -----------------------------------------------------------------------------------------------------------------------
-  
-  output$mapa_fill_rate <- renderLeaflet({
-    leaflet(data = mexico) %>%
-      addProviderTiles("CartoDB.Positron") %>%
-      addPolygons(fillColor = ~pal(fill_rate), 
-                  fillOpacity = 0.8, 
-                  color = "#BDBDC3", 
-                  weight = 1, 
-                  popup = state_popup)
-  })
+  # # mapa de fill_rate -----------------------------------------------------------------------------------------------------------------------
+  # 
+  # output$mapa_fill_rate <- renderLeaflet({
+  #   leaflet(data = mexico) %>%
+  #     addProviderTiles("CartoDB.Positron") %>%
+  #     addPolygons(fillColor = ~pal(fill_rate), 
+  #                 fillOpacity = 0.8, 
+  #                 color = "#BDBDC3", 
+  #                 weight = 1, 
+  #                 popup = state_popup)
+  # })
   
   # carga de los datos -----------------------------------------------------------------------------------------------------
   
@@ -258,32 +280,21 @@ shinyServer(function(input, session, output) {
   
   observeEvent(input$boton_carga,{
     
-    
-
-    
+    cat(input$input_filtro_region_pa)
     oldw <- getOption("warn")
     options(warn=-1)
-    
     style <- isolate(input$style)
     progress <- shiny::Progress$new(style = style)
     progress$set(message = "Cargando zsdr141 ", value = 0)
-    
     tablas$zsdr141 <- funcion_carga_datos('zsdr141','zsdr141')
-    
     tablas$zsdr141 <- funcion_ano_mes(tablas$zsdr141)
-    
     progress$set(message = "Cargando zsdr159 ", value = 0.5)
-    
     tablas$zsdr159 <- funcion_carga_datos('zsdr159','zsdr159')
-    
     tablas$zsdr159 <- funcion_ano_mes(tablas$zsdr159)
-    
     progress$set(message = "Carga finalizada ", value = 1)
-    
     tablas$ano_mes <- base::intersect(unique(tablas$zsdr141$ano_mes),unique(tablas$zsdr159$ano_mes))
-    
+    progress$close()
     options(warn = oldw)
-    
   })
   
   output$o_texto_carga_zsdr141 <- renderText({
@@ -304,7 +315,6 @@ shinyServer(function(input, session, output) {
   # input$input_filtro_region <- c('USA')
   
   observeEvent(input$boton_filtrar,{
-    
     if(input$input_filtro_region == 'Doméstico'){
       tablas$vis <- tablas$zsdr159
     }
@@ -318,42 +328,86 @@ shinyServer(function(input, session, output) {
         dplyr::filter(!is.na(region_nombre)) %>%
         dplyr::filter(region_nombre %in% c('APAC','EMEA','LATAM','PUK','JCMD'))
     }
-    
     tablas$vis <- tablas$vis %>%
     filter(ano_mes %in% input$input_filtro_fecha_original)
   })
   
   
-  # completo
-  
-  output$output_tabla_completo <- renderFormattable({
-    
-    nona <- function(a){
-      return(!is.na(a))
+  observeEvent(input$boton_filtrar_pa,{                      # filtro pedidos abiertos
+    if(input$input_filtro_region == 'Doméstico'){
+      tablas$vis_pa <- tablas$zsdr159
     }
-    
-    f_completo <- tablas$vis %>%
-      mutate_all(.funs = nona) %>%
-      summarise_all(.funs = sum)
-    
-   f_completo <- f_completo / nrow(tablas$vis)  
-   
+    if(input$input_filtro_region == 'USA'){
+      
+      eval(parse(text = paste0(
+        "tablas$vis_pa <- tablas$zsdr141 %>%
+        dplyr::filter(!is.na(region_nombre)) %>%
+        dplyr::filter(region_nombre == 'USA') %>%
+        dplyr::filter(is.na(",input$input_fecha_final_pa_141,")) %>%
+        dplyr::filter(fecha_original_preferente>= '",input$input_filtro_fecha_1,"') %>%
+        dplyr::filter(fecha_original_preferente<= '",input$input_filtro_fecha_2,"')"
+      )))
+      
+      
+    }
+    if(input$input_filtro_region == 'Resto del mundo'){
+     
+      eval(parse(text = paste0(
+        "tablas$vis_pa <- tablas$zsdr141 %>%
+        dplyr::filter(!is.na(region_nombre)) %>%
+        dplyr::filter(region_nombre %in% c('APAC','EMEA','LATAM','PUK','JCMD')) %>%
+        dplyr::filter(is.na(",input$input_fecha_final_pa_141,"))  %>%
+        dplyr::filter(",input$input_fecha_final_pa_141,">= '",input$input_filtro_fecha_1,"') %>%
+        dplyr::filter(",input$input_fecha_final_pa_141,"<= '",input$input_filtro_fecha_2,"')"
+      )))
+      
+    }
   
-   f_completo <- f_completo %>%
-     select(-contains('ex_fecha_'),-contains('ex_liberacion_calidad'))
-   
-   f_completo_arreglado <- data.frame(variable = names(f_completo), porcentaje = unlist(f_completo[1,]))
-   
-   
-   f_completo_arreglado <- f_completo_arreglado %>%
-     filter(!(variable %in% c('ano','mes','ano_mes')))
     
-   f_completo_arreglado %>%
-     formattable
+    
+    
     
   })
   
+  
+  # completo
+  # 
+  # output$output_tabla_completo <- renderFormattable({
+  #   
+  #   nona <- function(a){
+  #     return(!is.na(a))
+  #   }
+  #   
+  #   f_completo <- tablas$vis %>%
+  #     mutate_all(.funs = nona) %>%
+  #     summarise_all(.funs = sum)
+  #   
+  #  f_completo <- f_completo / nrow(tablas$vis)  
+  #  
+  # 
+  #  f_completo <- f_completo %>%
+  #    select(-contains('ex_fecha_'),-contains('ex_liberacion_calidad'))
+  #  
+  #  f_completo_arreglado <- data.frame(variable = names(f_completo), porcentaje = unlist(f_completo[1,]))
+  #  
+  #  
+  #  f_completo_arreglado <- f_completo_arreglado %>%
+  #    filter(!(variable %in% c('ano','mes','ano_mes')))
+  #   
+  #  f_completo_arreglado %>%
+  #    formattable
+  #   
+  # })
+  
   output$output_grafica_tiempo1 <- renderPlot({
+    
+    
+    
+    g <- NULL
+ 
+    
+    
+    
     
     p_compresion <- FALSE
     p_fecha_focal <- 'fecha_pedido'
@@ -362,16 +416,30 @@ shinyServer(function(input, session, output) {
       p_compresion <- TRUE
     }
     
+    
+    
+    
+    
     oldw <- getOption("warn")
     options(warn=-1)
     
-    g <- funcion_grafica_tiempos_grande(tablas$vis, p_fecha_focal, p_compresion, 'días', 'tablas (con diferentes grados de información')
+    g <- tryCatch(funcion_grafica_tiempos_grande(tablas$vis, p_fecha_focal, p_compresion, 'días', 'tablas (con diferentes grados de información'),error = function(e){return(NULL)})
     
     options(warn = oldw)
+    
+    validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
     
     
     g
   })
+  
+  
+  # outputs de la pestaña de pedidos abiertos
+
+  output$output_grafica_pa_total <- renderPlot({
+    
+  })
+  
   
   
 })

@@ -1,8 +1,10 @@
-# función para graficas procesos ------------------------------------------------------------------------------------------------
+# (main) función para graficas procesos ------------------------------------------------------------------------------------------------
 
 # p_fecha_focal <- 'fecha_creacion_min'
 # p_tabla <- tablas$zsdr159
 # p_compresion <- TRUE
+
+
 
 funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y){
   if(p_compresion){
@@ -13,6 +15,35 @@ funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion 
   f_resumen <- lapply(f_lista_tablas,funcion_resumen_tiempos)
   f_tabla_resumen <- do.call('rbind.fill',lapply(f_resumen,funcion_tabla1_tabla2))
   f_tabla_resumen <- funcion_compresion_tabla(f_tabla_resumen)
+  g <- funcion_grafica_tiempos(f_tabla_resumen,p_texto_x,p_texto_y)
+  return(g)
+}
+
+
+
+# (main) función gráficas pedidos abiertos ----------------------------------------------------------------------------------
+
+
+p_tabla <- tablas$vis_pa
+p_fecha_focal <- 'fecha_pedido_min'
+p_fecha_criterio <- 'fecha_entrega_real'
+p_compresion <- FALSE
+input <- list()
+input$input_fecha_final_pa_141 <- 'fecha_factura'
+input$input_filtro_fecha_1 <- '2019-09-28'
+input$input_filtro_fecha_2 <- '2019-09-30'
+
+
+funcion_grafica_tiempos_desagregados <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y){
+
+  p_tabla <- funcion_compresion_fecha(p_tabla, 'pedido_sap')
+  
+  f_tabla_centrada <- funcion_fechas_centradas_con_fecha(p_tabla,p_fecha_focal)
+  f_lista_tablas <- funcion_lista_tablas_fechas(f_tabla_centrada)
+
+  
+  funcion_grafica_tiempos_fecha(f_lista_tablas[[1]],'a','b')
+  
   g <- funcion_grafica_tiempos(f_tabla_resumen,p_texto_x,p_texto_y)
   return(g)
 }
@@ -69,6 +100,32 @@ funcion_fechas_centradas <- function(p_tabla,p_fecha_focal){
   cat('\n')
   f_funcion_1 <- 'f_tabla_transformada <- f_tabla %>% mutate('
   f_funcion_2 <- paste0(c(f_fechas,p_fecha_focal),' = as.numeric(', c(f_fechas,p_fecha_focal), ' - ', p_fecha_focal,')',collapse = ',')
+  f_funcion_3 <- ')'
+  f_funcion_completa <- paste0(f_funcion_1,f_funcion_2,f_funcion_3)
+  eval(parse(text = f_funcion_completa))
+  f_tabla_transformada <- cbind(p_tabla[,match(p_fecha_focal,names(p_tabla))],f_tabla_transformada)
+  names(f_tabla_transformada)[1] <- 'fecha_inicio'
+  f_tabla_transformada <- cbind(p_tabla$pedido_sap,f_tabla_transformada)
+  names(f_tabla_transformada)[1] <- 'pedido'
+  f_tabla_transformada <- data.frame(f_tabla_transformada)
+  f_tabla_transformada <- do.call(data.frame,lapply(f_tabla_transformada, function(x) replace(x, is.infinite(x),NA)))
+  return(f_tabla_transformada)
+}
+
+funcion_fechas_centradas_con_fecha <- function(p_tabla,p_fecha_focal){
+  f_tabla <- funcion_extrae_fechas(p_tabla)
+  cat(names(f_tabla))
+  cat('\n')
+  f_fechas <- names(f_tabla)
+  cat(f_fechas)
+  cat('\n')
+  cat(p_fecha_focal)
+  cat('\n')
+  f_fechas <- f_fechas[-match(p_fecha_focal,f_fechas)]
+  cat(f_fechas)
+  cat('\n')
+  f_funcion_1 <- 'f_tabla_transformada <- f_tabla %>% mutate('
+  f_funcion_2 <- paste0(c(f_fechas,p_fecha_focal),' =', c(f_fechas,p_fecha_focal),' + as.numeric(', c(f_fechas,p_fecha_focal), ' - ', p_fecha_focal,')',collapse = ',')
   f_funcion_3 <- ')'
   f_funcion_completa <- paste0(f_funcion_1,f_funcion_2,f_funcion_3)
   eval(parse(text = f_funcion_completa))
@@ -198,7 +255,7 @@ funcion_grafica_tiempos <- function(p_tabla, p_texto_x, p_texto_y){
         'geom_rect(data = f_tabla,aes(xmin = ', f_tabla[1,i],',',
         'xmax = ',f_tabla[1,(i+1)],',',
         'ymin = ',j-.3,',',
-        'ymax = ',j+.3,'),fill = "',f_colores[i - f_items_previos],'", color = "black", alpha = .5)'
+        'ymax = ',j+.3,'),fill = "',f_colores[i - f_items_previos],'", color = "black", alpha = 1)'
       )
       k <- k+1
     }
@@ -231,6 +288,62 @@ funcion_grafica_tiempos <- function(p_tabla, p_texto_x, p_texto_y){
 }
 
 
+# (secondary) función para graficar un dataframe de tiempos ----------------------------------------------------------------------------
+
+# p_tabla <- f_tabla_resumen
+
+funcion_grafica_tiempos_fecha <- function(p_tabla, p_texto_x, p_texto_y){
+  
+  f_items_previos <- 3
+  colores <- rainbow(length(p_tabla) - (f_items_previos + 1))
+  funcion0 <- paste0(
+    ' ggplot(p_tabla) + '
+  )
+  funcion1_lista <- list()
+  k <- 1
+  for(j in 1:nrow(p_tabla)){
+    f_tabla <- p_tabla[j,]                 # ordeno cronológicamente las variables
+    f_tabla <- f_tabla[,!is.na(f_tabla)]
+    f_orden <- order(unlist(f_tabla[-c(1:f_items_previos)])) + f_items_previos
+    f_tabla <- f_tabla[,c(1:f_items_previos,f_orden)]
+    f_colores <- colores[match(names(f_tabla)[(f_items_previos + 2):length(f_tabla)],names(p_tabla)[(f_items_previos + 1):length(p_tabla)]) - 1]
+    for(i in (f_items_previos + 1):(length(f_tabla) - 1)){     # creo el código para la serie
+      funcion1_lista[[k]] <- paste0(
+        'geom_rect(data = f_tabla,aes(xmin = as.Date("', f_tabla[1,i],'"),',
+        'xmax = as.Date("',f_tabla[1,(i+1)],'"),',
+        'ymin = ',j-.3,',',
+        'ymax = ',j+.3,'),fill = "',f_colores[i - f_items_previos],'", color = "black", alpha = 1)'
+      )
+      k <- k+1
+    }
+  }
+  funcion2_tabla <- data.frame(
+    y = (1:length(colores)) + nrow(p_tabla),
+    x = 1,
+    nombre = names(p_tabla[c((f_items_previos + 2):length(p_tabla))]),
+    color = colores
+  )
+  funcion1 <- paste0(unlist(funcion1_lista),collapse = '+')
+  funcion2 <- paste0(
+    '+ geom_point(data = funcion2_tabla,aes(x=as.Date(',max(p_tabla$fecha_original_preferente_max,na.rm=T) + 1,'),y=1,fill = color,colour = color)) + 
+       geom_text(data = p_tabla, aes(x = rep(as.Date(',max(p_tabla$fecha_original_preferente_max,na.rm=T) + 2,')), y = 1:nrow(p_tabla), label = pedido)) +
+    scale_color_manual(name = "proceso",labels= c(as.character(funcion2_tabla$nombre)), values = colores) + 
+    guides(fill = FALSE,colour = guide_legend(override.aes = list(size=10))) + 
+    xlab("',p_texto_x,'") + ylab("',p_texto_y,'")+ 
+    theme(legend.position="bottom",
+    legend.title = element_text(size=16),
+    legend.text = element_text(size=16))+
+  scale_x_date(labels = format("%Y-%m-%d"))'
+  )
+  funcion_completa <- paste0(
+    funcion0,
+    funcion1,
+    funcion2
+  )
+  funcion_completa
+  parse(text = funcion_completa)
+  eval(parse(text = funcion_completa))
+}
 
 #####################################################################################################################################################
 #####################################################################################################################################################

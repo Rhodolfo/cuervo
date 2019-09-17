@@ -55,6 +55,9 @@ sidebar <- dashboardSidebar(
       id = 'menu_visualizador',
       menuItem(
         'Visualizador', tabName = 'visualizador'
+      ),
+      menuItem(
+        'Pedidos Abiertos', tabName = 'pedidos_abiertos'
       )
     )
   ),
@@ -137,11 +140,11 @@ body <- dashboardBody(
         box(
           width = 12,
           title = 'Filtros',
-          div(style="display:inline-block",width = 100,
-              pickerInput(
+          div(style="display:inline-block",
+              pickerInput(width = 100,
                 'input_filtro_region',
                 'Región',
-                selected = NULL,
+                selected = 'USA',
                 multiple = FALSE,
                 choices = c(
                   'USA',
@@ -170,16 +173,75 @@ body <- dashboardBody(
           title = 'análisis',
           id = 'tabset1',
           width = 12,
+          # tabPanel(
+          #   'datos_completos',
+          #   'datos completos',
+          #   formattableOutput('output_tabla_completo')
+          # ),
           tabPanel(
-            'datos_completos',
-            'datos completos',
-            formattableOutput('output_tabla_completo')
-          ),
-          tabPanel(
-            'tiempo_de_los_procesos',
             'tiempo de los procesos',
             plotOutput('output_grafica_tiempo1')
           )
+        )
+      )
+    ),
+    tabItem(
+      'pedidos_abiertos',
+      box(
+        width = 12,
+        title = 'Filtros',
+        div(style="display:inline-block",
+            pickerInput(width = 100,
+                        'input_filtro_region_pa',
+                        'Región',
+                        selected = NULL,
+                        multiple = FALSE,
+                        choices = c(
+                          'USA',
+                          'Doméstico',
+                          'Resto del mundo'
+                        )
+            )
+        ),
+        div(style="display:inline-block",
+              pickerInput(width = 200,
+                          'input_fecha_final_pa_141',
+                          'Fecha de evaluación',
+                          selected = NULL,
+                          multiple = FALSE,
+                          choices = c(
+                            'ninguno'
+                          )
+              )
+        ),
+        div(style="display:inline-block",
+         dateInput(
+            'input_filtro_fecha_1',
+           'fecha_inicial',
+           value = Sys.Date() -7
+          )
+        ),
+        div(style="display:inline-block",
+          dateInput(
+            'input_filtro_fecha_1',
+            'fecha_final',
+            value = Sys.Date()
+          )
+        ),
+        
+        actionButton(
+          inputId = 'boton_filtrar_pa',
+          label = 'Filtrar'
+        )
+      ),
+      tabBox(
+        title = 'pedidos abiertos',
+        id = 'tabset2',
+        width = 12,
+        tabPanel(
+          'status_pedidos',
+          'status',
+          plotOutput('output$output_grafica_pa_total')
         )
       )
     ),
