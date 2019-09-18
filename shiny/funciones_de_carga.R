@@ -1,5 +1,57 @@
 
 
+# (main) función carga ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# función de carga de los datos utilizando como punto de partida los parámetros
+
+# p_carpeta <- 'zsdr141'
+# p_fechas <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_fechas)) %>%
+#   dplyr::select(usa_fechas) %>%
+#   unlist
+# p_cantidades <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_cantidades)) %>%
+#   dplyr::select(usa_cantidades) %>%
+#   unlist
+# p_filtros <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_filtros)) %>%
+#   dplyr::select(usa_filtros) %>%
+#   unlist
+# p_pedido <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_pedido)) %>%
+#   dplyr::select(usa_pedido) %>%
+#   unlist
+
+funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido){
+  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido)
+}
+
+# (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
+
+funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido){
+  f_archivos <- list.files(paste0('datos/',p_carpeta))
+  f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
+  
+  
+  f_lista <- list()
+  for(i in 1:length(f_archivos)){
+    f_lista[[i]] <- read_excel(paste0('datos/',p_carpeta,'/',f_archivos[i])) %>% 
+      setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  }
+  f_lista <- do.call('rbind',f_lista)
+  f_lista <- as.data.frame(f_lista) %>% 
+    setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  f_lista <- f_lista %>%
+    mutate_at(.vars = p_fechas,.funs = as.Date) %>%
+    mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
+    mutate_at(.vars = p_pedido,.funs = as.character) %>%
+    mutate_at(.vars = p_filtros,.funs = as.factor) 
+  f_resultado <- f_lista[,(length(f_lista) - length(p_fechas) - length(p_cantidades) - length(p_pedido) - length(p_filtros) + 1):(length(f_lista))]
+  f_resultado <- f_resultado %>%
+    setNames(c(p_fechas,p_cantidades,p_pedido,p_filtros))
+  return(f_resultado)
+}
+
 
 
 # función carga general de datos ---------------------------------------------------

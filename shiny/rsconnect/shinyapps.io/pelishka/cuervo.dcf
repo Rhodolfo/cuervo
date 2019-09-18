@@ -5,9 +5,9 @@ account: pelishka
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1034421
-bundleId: 2409206
+bundleId: 2241074
 url: https://pelishka.shinyapps.io/cuervo/
-when: 1568312749.80977
+when: 1563377283.73979
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: mexico.zip

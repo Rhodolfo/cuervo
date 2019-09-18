@@ -1,21 +1,22 @@
-# (main) función para graficas procesos ------------------------------------------------------------------------------------------------
+# (main) función para graficas sobre resumenes ------------------------------------------------------------------------------------------------
 
-# p_fecha_focal <- 'fecha_creacion_min'
+# p_fecha_focal <- 'fecha_creacion'
 # p_tabla <- tablas$zsdr159
 # p_compresion <- TRUE
 
 
 
-funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y){
+funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_sobrantes_inicio){
   if(p_compresion){
     p_tabla <- funcion_compresion_fecha(p_tabla, 'pedido_sap')
+    p_fecha_focal <- paste0(p_fecha_focal,'_min')
   }
   f_tabla_centrada <- funcion_fechas_centradas(p_tabla,p_fecha_focal)
   f_lista_tablas <- funcion_lista_tablas_fechas(f_tabla_centrada)
   f_resumen <- lapply(f_lista_tablas,funcion_resumen_tiempos)
   f_tabla_resumen <- do.call('rbind.fill',lapply(f_resumen,funcion_tabla1_tabla2))
   f_tabla_resumen <- funcion_compresion_tabla(f_tabla_resumen)
-  g <- funcion_grafica_tiempos(f_tabla_resumen,p_texto_x,p_texto_y)
+  g <- funcion_grafica_tiempos_puntos(f_tabla_resumen,p_texto_x,p_texto_y,p_variables_sobrantes_inicio)
   return(g)
 }
 
@@ -24,29 +25,36 @@ funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion 
 # (main) función gráficas pedidos abiertos ----------------------------------------------------------------------------------
 
 
-p_tabla <- tablas$vis_pa
-p_fecha_focal <- 'fecha_pedido_min'
-p_fecha_criterio <- 'fecha_entrega_real'
-p_compresion <- FALSE
-input <- list()
-input$input_fecha_final_pa_141 <- 'fecha_factura'
-input$input_filtro_fecha_1 <- '2019-09-28'
-input$input_filtro_fecha_2 <- '2019-09-30'
 
+# p_fecha_focal <- 'fecha_pedido_min'
+# p_fecha_criterio <- 'fecha_entrega_real'
+# p_compresion <- FALSE
+# input <- list()
+# input$input_fecha_final_pa_141 <- 'fecha_original_preferente'
+# input$input_filtro_fecha_1 <- '2019-09-01'
+# input$input_filtro_fecha_2 <- '2019-09-15'
+# eval(parse(text = paste0(
+#   "tablas$vis_pa <- tablas$zsdr141 %>%
+#   dplyr::filter(!is.na(region_nombre)) %>%
+#   dplyr::filter(region_nombre == 'USA') %>%
+#   dplyr::filter(",input$input_fecha_final_pa_141,">= '",input$input_filtro_fecha_1,"') %>%
+#   dplyr::filter(",input$input_fecha_final_pa_141,"<= '",input$input_filtro_fecha_2,"')"
+# )))
+# p_tabla <- tablas$vis_pa
 
-funcion_grafica_tiempos_desagregados <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y){
-
-  p_tabla <- funcion_compresion_fecha(p_tabla, 'pedido_sap')
-  
-  f_tabla_centrada <- funcion_fechas_centradas_con_fecha(p_tabla,p_fecha_focal)
-  f_lista_tablas <- funcion_lista_tablas_fechas(f_tabla_centrada)
-
-  
-  funcion_grafica_tiempos_fecha(f_lista_tablas[[1]],'a','b')
-  
-  g <- funcion_grafica_tiempos(f_tabla_resumen,p_texto_x,p_texto_y)
-  return(g)
-}
+# funcion_grafica_tiempos_desagregados <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y){
+# 
+#   p_tabla <- funcion_compresion_fecha(p_tabla, 'pedido_sap')
+#   
+#   f_tabla_centrada <- funcion_fechas_centradas_con_fecha(p_tabla,p_fecha_focal)
+#   f_lista_tablas <- funcion_lista_tablas_fechas(f_tabla_centrada)
+# 
+#   
+#   funcion_grafica_tiempos_fecha(f_lista_tablas[[1]],'a','b')
+#   
+#   g <- funcion_grafica_tiempos(f_tabla_resumen,p_texto_x,p_texto_y)
+#   return(g)
+# }
 
 # función de construcción de compresión de fechas para la tabla zsdr159 -------------------------------------------------------
 
@@ -234,8 +242,15 @@ funcion_compresion_tabla <- function(p_tabla){
 # función para graficar un dataframe de tiempos ----------------------------------------------------------------------------
 
 # p_tabla <- f_tabla_resumen
+# p_texto_x <- 'x'
+# p_texto_y <- 'y'
+# p_variables_sobrantes_inicio <- 3
 
-funcion_grafica_tiempos <- function(p_tabla, p_texto_x, p_texto_y){
+
+
+
+
+funcion_grafica_tiempos <- function(p_tabla, p_texto_x, p_texto_y,p_variables_sobrantes_inicio){
   
   f_items_previos <- 3
   colores <- rainbow(length(p_tabla) - (f_items_previos + 1))
@@ -344,6 +359,104 @@ funcion_grafica_tiempos_fecha <- function(p_tabla, p_texto_x, p_texto_y){
   parse(text = funcion_completa)
   eval(parse(text = funcion_completa))
 }
+
+# p_tabla <- f_lista_tablas[[1]]
+
+funcion_grafica_proceso_tiempos <- function(p_t){
+  
+  p_tabla$y <- 1:nrow(p_tabla)
+  
+  colores <- rainbow(length(p_tabla)-2)
+  funcion1 <-  'ggplot(p_tabla) +'
+  
+  
+  funcion2 <- paste0(
+    'geom_rect(aes(
+    xmin = ',names(p_tabla)[p_vari],',
+    xmanx
+    ),colour ="', colores,'", size = 3, alpha = .5)', collapse = '+'
+  )
+  
+  funcion3 <- '+ ylab("bla")'
+  
+eval(parse(text = paste0(
+  funcion1,
+  funcion2
+)))
+    
+  
+}
+
+
+# (secondary) gráfica de barras --------------------------------------------------------------------------------------------
+
+# p_tabla <- f_tabla_resumen
+# p_texto_x <- 'x'
+# p_texto_y <- 'y'
+# p_variables_sobrantes_inicio <- 3
+
+
+funcion_grafica_tiempos_puntos <- function(p_tabla,p_texto_x,p_texto_y,p_variables_sobrantes_inicio){
+  colores <- rainbow(length(p_tabla) - p_variables_sobrantes_inicio)
+  
+  p_tabla$y <- 1:nrow(p_tabla)
+  
+  f_valores_y <- rep(c(1,3,5),10)
+  
+  funcion1 <-  'ggplot(p_tabla) +'
+  
+  # funcion2 <- paste0(
+  #   'geom_point(aes(
+  #   x=',names(p_tabla)[-c(1:p_variables_sobrantes_inicio,length(p_tabla))],',
+  #   y = ',f_valores_y[1:(length(p_tabla)-p_variables_sobrantes_inicio-1)],'
+  #   ),colour ="black", alpha = .1, size = 15)', collapse = '+'
+  # )
+  
+  funcion3 <- paste0(
+    'geom_point(aes(
+    x=',names(p_tabla)[-c(1:p_variables_sobrantes_inicio,length(p_tabla))],',
+    y = ',f_valores_y[1:(length(p_tabla)-p_variables_sobrantes_inicio-1)],'
+  ),colour ="', colores,'", alpha = .5, size = 14)', collapse = '+'
+  )
+  
+  funcion4 <- paste0(
+    'geom_text(aes(
+    x=',names(p_tabla)[-c(1:p_variables_sobrantes_inicio,length(p_tabla))],',
+    y = ',f_valores_y[1:(length(p_tabla)-p_variables_sobrantes_inicio-1)],',
+    label = round(',names(p_tabla)[-c(1:p_variables_sobrantes_inicio,length(p_tabla))],',1)
+  ),size = 6)', collapse = '+'
+  )
+  
+  funcion5 <- '+ facet_wrap(~n,scales = "free", ncol = 1)'
+  
+  funcion6 <- '+ ylim(-3,9)'
+  
+  f_tabla_colores <- data.frame(colores = colores,proceso = names(p_tabla[-c(1:p_variables_sobrantes_inicio,length(p_tabla))]))
+  
+  funcion7 <- paste0('+ geom_point(data = f_tabla_colores,aes(x=(',max(p_tabla$fecha_original_preferente_min,na.rm=T) + 1,'),y=1,fill = colores,colour = colores))')
+  
+  funcion8 <- paste0('+scale_colour_manual(name = "proceso",labels= f_tabla_colores$proceso,  values = colores) + 
+                     guides(fill = FALSE,colour = guide_legend(override.aes = list(size=10,alpha = .5,text)))  + 
+                     theme(legend.text=element_text(size=12))' )
+  
+  eval(parse(text = paste0(
+    funcion1,
+    # funcion2,
+    # '+',
+    funcion3,
+    '+',
+    funcion4,
+    funcion5,
+    funcion6,
+    funcion7,
+    funcion8
+  )))
+  
+}
+
+# (terciary) función para acomodar una tabla (nas a la izquierda) --------------------------------------------------------------
+
+
 
 #####################################################################################################################################################
 #####################################################################################################################################################

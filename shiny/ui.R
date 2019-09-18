@@ -6,16 +6,10 @@ header <- dashboardHeader(
           tags$li(class = "dropdown", textOutput("logged_user"), style = "padding-top: 15px; padding-bottom: 15px; padding-right: 15px; color: #66b3ff;"),
           tags$li(class = "dropdown", actionLink("boton_login_pre",textOutput('texto_link')))
           )
-  
 )
 
 header$children[[2]]$children <-  tags$a(href='wiii',
                                            tags$img(src='logo_arena.png'))
-
-
-
-
-
 
 sidebar <- dashboardSidebar(
   conditionalPanel(condition = 'output.esta_logeado',
@@ -26,42 +20,23 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_administrador',
+  conditionalPanel(condition = 'output.activa_carga',    # visualizador de tablas
     sidebarMenu(
-      id = 'menu_proceso',
+      id = 'menu_preparacion',
       menuItem(
-        'Proceso', tabName = 'proceso'
+        'Preparación de los datos', tabName = 'preparacion'
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_servicio_cliente_nacional || output.es_administrador',
+  conditionalPanel(condition = 'output.activa_visualizacion1',    # visualizador de tablas
                    sidebarMenu(
-                     id = 'menu_servicio_cliente_nacional',
+                     id = 'menu_visualizacion1',
                      menuItem(
-                       'Pedidos', tabName = 'pedidos_nacional'
+                       'Visualización 1', tabName = 'visualizacion1'
                      )
                    )
   ),
-  conditionalPanel(condition = 'output.es_administrador',
-    sidebarMenu(
-      id = 'menu_kpi',
-      menuItem(
-        'KPIs', tabName = 'kpi'
-      )
-    )
-  ),
-  conditionalPanel(condition = 'output.es_administrador || output.es_tester',    # visualizador de tablas
-    sidebarMenu(
-      id = 'menu_visualizador',
-      menuItem(
-        'Visualizador', tabName = 'visualizador'
-      ),
-      menuItem(
-        'Pedidos Abiertos', tabName = 'pedidos_abiertos'
-      )
-    )
-  ),
-  conditionalPanel(condition = 'output.es_administrador',
+  conditionalPanel(condition = 'output.es_administrador & output.',
     sidebarMenu(
       id = 'menu_variables',
       h1('variables'),
@@ -71,54 +46,37 @@ sidebar <- dashboardSidebar(
       textOutput('variables_user_logged'),
       textOutput('variables_user_name'),
       textOutput('variables_user_role'),
-      textOutput('variables_filtro_region'),
-      textOutput('variables_filtro_ano_mes')
+      textOutput('variables_status_carga')
     )
   )
 )
 
 
+# body ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 body <- dashboardBody(
   
-
+  tags$script(HTML(                 # función para definir openTab
+        "                                             
+        var openTab = function(tabName){
+                   $('a', $('.sidebar')).each(function() {
+                   if(this.getAttribute('data-value') == tabName) {
+                   this.click()
+                   };
+                   });
+                   }
+                   ")),
   
   tags$head(tags$style(HTML('
-
-.skin-blue .main-header .logo {
-                              background-color: #66b3ff;
-                              }
-  .skin-blue .main-header .navbar {
-    background-color: #001a33;
-  }'))),  
+.skin-blue .main-header .logo {background-color: #66b3ff;}.skin-blue .main-header .navbar {background-color: #001a33;}'))),  
   tabItems(
-    tabItem(
+    tabItem(                        # login
       'entrada',
       uiOutput('page')
     ),
-    tabItem(
-      'proceso',
-      box(
-        title = 'Proceso',
-        solidHeader = T,
-        width = 9,
-        status = 'warning',
-        sankeyNetworkOutput('grafica_proceso')
-      )
-    ),
-    tabItem(
-      'kpi',
-      box(
-        width = 6,
-        highchartOutput('grafica_fill_rate')
-      ),
-      box(
-        width = 6,
-        leafletOutput('mapa_fill_rate')
-      )
-    ),
-    tabItem(                            # carga de los datos
-      'visualizador',
-      conditionalPanel('input.boton_siguiente_carga == 0',
+    tabItem(                        # carga de los datos
+      'preparacion',
         box(
           width = 12,
           title = 'Preparación de los datos',
@@ -126,66 +84,50 @@ body <- dashboardBody(
             inputId = 'boton_carga',
             label = 'Carga de los datos'
           ),
-          textOutput('o_texto_carga_zsdr141'),
-          textOutput('o_texto_carga_zsdr159')
+          textOutput('o_texto_carga_usa'),
+          textOutput('o_texto_carga_row'),
+          textOutput('o_texto_carga_domestico')
+        ),
+        actionButton(
+          inputId = 'boton_siguiente_carga',
+          label = 'Siguiente'
+        )
+    ),
+    tabItem(                   # visualización 1
+      'visualizacion1',
+      box(
+        width = 12,
+        title = 'Filtros',
+        div(style="display:inline-block",
+            pickerInput(width = 100,             # filtro región
+                        'input_filtro_zona',
+                        'Región',
+                        selected = 'USA',
+                        multiple = FALSE,
+                        choices = c(
+                          'USA',
+                          'Doméstico',
+                          'Resto del mundo'
+                        )
+            )
+        ),
+        uiOutput('i_filtros_visualizacion1'),
+        actionButton(
+          inputId = 'boton_filtrar',
+          label = 'Filtrar'
         )
       ),
-      conditionalPanel('input.boton_carga == 1 & input.boton_siguiente_carga == 0',
-                       actionButton(
-                         inputId = 'boton_siguiente_carga',
-                         label = 'Siguiente'
-                       )
-      ),
-      conditionalPanel('input.boton_siguiente_carga == 1',
-        box(
-          width = 12,
-          title = 'Filtros',
-          div(style="display:inline-block",
-              pickerInput(width = 100,
-                'input_filtro_region',
-                'Región',
-                selected = 'USA',
-                multiple = FALSE,
-                choices = c(
-                  'USA',
-                  'Doméstico',
-                  'Resto del mundo'
-                )
-              )
-            ),
-          div(style="display:inline-block",
-              pickerInput(
-                'input_filtro_fecha_original',
-                'Fecha Original de Entrega',
-                selected = NULL,
-                multiple = TRUE,
-                choices = c(
-                  'ninguno'
-                )
-              )
-            ),
-          actionButton(
-            inputId = 'boton_filtrar',
-            label = 'Filtrar'
-          )
-        ),
-        tabBox(
-          title = 'análisis',
-          id = 'tabset1',
-          width = 12,
-          # tabPanel(
-          #   'datos_completos',
-          #   'datos completos',
-          #   formattableOutput('output_tabla_completo')
-          # ),
-          tabPanel(
-            'tiempo de los procesos',
-            plotOutput('output_grafica_tiempo1')
-          )
+      tabBox(
+        title = 'análisis',
+        id = 'tabset1',
+        width = 12,
+        tabPanel(
+          'tiempo de los procesos',
+          plotOutput('output_grafica_tiempo1',height = 600)
         )
       )
     ),
-    tabItem(
+    tabItem(                    # visualizacion 2
       'pedidos_abiertos',
       box(
         width = 12,
@@ -244,9 +186,6 @@ body <- dashboardBody(
           plotOutput('output$output_grafica_pa_total')
         )
       )
-    ),
-    tabItem(
-      'pedidos_nacional'
     )
   )
 )

@@ -17,5 +17,12 @@ source('gs.R', encoding = "UTF-8")
 # source('mapa.R', encoding = "UTF-8")
 source('funciones_de_carga.R', encoding = "UTF-8")
 source('funciones_graficas.R', encoding = "UTF-8")
+source('funciones_interfaz.R', encoding = "UTF-8")
 
-prelogged <- FALSE
+excel_parametros <- read_excel('datos/setup/parametros.xlsx') %>% data.frame
+
+for(i in 1:nrow(excel_parametros)){
+  for(j in 1:length(excel_parametros)){
+    excel_parametros[i,j] <- str_replace_all(excel_parametros[i,j],' ','_')
+  }
+}
