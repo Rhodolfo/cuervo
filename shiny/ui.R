@@ -102,7 +102,7 @@ body <- dashboardBody(
             pickerInput(width = 100,             # filtro región
                         'input_filtro_zona',
                         'Región',
-                        selected = 'USA',
+                        selected = 'Resto del mundo',
                         multiple = FALSE,
                         choices = c(
                           'USA',
@@ -111,7 +111,7 @@ body <- dashboardBody(
                         )
             )
         ),
-        uiOutput('i_filtros_visualizacion1'),
+        uiOutput('ui_filtros_visualizacion1'),
         actionButton(
           inputId = 'boton_filtrar',
           label = 'Filtrar'

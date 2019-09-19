@@ -27,11 +27,19 @@ shinyServer(function(input, session, output) {
     zsdr141 = NULL,
     total = NULL,
     vis = NULL,
-    vis_pa = NULL
+    vis_pa = NULL,
+    visualizacion1 = NULL,
+    usa = NULL,
+    row = NULL,
+    domestico = NULL
   )
   
   status <- reactiveValues(      # banderas para supervisar procesos
     carga = FALSE
+  )
+  
+  codigos <- reactiveValues(
+    update_filtros = NULL
   )
   
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
@@ -473,33 +481,28 @@ shinyServer(function(input, session, output) {
   })
   
   
-  # visualizacion1 --------------------------------------------------------------------------------------------------------------------------------------------------------------
+  # visualizacion1 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   
-  ui_filtros_visualizador1 <- function(){          # interface con los filtros general
-    
-    
+  ui_filtros_visualizacion1 <- function(){                   # interface con los filtros dinámicos
+    f_region <- 'row'
     if(input$input_filtro_zona == 'USA')f_region <- 'usa'
     if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
     if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
-      
-    
-    
-    lista_opciones <- list()
-    
-    eval(parse(text=paste0('a <- ')))
-    
-    eval(parse(text=paste0('lista_opciones[[',1:3,']] <- unique(tablas$',f_region,'$',,')',collapse = ';')))
-    
-    vector_opciones <- NULL
-    for(i in 1:length(lista_opciones)){
-      lista_opciones[[i]] <- paste0('"',paste0(lista_opciones[[i]],collapse = '","'),'"')
-      vector_opciones <- c(vector_opciones,lista_opciones[[i]])
+    eval(parse(text = paste0('parametros$visualizacion1_filtros <- parametros$',f_region,'_filtros')))  # nombres de las variables
+    eval(parse(text = paste0('tablas$visualizacion1 <- tablas$',f_region)))
+    f_lista_opciones <- list()
+    f_t <-  paste0('f_lista_opciones[[',1:length(parametros$visualizacion1_filtros),']] <- unique(tablas$visualizacion1$',parametros$visualizacion1_filtros,')')
+    eval(parse(text = paste0(f_t,collapse = ';')))
+    f_vector_opciones <- NULL
+    for(i in 1:length(f_lista_opciones)){
+      f_lista_opciones[[i]] <- paste0('"',paste0(f_lista_opciones[[i]],collapse = '","'),'"')
+      f_vector_opciones <- c(f_vector_opciones,f_lista_opciones[[i]])
     }
     funcion1 <- 'tagList('
-    funcion2 <- paste0('div(style="display:inline-block",pickerInput(width = 150,"input_filtro_',eval(parse(text=paste0("parametros$",f_region,"_filtros"))),'",
-                       "',eval(parse(text=paste0("parametros$",f_region,"_filtros"))),'",selected = NULL,options = list(`actions-box` = TRUE),multiple = TRUE,choices = c(',vector_opciones,')))')
-    funcion2 <- paste0(funcion2,collapse = ',')    
+    funcion2 <- paste0('div(style="display:inline-block",pickerInput(width = 150,"input_filtro_',1:length(parametros$visualizacion1_filtros),'",
+                     "',parametros$visualizacion1_filtros,'",selected = NULL,options = list(`actions-box` = TRUE),multiple = TRUE,choices = c(',f_vector_opciones,')))', collapse = ',\n')
+    funcion2 <- paste0(funcion2,collapse = ',')   
     funcion3 <- ')'
     resultado <- eval(parse(text = paste0(
       funcion1,
@@ -510,103 +513,41 @@ shinyServer(function(input, session, output) {
   }
   
   
-  # ui_filtros_domestico <- function(){          # interface con los filtros de doméstico
-  #   lista_opciones <- list()
-  #   for(i in 1:length(parametros$domestico_filtros)){
-  #     eval(parse(text=paste0('lista_opciones[[',i,']] <- unique(tablas$domestico$',parametros$domestico_filtros[i],')')))
-  #   }
-  #   vector_opciones <- NULL
-  #   for(i in 1:length(lista_opciones)){
-  #     lista_opciones[[i]] <- paste0('"',paste0(lista_opciones[[i]],collapse = '","'),'"')
-  #     vector_opciones <- c(vector_opciones,lista_opciones[[i]])
-  #   }
-  #   funcion1 <- 'tagList('
-  #   funcion2 <- paste0('div(style="display:inline-block",pickerInput(width = 150,"input_filtro_',parametros$domestico_filtros,'",
-  #                      "',parametros$domestico_filtros,'",selected = NULL,options = list(`actions-box` = TRUE),multiple = TRUE,choices = c(',vector_opciones,')))')
-  #   funcion2 <- paste0(funcion2,collapse = ',')    
-  #   funcion3 <- ')'
-  #   resultado <- eval(parse(text = paste0(
-  #     funcion1,
-  #     funcion2,
-  #     funcion3
-  #   )))
-  #   return(resultado)
-  # }
-  # 
-  # 
-  # ui_filtros_usa <- function(){         # interface con los filtros de usa
-  #   lista_opciones <- list()
-  #   for(i in 1:length(parametros$usa_filtros)){
-  #     eval(parse(text=paste0('lista_opciones[[',i,']] <- unique(tablas$usa$',parametros$usa_filtros[i],')')))
-  #   }
-  #   vector_opciones <- NULL
-  #   for(i in 1:length(lista_opciones)){
-  #     lista_opciones[[i]] <- paste0('"',paste0(lista_opciones[[i]],collapse = '","'),'"')
-  #     vector_opciones <- c(vector_opciones,lista_opciones[[i]])
-  #   }
-  #   funcion1 <- 'tagList('
-  #   funcion2 <- paste0('div(style="display:inline-block",pickerInput(width = 150,"input_filtro_',parametros$usa_filtros,'",
-  #                      "',parametros$usa_filtros,'",selected = NULL,options = list(`actions-box` = TRUE),multiple = TRUE,choices = c(',vector_opciones,')))')
-  #   funcion2 <- paste0(funcion2,collapse = ',')    
-  #   funcion3 <- ')'
-  #   resultado <- eval(parse(text = paste0(
-  #     funcion1,
-  #     funcion2,
-  #     funcion3
-  #   )))
-  #   return(resultado)
-  # }
-  # 
-  # 
-  # ui_filtros_row <- function(){         # interface con los filtros de resto del mundo 
-  #   lista_opciones <- list()
-  #   for(i in 1:length(parametros$row_filtros)){
-  #     eval(parse(text=paste0('lista_opciones[[',i,']] <- unique(tablas$row$',parametros$row_filtros[i],')')))
-  #   }
-  #   vector_opciones <- NULL
-  #   for(i in 1:length(lista_opciones)){
-  #     lista_opciones[[i]] <- paste0('"',paste0(lista_opciones[[i]],collapse = '","'),'"')
-  #     vector_opciones <- c(vector_opciones,lista_opciones[[i]])
-  #   }
-  #   funcion1 <- 'tagList('
-  #   funcion2 <- paste0('div(style="display:inline-block",pickerInput(width = 150,"input_filtro_',parametros$row_filtros,'",
-  #                      "',parametros$row_filtros,'",selected = NULL,options = list(`actions-box` = TRUE),multiple = TRUE,choices = c(',vector_opciones,')))')
-  #   funcion2 <- paste0(funcion2,collapse = ',')    
-  #   funcion3 <- ')'
-  #   resultado <- eval(parse(text = paste0(
-  #     funcion1,
-  #     funcion2,
-  #     funcion3
-  #   )))
-  #   return(resultado)
-  # }
-  
-  observe({                                              # decido cuál de las interfaces se muestra
-      output$i_filtros_visualizacion1 <- renderUI({
-        div(class="outer",do.call(bootstrapPage,c("",ui_filtros_visualizador1())))
+  observe({                                              # decido cuál de las interfaces se muestra, resultó ser un paso trivial
+      output$ui_filtros_visualizacion1 <- renderUI({
+        div(class="outer",do.call(bootstrapPage,c("",ui_filtros_visualizacion1())))
       })
   })
   
-  # observe({                                              # decido cuál de las interfaces se muestra
-  #   if (input$input_filtro_zona == 'Doméstico') {
-  #     output$i_filtros_visualizacion1 <- renderUI({
-  #       div(class="outer",do.call(bootstrapPage,c("",ui_filtros_domestico())))
-  #     })
-  #   }
-  #   if (input$input_filtro_zona == 'USA') {
-  #     output$i_filtros_visualizacion1 <- renderUI({
-  #       div(class="outer",do.call(bootstrapPage,c("",ui_filtros_usa())))
-  #     })
-  #   }
-  #   if (input$input_filtro_zona == 'Resto del mundo') {
-  #     output$i_filtros_visualizacion1 <- renderUI({
-  #       div(class="outer",do.call(bootstrapPage,c("",ui_filtros_row())))
-  #     })
-  #   }
-  # })
-
   
-  observe
+  observeEvent(input$input_filtro_1,{
+      eval(parse(text = paste(
+        "a <- 'ninguno'
+        if(!is.null(parametros$visualizacion1_filtros)){
+          f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1) %>% dplyr::select(",parametros$visualizacion1_filtros[2],")
+          
+          a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[2],"))
+        }
+        updatePickerInput(session = session, inputId = 'input_filtro_2', choices = a,selected = )"
+      )))
+  })
+  
+  observeEvent(input$input_filtro_2,{
+    eval(parse(text = paste(
+      "a <- 'ninguno'
+      if(!is.null(parametros$visualizacion1_filtros)){
+      f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1);
+      f_tabla <- f_tabla %>% dplyr::filter(",parametros$visualizacion1_filtros[2]," %in% input$input_filtro_2) %>% dplyr::select(",parametros$visualizacion1_filtros[3],")
+      
+      a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[3],"))
+      }
+      updatePickerInput(session = session, inputId = 'input_filtro_3', choices = a)"
+    )))
+})
+  
+  
+  
+  
   
   observe({                           # actualización de los filtros
     a <- 'ninguno'
@@ -617,7 +558,6 @@ shinyServer(function(input, session, output) {
       if(input$input_filtro_region_pa %in% c('USA','Resto del mundo')){
         a <- funcion_extrae_fechas(tablas$zsdr141) %>% names
       }
-      
     }
     
     updatePickerInput(
