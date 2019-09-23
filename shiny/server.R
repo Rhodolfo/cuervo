@@ -11,7 +11,7 @@ shinyServer(function(input, session, output) {
     users = NULL
   )
   
-  user <- reactiveValues(        # variables de usuario y status de logeo
+  user <- reactiveValues(    # variables de usuario y status de logeo
     prelog = FALSE,
     logged = FALSE, 
     role = '',
@@ -198,35 +198,9 @@ shinyServer(function(input, session, output) {
   #   dplyr::filter(!is.na(domestico_pedido)) %>%
   #   dplyr::select(domestico_pedido) %>%
   #   unlist
-  
-  
-  
-  
-    # update de selector de  --------------------------------------------------------------------------------------------------------------------------------------------------
 
   
-  
-  observe({
-    a <- 'ninguno'
-    if(!is.null(tablas$ano_mes)){
-      if(input$input_filtro_region_pa == 'Doméstico'){
-        a <- funcion_extrae_fechas(tablas$zsdr159) %>% names
-      }
-      if(input$input_filtro_region_pa %in% c('USA','Resto del mundo')){
-        a <- funcion_extrae_fechas(tablas$zsdr141) %>% names
-      }
-     
-    }
-   
-    updatePickerInput(
-      session,'input_fecha_final_pa_141',
-      choices = unique(as.character(a)),
-      selected = NULL
-    )
-  })
-
-  
-  # ui de login ------------------------------------------------------------------------------------------------------------------------------------------------------------
+  # login ------------------------------------------------------------------------------------------------------------------------------------------------------------
   
 
   
@@ -245,10 +219,10 @@ shinyServer(function(input, session, output) {
                   ;margin-left: -150px;}")
       )}
   
-  ui2 <- function(){list(tabPanel(user$name,actionButton(
+  ui2 <- function(){list(tabPanel(user$name,actionButton( # pantalla de log in existoso
     inputId = 'boton_siguiente_login',
     label = 'Siguiente'
-  )),tabPanel(user$role))}    # información de log in existoso
+  )),tabPanel(user$role))}    
 
   
   
@@ -435,14 +409,14 @@ shinyServer(function(input, session, output) {
     progress$set(message = "Cargando USA ", value = 0)
     Sys.sleep(1)
     tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido) %>% 
-      dplyr::filter(!is.na(Zona_de_ventas)) %>%
+      dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región == 'USA')
     
    
     progress$set(message = "Cargando Resto del Mundo ", value = 0.3)
     Sys.sleep(1)
     tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido) %>% 
-      dplyr::filter(!is.na(Zona_de_ventas)) %>%
+      dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región != 'USA')
     
  
@@ -483,25 +457,36 @@ shinyServer(function(input, session, output) {
   
   # visualizacion1 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  
-  ui_filtros_visualizacion1 <- function(){                   # interface con los filtros dinámicos
-    f_region <- 'row'
+  ui_filtros_visualizacion1 <- function(){                   # función interfaz con los filtros dinámicos (toma los filtros de la tabla de excel para cada uno de los 3 canales)
+    f_region <- 'usa'
     if(input$input_filtro_zona == 'USA')f_region <- 'usa'
     if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
     if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
-    eval(parse(text = paste0('parametros$visualizacion1_filtros <- parametros$',f_region,'_filtros')))  # nombres de las variables
+    eval(parse(text = paste0('parametros$visualizacion1_filtros <- parametros$',f_region,'_filtros')))
     eval(parse(text = paste0('tablas$visualizacion1 <- tablas$',f_region)))
     f_lista_opciones <- list()
     f_t <-  paste0('f_lista_opciones[[',1:length(parametros$visualizacion1_filtros),']] <- unique(tablas$visualizacion1$',parametros$visualizacion1_filtros,')')
     eval(parse(text = paste0(f_t,collapse = ';')))
+     
+    for(i in 1:length(f_lista_opciones)){
+      f_lista_opciones[[i]] <- f_lista_opciones[[i]][!is.na(f_lista_opciones[[1]])]
+    }
+    
     f_vector_opciones <- NULL
     for(i in 1:length(f_lista_opciones)){
       f_lista_opciones[[i]] <- paste0('"',paste0(f_lista_opciones[[i]],collapse = '","'),'"')
       f_vector_opciones <- c(f_vector_opciones,f_lista_opciones[[i]])
     }
     funcion1 <- 'tagList('
-    funcion2 <- paste0('div(style="display:inline-block",pickerInput(width = 150,"input_filtro_',1:length(parametros$visualizacion1_filtros),'",
-                     "',parametros$visualizacion1_filtros,'",selected = NULL,options = list(`actions-box` = TRUE),multiple = TRUE,choices = c(',f_vector_opciones,')))', collapse = ',\n')
+    funcion2 <- paste0(
+                    'pickerInput(width = 150,
+                          "input_filtro_',1:length(parametros$visualizacion1_filtros),'",
+                          "',parametros$visualizacion1_filtros,'",
+                          selected = c(',f_vector_opciones,'),
+                          options = list(`actions-box` = TRUE),
+                          multiple = TRUE,
+                          choices = c(',f_vector_opciones,'))'
+                , collapse = ',\n')
     funcion2 <- paste0(funcion2,collapse = ',')   
     funcion3 <- ')'
     resultado <- eval(parse(text = paste0(
@@ -512,120 +497,116 @@ shinyServer(function(input, session, output) {
     return(resultado)
   }
   
-  
-  observe({                                              # decido cuál de las interfaces se muestra, resultó ser un paso trivial
+  observe({                                                   # decido cuál de las interfaces se muestra, resultó ser un paso trivial pero lo dejo como referencia por si es necesario usar una no trivial
       output$ui_filtros_visualizacion1 <- renderUI({
         div(class="outer",do.call(bootstrapPage,c("",ui_filtros_visualizacion1())))
       })
   })
   
-  
-  observeEvent(input$input_filtro_1,{
+  observeEvent(input$input_filtro_1,{   # actualización dinámica de los filtros (hardcodedish porque las variables tienen siempre esta estructura de naming), soporta 3 variables por el momento y
+    eval(parse(text = paste(          # anida siguiendo la jerarquización:  filtro1 > filtro2 > filtro3
+      "a <- 'ninguno'
+      if(!is.null(parametros$visualizacion1_filtros)){
+      f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1) %>% dplyr::select(",parametros$visualizacion1_filtros[2],")
+      a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[2],"))
+      }
+      updatePickerInput(session = session, inputId = 'input_filtro_2', choices = a,selected = a)"
+    )))
+})
+  observeEvent(input$input_filtro_2,{
+    if(length(parametros$visualizacion1_filtros) >= 3){
       eval(parse(text = paste(
         "a <- 'ninguno'
         if(!is.null(parametros$visualizacion1_filtros)){
-          f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1) %>% dplyr::select(",parametros$visualizacion1_filtros[2],")
-          
-          a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[2],"))
+        f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1);
+        f_tabla <- f_tabla %>% dplyr::filter(",parametros$visualizacion1_filtros[2]," %in% input$input_filtro_2) %>% dplyr::select(",parametros$visualizacion1_filtros[3],")
+        a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[3],"))
         }
-        updatePickerInput(session = session, inputId = 'input_filtro_2', choices = a,selected = )"
+        updatePickerInput(session = session, inputId = 'input_filtro_3', choices = a, selected = a)"
       )))
+    }
   })
   
-  observeEvent(input$input_filtro_2,{
-    eval(parse(text = paste(
-      "a <- 'ninguno'
-      if(!is.null(parametros$visualizacion1_filtros)){
-      f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1);
-      f_tabla <- f_tabla %>% dplyr::filter(",parametros$visualizacion1_filtros[2]," %in% input$input_filtro_2) %>% dplyr::select(",parametros$visualizacion1_filtros[3],")
-      
-      a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[3],"))
-      }
-      updatePickerInput(session = session, inputId = 'input_filtro_3', choices = a)"
-    )))
-})
-  
-  
-  
-  
-  
-  observe({                           # actualización de los filtros
-    a <- 'ninguno'
-    if(!is.null(tablas$ano_mes)){
-      if(input$input_filtro_region_pa == 'Doméstico'){
-        a <- funcion_extrae_fechas(tablas$zsdr159) %>% names
-      }
-      if(input$input_filtro_region_pa %in% c('USA','Resto del mundo')){
-        a <- funcion_extrae_fechas(tablas$zsdr141) %>% names
-      }
-    }
+  ui_filtros_fecha_variable_visualizacion1 <- function(){          # ui filtros de fecha variable
+    f_fechas <- parametros$usa_fechas
     
-    updatePickerInput(
-      session,'input_fecha_final_pa_141',
-      choices = unique(as.character(a)),
-      selected = NULL
+    cat(parametros$usa_fechas)
+    cat('\n')
+    cat(parametros$row_fechas)
+    cat('\n')
+    cat(parametros$domestico_fechas)
+    cat('\n')
+    
+    if(input$input_filtro_zona == 'USA')f_fechas <- parametros$usa_fechas
+    if(input$input_filtro_zona == 'Resto del mundo')f_fechas <- parametros$row_fechas
+    if(input$input_filtro_zona == 'Doméstico')f_fechas <- parametros$domestico_fechas
+    
+    cat(input$input_filtro_zona)
+    cat('\n')
+    
+    f_fechas <- paste0('c("',paste0(f_fechas,collapse = '","'),'")')
+    funcion1 <- 'tagList('
+    funcion2 <- paste0(
+      'pickerInput("input_filtro_fecha_variable","Fecha para filtrar", choices =',f_fechas,', selected = ',f_fechas[1],', multiple = FALSE)'
     )
+    funcion3 <- ')'
+    resultado <- eval(parse(text = paste0(
+      funcion1,
+      funcion2,
+      funcion3
+    )))
+    return(resultado)
+  }
+  observe({                                                   
+    output$ui_filtros_fecha_variable_visualizacion1 <- renderUI({
+      div(class="outer",do.call(bootstrapPage,c("",ui_filtros_fecha_variable_visualizacion1())))
+    })
+  })
+  
+  ui_filtros_fecha_rango_visualizacion1 <- function(){          # ui filtros de fecha rango
+    f_tabla <- tablas$usa
+    f_variable <- parametros$usa_fechas[1]
+    if(input$input_filtro_zona == 'USA')f_tabla <- tablas$usa
+    if(input$input_filtro_zona == 'Resto del mundo')f_tabla <- tablas$row
+    if(input$input_filtro_zona == 'Doméstico')f_tabla <- tablas$domestico
+    f_variable <- input$input_filtro_fecha_variable
+    eval(parse(text = paste0('f_min <- as.Date(min(f_tabla$',f_variable,', na.rm= T), origin ="1970-01-01")')))
+    f_min <- as.Date(f_min, origin ="1970-01-01")
+    eval(parse(text = paste0('f_max <- as.Date(max(f_tabla$',f_variable,', na.rm= T), origin ="1970-01-01")')))
+    f_max <- as.Date(f_max, origin ="1970-01-01")
+    funcion1 <- 'tagList('
+    funcion2 <- paste0(
+      'dateRangeInput(
+      "input_filtro_fecha_rango",
+      "Fecha Rango",
+      min = "',as.character(f_min),'",
+      max = "',as.character(f_max),'", 
+      start = "',as.character(as.Date(f_max -30)),'",
+      end = "',as.character(f_max),'")'
+    )
+    funcion3 <- ')'
+    resultado <- eval(parse(text = paste0(
+      funcion1,
+      funcion2,
+      funcion3
+    )))
+    return(resultado)
+  }
+  observe({                                                   
+    output$ui_filtros_fecha_rango_visualizacion1 <- renderUI({
+      div(class="outer",do.call(bootstrapPage,c("",ui_filtros_fecha_rango_visualizacion1())))
+    })
   })
   
   
+ 
   
   
-  observeEvent(input$boton_filtrar,{                           # filtro de la información
-    if(input$input_filtro_region == 'Doméstico'){
-      tablas$vis <- tablas$zsdr159
-    }
-    if(input$input_filtro_region == 'USA'){
-      tablas$vis <- tablas$zsdr141 %>%
-        dplyr::filter(!is.na(region_nombre)) %>%
-        dplyr::filter(region_nombre == 'USA')
-    }
-    if(input$input_filtro_region == 'Resto del mundo'){
-      tablas$vis <- tablas$zsdr141 %>%
-        dplyr::filter(!is.na(region_nombre)) %>%
-        dplyr::filter(region_nombre %in% c('APAC','EMEA','LATAM','PUK','JCMD'))
-    }
-    tablas$vis <- tablas$vis %>%
-    filter(ano_mes %in% input$input_filtro_fecha_original)
-  })
   
-  
-  observeEvent(input$boton_filtrar_pa,{                      # filtro pedidos abiertos
-    if(input$input_filtro_region == 'Doméstico'){
-      tablas$vis_pa <- tablas$zsdr159
-    }
-    if(input$input_filtro_region == 'USA'){
-      
-      eval(parse(text = paste0(
-        "tablas$vis_pa <- tablas$zsdr141 %>%
-        dplyr::filter(!is.na(region_nombre)) %>%
-        dplyr::filter(region_nombre == 'USA') %>%
-        dplyr::filter(is.na(",input$input_fecha_final_pa_141,")) %>%
-        dplyr::filter(fecha_original_preferente>= '",input$input_filtro_fecha_1,"') %>%
-        dplyr::filter(fecha_original_preferente<= '",input$input_filtro_fecha_2,"')"
-      )))
-      
-      
-    }
-    if(input$input_filtro_region == 'Resto del mundo'){
-     
-      eval(parse(text = paste0(
-        "tablas$vis_pa <- tablas$zsdr141 %>%
-        dplyr::filter(!is.na(region_nombre)) %>%
-        dplyr::filter(region_nombre %in% c('APAC','EMEA','LATAM','PUK','JCMD')) %>%
-        dplyr::filter(is.na(",input$input_fecha_final_pa_141,"))  %>%
-        dplyr::filter(",input$input_fecha_final_pa_141,">= '",input$input_filtro_fecha_1,"') %>%
-        dplyr::filter(",input$input_fecha_final_pa_141,"<= '",input$input_filtro_fecha_2,"')"
-      )))
-      
-    }
-  
-    
-  })
   
   
   
   output$output_grafica_tiempo1 <- renderPlot({
-    
     
     
     g <- NULL
@@ -660,12 +641,7 @@ shinyServer(function(input, session, output) {
   })
   
   
-  # outputs de la pestaña de pedidos abiertos
 
-  output$output_grafica_pa_total <- renderPlot({
-    
-  })
-  
   
   
 })

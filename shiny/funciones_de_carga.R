@@ -28,6 +28,15 @@ funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_ped
 
 # (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
 
+
+# p_carpeta <- parametros$usa_carpeta
+# p_fechas <- parametros$usa_fechas
+# p_cantidades <- parametros$usa_cantidades
+# p_filtros <- parametros$usa_filtros
+# p_pedido <- parametros$usa_pedido
+
+
+
 funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido){
   f_archivos <- list.files(paste0('datos/',p_carpeta))
   f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
@@ -41,6 +50,15 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   f_lista <- do.call('rbind',f_lista)
   f_lista <- as.data.frame(f_lista) %>% 
     setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  
+
+
+  for(i in 1:length(p_filtros)){
+    eval(parse(text = paste0(
+      'f_lista$',p_filtros[i],'[is.na(f_lista$',p_filtros[i],')] <- "ninguno"' 
+    )))
+  }  
+  
   f_lista <- f_lista %>%
     mutate_at(.vars = p_fechas,.funs = as.Date) %>%
     mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
@@ -52,6 +70,12 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   return(f_resultado)
 }
 
+# (terciary) función de sustitución de datos perdidos------------
+
+funcion_na_vacio <- function(a){
+  a <- as.character(a)
+  replace_na(a,'ninguno')
+}
 
 
 # función carga general de datos ---------------------------------------------------
@@ -444,7 +468,7 @@ funcion_mes_a_numero <- function(p_mes){
 # 
 # 
 
-# función para extraer el año y el mes de una variable en una tabla y con ello crear un catálogo de selección --------------------------------------------
+# (secondary) función para extraer el año y el mes de una variable en una tabla y con ello crear un catálogo de selección --------------------------------------------
 
 # p_tabla <- tablas$zsdr159
 

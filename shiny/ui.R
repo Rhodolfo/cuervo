@@ -20,7 +20,10 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  conditionalPanel(condition = 'output.activa_carga',    # visualizador de tablas
+  
+  # carga de los datos -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'output.activa_carga',    
     sidebarMenu(
       id = 'menu_preparacion',
       menuItem(
@@ -28,11 +31,32 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  conditionalPanel(condition = 'output.activa_visualizacion1',    # visualizador de tablas
+  
+  # visualización 1 sidebar -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'output.activa_visualizacion1',    
                    sidebarMenu(
                      id = 'menu_visualizacion1',
                      menuItem(
                        'Visualización 1', tabName = 'visualizacion1'
+                     ),
+                     pickerInput(width = 100,             # filtro región
+                                 'input_filtro_zona',
+                                 'Región',
+                                 selected = 'USA',
+                                 multiple = FALSE,
+                                 choices = c(
+                                   'USA',
+                                   'Doméstico',
+                                   'Resto del mundo'
+                                 )
+                     ),
+                     uiOutput('ui_filtros_visualizacion1'),
+                     uiOutput('ui_filtros_fecha_variable_visualizacion1'),
+                     uiOutput('ui_filtros_fecha_rango_visualizacion1'),
+                     actionButton(
+                       inputId = 'boton_filtrar',
+                       label = 'Filtrar'
                      )
                    )
   ),
@@ -93,30 +117,11 @@ body <- dashboardBody(
           label = 'Siguiente'
         )
     ),
-    tabItem(                   # visualización 1
+    
+  # (body) visualización 1  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    tabItem(                   
       'visualizacion1',
-      box(
-        width = 12,
-        title = 'Filtros',
-        div(style="display:inline-block",
-            pickerInput(width = 100,             # filtro región
-                        'input_filtro_zona',
-                        'Región',
-                        selected = 'Resto del mundo',
-                        multiple = FALSE,
-                        choices = c(
-                          'USA',
-                          'Doméstico',
-                          'Resto del mundo'
-                        )
-            )
-        ),
-        uiOutput('ui_filtros_visualizacion1'),
-        actionButton(
-          inputId = 'boton_filtrar',
-          label = 'Filtrar'
-        )
-      ),
       tabBox(
         title = 'análisis',
         id = 'tabset1',
@@ -136,7 +141,7 @@ body <- dashboardBody(
             pickerInput(width = 100,
                         'input_filtro_region_pa',
                         'Región',
-                        selected = NULL,
+                        selected = 'USA',
                         multiple = FALSE,
                         choices = c(
                           'USA',
