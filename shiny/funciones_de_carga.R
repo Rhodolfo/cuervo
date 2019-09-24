@@ -58,15 +58,19 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
       'f_lista$',p_filtros[i],'[is.na(f_lista$',p_filtros[i],')] <- "ninguno"' 
     )))
   }  
+  for(i in 1:length(p_pedido)){
+    eval(parse(text = paste0(
+      'f_lista$',p_pedido[i],'[is.na(f_lista$',p_pedido[i],')] <- "ninguno"' 
+    )))
+  }  
   
   f_lista <- f_lista %>%
     mutate_at(.vars = p_fechas,.funs = as.Date) %>%
     mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
     mutate_at(.vars = p_pedido,.funs = as.character) %>%
     mutate_at(.vars = p_filtros,.funs = as.factor) 
-  f_resultado <- f_lista[,(length(f_lista) - length(p_fechas) - length(p_cantidades) - length(p_pedido) - length(p_filtros) + 1):(length(f_lista))]
-  f_resultado <- f_resultado %>%
-    setNames(c(p_fechas,p_cantidades,p_pedido,p_filtros))
+  f_resultado <- f_lista %>%
+    dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros))
   return(f_resultado)
 }
 

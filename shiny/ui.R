@@ -39,46 +39,71 @@ sidebar <- dashboardSidebar(
                      id = 'menu_visualizacion1',
                      menuItem(
                        'Visualización 1', tabName = 'visualizacion1'
-                     ),
-                     pickerInput(                  # filtro región
-                       'input_filtro_zona',
-                       'Región',
-                       selected = 'USA',
-                       multiple = FALSE,
-                       choices = c(
-                         'USA',
-                         'Doméstico',
-                         'Resto del mundo'
                      )
-                     ),
-                     pickerInput(
-                       'input_filtro1',
-                       ''
-                     ),
-                     # uiOutput('ui_filtros_visualizacion1'),
-                     pickerInput(                                    # filtro fecha variable
-                       'filtro_fecha_variable',
-                       'Fecha para filtrar',
-                       choices = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)],
-                       selected = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)][1],
-                       multiple = FALSE
-                     ),
-                     dateRangeInput(                     # filtro fecha región
-                       'filtro_fecha_rango',
-                       'Rango de fechas',
-                       start = '2019-01-01',
-                       end = '2019-01-01',
-                       min = '2019-01-01',
-                       max = '2019-01-01'
-                     ),
                      # uiOutput('ui_filtros_fecha_variable_visualizacion1'),
                      # uiOutput('ui_filtros_fecha_rango_visualizacion1'),
+                   )
+  ),
+  conditionalPanel(condition = 'output.activa_visualizacion1',
+    sidebarMenu(
+      id = 'menu_filtros_1',
+      pickerInput(                  # filtro región
+        'input_filtro_zona',
+        'Región',
+        selected = NULL,
+        multiple = FALSE,
+        choices = c(
+          'USA',
+          'Doméstico',
+          'Resto del mundo'
+        )
+      ),
+      pickerInput(                   # filtro 1
+        'input_filtro1',
+        'filtro1',
+        selected = 'ninguna',
+        choices = 'ninguna',
+        multiple = TRUE,
+        options = list(`actions-box` = TRUE)
+      ),
+      conditionalPanel('output.activa_filtro2',
+                       pickerInput(                   # filtro 2
+                         'input_filtro2',
+                         'filtro2',
+                         selected = 'ninguna',
+                         choices = 'ninguna',
+                         multiple = TRUE,
+                         options = list(`actions-box` = TRUE)
+                       )
+      ),
+      # uiOutput('ui_filtros_visualizacion1'),
+      pickerInput(                                    # filtro fecha variable
+        'filtro_fecha_variable',
+        'Fecha para filtrar',
+        choices = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)],
+        selected = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)][1],
+        multiple = FALSE
+      ),
+      dateRangeInput(                     # filtro fecha rango
+        'filtro_fecha_rango',
+        'Rango de fechas',
+        start = '2019-01-01',
+        end = '2019-12-31',
+        min = '2019-01-01',
+        max = '2019-12-31'
+      )
+    )
+  ),
+  conditionalPanel(condition = 'output.activa_visualizacion1',
+                   sidebarMenu(
+                     id = 'menu_boton_1',
                      actionButton(
                        inputId = 'boton_filtrar',
                        label = 'Filtrar'
                      )
                    )
   ),
+  
   conditionalPanel(condition = 'output.es_administrador & output.',
     sidebarMenu(
       id = 'menu_variables',

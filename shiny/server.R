@@ -142,77 +142,92 @@ shinyServer(function(input, session, output) {
   # parametros$domestico_fechas = excel_parametros %>%
   #   dplyr::filter(!is.na(domestico_fechas)) %>%
   #   dplyr::select(domestico_fechas) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$usa_fechas = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_fechas)) %>%
   #   dplyr::select(usa_fechas) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$row_fechas = excel_parametros %>%
   #   dplyr::filter(!is.na(row_fechas)) %>%
   #   dplyr::select(row_fechas) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$domestico_cantidades = excel_parametros %>%
   #   dplyr::filter(!is.na(domestico_cantidades)) %>%
   #   dplyr::select(domestico_cantidades) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$usa_cantidades = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_cantidades)) %>%
   #   dplyr::select(usa_cantidades) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$row_cantidades = excel_parametros %>%
   #   dplyr::filter(!is.na(row_cantidades)) %>%
   #   dplyr::select(row_cantidades) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$domestico_filtros = excel_parametros %>%
   #   dplyr::filter(!is.na(domestico_filtros)) %>%
   #   dplyr::select(domestico_filtros) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$usa_filtros = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_filtros)) %>%
   #   dplyr::select(usa_filtros) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$row_filtros = excel_parametros %>%
   #   dplyr::filter(!is.na(row_filtros)) %>%
   #   dplyr::select(row_filtros) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$usa_carpeta = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_carpeta)) %>%
   #   dplyr::select(usa_carpeta) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$row_carpeta = excel_parametros %>%
   #   dplyr::filter(!is.na(row_carpeta)) %>%
   #   dplyr::select(row_carpeta) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$domestico_carpeta = excel_parametros %>%
   #   dplyr::filter(!is.na(domestico_carpeta)) %>%
   #   dplyr::select(domestico_carpeta) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$usa_pedido = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_pedido)) %>%
   #   dplyr::select(usa_pedido) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$row_pedido = excel_parametros %>%
   #   dplyr::filter(!is.na(row_pedido)) %>%
   #   dplyr::select(row_pedido) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
   # 
   # parametros$domestico_pedido = excel_parametros %>%
   #   dplyr::filter(!is.na(domestico_pedido)) %>%
   #   dplyr::select(domestico_pedido) %>%
-  #   unlist
+  #   unlist %>%
+  #   as.character
 
   
   # login ------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -464,6 +479,15 @@ shinyServer(function(input, session, output) {
     
     status$carga <- TRUE
     
+    eval(parse(text = paste0('f_opciones_filtro1 <- as.character(unique(tablas$usa$',parametros$usa_filtros[1],'))')))  # inicializo el filtro1
+    updatePickerInput(
+      session,
+      inputId = 'input_filtro1',
+      label = 'usa',
+      choices = f_opciones_filtro1,
+      selected = f_opciones_filtro1
+    )
+    
   })
   
   output$o_texto_carga_usa <- renderText({
@@ -488,86 +512,59 @@ shinyServer(function(input, session, output) {
   
   # visualizacion1 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#   ui_filtros_visualizacion1 <- function(){                   # función interfaz con los filtros dinámicos (toma los filtros de la tabla de excel para cada uno de los 3 canales)
-#     f_region <- 'usa'
-#     if(input$input_filtro_zona == 'USA')f_region <- 'usa'
-#     if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
-#     if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
-#     
-#     
-#     cat('\n')
-#     cat(f_region)
-#     cat('\n')
-#     
-#     eval(parse(text = paste0('parametros$visualizacion1_filtros <- parametros$',f_region,'_filtros')))
-#     
-#     cat('\n')
-#     cat(parametros$visualizacion1_filtros)
-#     cat('\n')
-#     
-#     eval(parse(text = paste0('tablas$visualizacion1 <- tablas$',f_region)))
-#     f_lista_opciones <- list()
-#     f_t <-  paste0('f_lista_opciones[[',1:length(parametros$visualizacion1_filtros),']] <- unique(tablas$visualizacion1$',parametros$visualizacion1_filtros,')')
-#     eval(parse(text = paste0(f_t,collapse = ';')))
-#      
-#     for(i in 1:length(f_lista_opciones)){
-#       f_lista_opciones[[i]] <- f_lista_opciones[[i]][!is.na(f_lista_opciones[[1]])]
-#     }
-#     
-#     f_vector_opciones <- NULL
-#     for(i in 1:length(f_lista_opciones)){
-#       f_lista_opciones[[i]] <- paste0('"',paste0(f_lista_opciones[[i]],collapse = '","'),'"')
-#       f_vector_opciones <- c(f_vector_opciones,f_lista_opciones[[i]])
-#     }
-#     funcion1 <- 'tagList('
-#     funcion2 <- paste0(
-#                     'pickerInput(width = 150,
-#                           "input_filtro_',1:length(parametros$visualizacion1_filtros),'",
-#                           "',parametros$visualizacion1_filtros,'",
-#                           selected = c(',f_vector_opciones,'),
-#                           options = list(`actions-box` = TRUE),
-#                           multiple = TRUE,
-#                           choices = c(',f_vector_opciones,'))'
-#                 , collapse = ',\n')
-#     funcion2 <- paste0(funcion2,collapse = ',')   
-#     funcion3 <- ')'
-#     resultado <- eval(parse(text = paste0(
-#       funcion1,
-#       funcion2,
-#       funcion3
-#     )))
-#     return(resultado)
-#   }
-#   
-#   observe({                                                   # decido cuál de las interfaces se muestra, resultó ser un paso trivial pero lo dejo como referencia por si es necesario usar una no trivial
-#       output$ui_filtros_visualizacion1 <- renderUI({
-#         div(class="outer",do.call(bootstrapPage,c("",ui_filtros_visualizacion1())))
-#       })
-#   })
-#   
-#   observeEvent(input$input_filtro_1,{   # actualización dinámica de los filtros (hardcodedish porque las variables tienen siempre esta estructura de naming), soporta 3 variables por el momento y
-#     eval(parse(text = paste(            # anida siguiendo la jerarquización:  filtro1 > filtro2 > filtro3
-#       "a <- 'ninguno'
-#       if(!is.null(parametros$visualizacion1_filtros)){
-#       f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1) %>% dplyr::select(",parametros$visualizacion1_filtros[2],")
-#       a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[2],"))
-#       }
-#       updatePickerInput(session = session, inputId = 'input_filtro_2', choices = a,selected = a)"
-#     )))
-# })
-#   observeEvent(input$input_filtro_2,{                       # actualización dinámica de los filtros (hardcodedish porque las variables tienen siempre esta estructura de naming), soporta 3 variables por el momento y
-#     if(length(parametros$visualizacion1_filtros) >= 3){     # anida siguiendo la jerarquización:  filtro1 > filtro2 > filtro3
-#       eval(parse(text = paste(
-#         "a <- 'ninguno'
-#         if(!is.null(parametros$visualizacion1_filtros)){
-#         f_tabla <- tablas$visualizacion1 %>% dplyr::filter(",parametros$visualizacion1_filtros[1]," %in% input$input_filtro_1);
-#         f_tabla <- f_tabla %>% dplyr::filter(",parametros$visualizacion1_filtros[2]," %in% input$input_filtro_2) %>% dplyr::select(",parametros$visualizacion1_filtros[3],")
-#         a <- unique(as.character(f_tabla$",parametros$visualizacion1_filtros[3],"))
-#         }
-#         updatePickerInput(session = session, inputId = 'input_filtro_3', choices = a, selected = a)"
-#       )))
-#     }
-#   })
+  
+  observeEvent(input$input_filtro_zona,{                # actualización dinámica de filtro 1
+    
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    
+    f_variable <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
+    f_choices <- eval(parse(text = paste0('as.character(unique(tablas$',f_region,'$',f_variable,'))')))
+    
+    updatePickerInput(            
+      session,
+      inputId = 'input_filtro1',
+      label = f_variable,
+      choices = f_choices,
+      selected = f_choices
+    )
+  })
+  
+  
+  output$activa_filtro2 <- reactive({                             # condicionante para que aparezca el filtro 2
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    eval(parse(text = paste0('length(parametros$',f_region,'_filtros) >= 2')))
+  })
+  outputOptions(output, "activa_filtro2", suspendWhenHidden = FALSE)
+  
+  observeEvent(input$input_filtro1,{                # actualización dinámica de filtro 2
+    
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    
+    eval(parse(text = paste0('a <- (length(parametros$',f_region,'_filtros) >= 2)')))
+    
+    if(a){
+      f_variable_1 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
+      f_filtro1 <- paste0('c("',paste0(input$input_filtro1,collapse = '","'),'")')
+      f_variable_2 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[2]')))
+      f_tabla <- eval(parse(text=paste0('tablas$',f_region,' %>% dplyr::filter(',f_variable_1,' %in% ',f_filtro1,')')))
+      f_choices <- eval(parse(text = paste0('as.character(unique(f_tabla$',f_variable_2,'))')))
+
+      
+      updatePickerInput(            
+        session,
+        inputId = 'input_filtro2',
+        label = f_variable_2,
+        choices = f_choices,
+        selected = f_choices
+      )
+    }
+  })
   
   
   observeEvent(input$input_filtro_zona,{                                                # actualización del filtro de fecha_variable dependiendo de la zona
