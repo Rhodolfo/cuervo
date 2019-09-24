@@ -40,20 +40,39 @@ sidebar <- dashboardSidebar(
                      menuItem(
                        'Visualización 1', tabName = 'visualizacion1'
                      ),
-                     pickerInput(width = 100,             # filtro región
-                                 'input_filtro_zona',
-                                 'Región',
-                                 selected = 'USA',
-                                 multiple = FALSE,
-                                 choices = c(
-                                   'USA',
-                                   'Doméstico',
-                                   'Resto del mundo'
-                                 )
+                     pickerInput(                  # filtro región
+                       'input_filtro_zona',
+                       'Región',
+                       selected = 'USA',
+                       multiple = FALSE,
+                       choices = c(
+                         'USA',
+                         'Doméstico',
+                         'Resto del mundo'
+                     )
                      ),
-                     uiOutput('ui_filtros_visualizacion1'),
-                     uiOutput('ui_filtros_fecha_variable_visualizacion1'),
-                     uiOutput('ui_filtros_fecha_rango_visualizacion1'),
+                     pickerInput(
+                       'input_filtro1',
+                       ''
+                     ),
+                     # uiOutput('ui_filtros_visualizacion1'),
+                     pickerInput(                                    # filtro fecha variable
+                       'filtro_fecha_variable',
+                       'Fecha para filtrar',
+                       choices = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)],
+                       selected = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)][1],
+                       multiple = FALSE
+                     ),
+                     dateRangeInput(                     # filtro fecha región
+                       'filtro_fecha_rango',
+                       'Rango de fechas',
+                       start = '2019-01-01',
+                       end = '2019-01-01',
+                       min = '2019-01-01',
+                       max = '2019-01-01'
+                     ),
+                     # uiOutput('ui_filtros_fecha_variable_visualizacion1'),
+                     # uiOutput('ui_filtros_fecha_rango_visualizacion1'),
                      actionButton(
                        inputId = 'boton_filtrar',
                        label = 'Filtrar'
@@ -70,7 +89,9 @@ sidebar <- dashboardSidebar(
       textOutput('variables_user_logged'),
       textOutput('variables_user_name'),
       textOutput('variables_user_role'),
-      textOutput('variables_status_carga')
+      textOutput('variables_status_carga'),
+      textOutput('variables_filtro_region'),
+      textOutput('variables_filtro_fecha_variable')
     )
   )
 )
