@@ -31,7 +31,8 @@ shinyServer(function(input, session, output) {
     visualizacion1 = NULL,
     usa = NULL,
     row = NULL,
-    domestico = NULL
+    domestico = NULL,
+    sub = NULL
   )
   
   status <- reactiveValues(      # banderas para supervisar procesos
@@ -382,61 +383,73 @@ shinyServer(function(input, session, output) {
       user$prelog
     )
   })
-  
   output$variables_user_logged <- renderText({
     paste(
       'user_logged',
       user$logged
     )
   })
-  
   output$variables_user_role <- renderText({
     paste(
       'user_role',
       user$role
     )
   })
-  
   output$variables_user_name <- renderText({
     paste(
       'user_name',
       user$name
     )
   })
-  
   output$variables_filtro_region <- renderText({
     paste(
       'filtro_region',
       input$input_filtro_region
     )
   })
-  
   output$variables_filtro_ano_mes <- renderText({
     paste(
       'ano_mes',
       input$input_filtro_fecha_original
     )
   })
-  
   output$variables_status_carga <- renderText({
     paste(
       'status_carga',
       status$carga
     )
   })
-  
   output$variables_filtro_region <- renderText({
     paste(
-      'filtro_region',
+      'region',
       input$input_filtro_zona
     )
   })
-  output$variables_filtro_fecha_variable <- renderText({
+  output$variables_input_filtro1 <- renderText({
+    f_var <- paste0(input$input_filtro1,collapse = ',')
     paste(
-      'filtro_fecha',
-      input$input_filtro_fecha_variable
+      'filtro1',f_var
     )
   })
+  output$variables_input_filtro2 <- renderText({
+    f_var <- paste0(input$input_filtro2,collapse = ',')
+    paste(
+      'filtro2',f_var
+    )
+  })
+  output$variables_filtro_fecha_variable <- renderText({
+    f_var <- paste0(input$filtro_fecha_variable,collapse = ',')
+    paste(
+      'fecha_variable',f_var
+    )
+  })
+  output$variables_filtro_fecha_rango <- renderText({
+    f_var <- paste0(input$filtro_fecha_rango,collapse = ',')
+    paste(
+      'fecha_rango',f_var
+    )
+  })
+  
 
   
   
@@ -510,18 +523,15 @@ shinyServer(function(input, session, output) {
   })
   
   
-  # visualizacion1 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  # filtros --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   
   observeEvent(input$input_filtro_zona,{                # actualización dinámica de filtro 1
-    
     if(input$input_filtro_zona == 'USA')f_region <- 'usa'
     if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
     if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
-    
     f_variable <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
     f_choices <- eval(parse(text = paste0('as.character(unique(tablas$',f_region,'$',f_variable,'))')))
-    
     updatePickerInput(            
       session,
       inputId = 'input_filtro1',
@@ -540,22 +550,18 @@ shinyServer(function(input, session, output) {
   })
   outputOptions(output, "activa_filtro2", suspendWhenHidden = FALSE)
   
+  
   observeEvent(input$input_filtro1,{                # actualización dinámica de filtro 2
-    
     if(input$input_filtro_zona == 'USA')f_region <- 'usa'
     if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
     if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
-    
     eval(parse(text = paste0('a <- (length(parametros$',f_region,'_filtros) >= 2)')))
-    
     if(a){
       f_variable_1 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
       f_filtro1 <- paste0('c("',paste0(input$input_filtro1,collapse = '","'),'")')
       f_variable_2 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[2]')))
       f_tabla <- eval(parse(text=paste0('tablas$',f_region,' %>% dplyr::filter(',f_variable_1,' %in% ',f_filtro1,')')))
       f_choices <- eval(parse(text = paste0('as.character(unique(f_tabla$',f_variable_2,'))')))
-
-      
       updatePickerInput(            
         session,
         inputId = 'input_filtro2',
@@ -587,26 +593,66 @@ shinyServer(function(input, session, output) {
     )
   })
   
-  observeEvent(input$input_filtro_fecha_variable,{                                                # actualización del filtro de fecha_rango dependiendo de fecha_variable
   
-    eval(parse(paste0(
-      'f_fecha <- tablas$visualizacion1$',input$filtro_fecha_variable
-    )))
-    
-    f_start = min(f_fecha, na.rm = T)
-    f_end = max(f_fecha, na.rm = T)
-    f_min = max(f_fecha, na.rm = T) - 30
-    f_max = max(f_fecha, na.rm = T)
-
+  observeEvent(input$input_filtro_fecha_variable,{                                                # actualización del filtro de fecha_rango dependiendo de fecha_variable
+    f_fecha <- Sys.Date()
+    f_start = f_fecha - 370
+    f_end = f_fecha + 370
+    f_min = f_fecha -30
+    f_max = f_fecha
     updatePickerInput(
       session,'filtro_fecha_rango', start = f_start, end = f_end, min = f_min, max = f_max
     )
   })
   
+  # filtro 1 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  # input <- list()
+  # input$input_filtro1 <- unique(tablas$usa$Cliente_Destinatario...30)
+  
+  observeEvent(input$boton_filtrar1,{                                      # botón para filtrar
+    
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'                  # regiones
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    
+    f_filtros <- eval(parse(text = paste0(
+      'parametros$',f_region,'_filtros'
+    )))
+    
+    f_filtros_contenido <- list()
+    for(i in 1:length(f_filtros)){
+      f_filtros_contenido[[i]] <- eval(parse(text = paste0('input$input_filtro',1)))
+    }
+    
+    funcion1 <- paste0('tablas$',f_region,' %>% ')
+    
+    funcion2 <- paste0('dplyr::filter(',f_filtros,' %in% ',f_filtros_contenido,') %>%' )
+    
+    funcion3 <- eval(parse(text = paste0(
+      'dplyr::filter(',input$filtro_fecha_variable,' >= ', input$filtro_fecha_rango[1],') %>%'
+    )))
+    
+    funcion4 <- eval(parse(text = paste0(
+      'dplyr::filter(',input$filtro_fecha_variable,' <= ', input$filtro_fecha_rango[2],')'
+    )))
+    
+    tablas$sub <- eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4)))
+    
+  })
+  
+  
   
   
   
   output$output_grafica_tiempo1 <- renderPlot({
+    
+    
+    
+    
+    
+    
+    
     
     
     g <- NULL

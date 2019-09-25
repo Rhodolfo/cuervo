@@ -1,14 +1,18 @@
 # (main) función para graficas sobre resumenes ------------------------------------------------------------------------------------------------
 
-# p_fecha_focal <- 'fecha_creacion'
 # p_tabla <- tablas$zsdr159
+# p_fecha_focal <- 'Fecha_pedido'
+# p_texto_x <- 'x'
+# p_texto_y <- 'y'
+# p_variables_fecha <- parametros$row_fechas
+# p_variable_pedido <- parametros$row_pedido[1]
 # p_compresion <- TRUE
 
 
 
-funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_sobrantes_inicio){
+funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido){
   if(p_compresion){
-    p_tabla <- funcion_compresion_fecha(p_tabla, 'pedido_sap')
+    p_tabla <- funcion_compresion_fecha(p_tabla, p_variable_pedido)
     p_fecha_focal <- paste0(p_fecha_focal,'_min')
   }
   f_tabla_centrada <- funcion_fechas_centradas(p_tabla,p_fecha_focal)
@@ -21,73 +25,215 @@ funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion 
 }
 
 
+# (main) función para grafica 1 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# (main) función gráficas pedidos abiertos ----------------------------------------------------------------------------------
+p_tabla <- tablas$row %>% dplyr::filter(Fe.Orig.Pref >= '2019-06-15') %>% dplyr::filter(Fe.Orig.Pref <= '2019-06-30')
+p_texto_x <- 'x'
+p_texto_y <- 'y'
+p_variables_fecha <- parametros$row_fechas
+p_variable_pedido <- parametros$row_pedido[1]
+p_compresion <- TRUE
 
 
-
-# p_fecha_focal <- 'fecha_pedido_min'
-# p_fecha_criterio <- 'fecha_entrega_real'
-# p_compresion <- FALSE
-# input <- list()
-# input$input_fecha_final_pa_141 <- 'fecha_original_preferente'
-# input$input_filtro_fecha_1 <- '2019-09-01'
-# input$input_filtro_fecha_2 <- '2019-09-15'
-# eval(parse(text = paste0(
-#   "tablas$vis_pa <- tablas$zsdr141 %>%
-#   dplyr::filter(!is.na(region_nombre)) %>%
-#   dplyr::filter(region_nombre == 'USA') %>%
-#   dplyr::filter(",input$input_fecha_final_pa_141,">= '",input$input_filtro_fecha_1,"') %>%
-#   dplyr::filter(",input$input_fecha_final_pa_141,"<= '",input$input_filtro_fecha_2,"')"
-# )))
-# p_tabla <- tablas$vis_pa
-
-# funcion_grafica_tiempos_desagregados <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y){
-# 
-#   p_tabla <- funcion_compresion_fecha(p_tabla, 'pedido_sap')
-#   
-#   f_tabla_centrada <- funcion_fechas_centradas_con_fecha(p_tabla,p_fecha_focal)
-#   f_lista_tablas <- funcion_lista_tablas_fechas(f_tabla_centrada)
-# 
-#   
-#   funcion_grafica_tiempos_fecha(f_lista_tablas[[1]],'a','b')
-#   
-#   g <- funcion_grafica_tiempos(f_tabla_resumen,p_texto_x,p_texto_y)
-#   return(g)
-# }
-
-# función de construcción de compresión de fechas para la tabla zsdr159 -------------------------------------------------------
-
-# p_tabla <- tablas$zsdr159
-# p_variable_agrupacion <- 'pedido_sap'
-
-funcion_compresion_fecha <- function(p_tabla, p_variable_agrupacion){
-  funcion1 <- paste0(
-    'f_tabla <- p_tabla %>%
-    group_by(',
-    p_variable_agrupacion,
-    ') %>%
-    summarise('
-  )
-  funcion2 <- paste0(
-    names(p_tabla)[str_detect(names(p_tabla),'fecha')],'_min = min(', names(p_tabla)[str_detect(names(p_tabla),'fecha')], ', na.rm = T)', collapse = ','
-  )
-  funcion3 <- ','
-  
-  funcion4 <- paste0(
-    names(p_tabla)[str_detect(names(p_tabla),'fecha')],'_max = max(', names(p_tabla)[str_detect(names(p_tabla),'fecha')], ', na.rm = T)', collapse = ','
-  )
-  funcion5 <- paste0(
-    ') %>% data.frame'
-  )
-  eval(parse(text = paste0(
-    funcion1,
-    funcion2,
-    funcion3,
-    funcion4,
-    funcion5
-  )))
+funcion_main_grafica_1 <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido){
+  if(p_compresion){
+    f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido)
+    f_tabla <- f_resultado[[1]]
+    f_variables_fecha <- f_resultado[[2]]
+  }
+  f_resultado2 <- funcion_ordena_fechas(f_tabla,f_variables_fecha)
+  f_tabla <- f_resultado2$tabla
+  f_variables_fecha <- f_resultado2$fechas
 }
+
+
+# (secondary - wrangling) comnpresión de fechas ------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+p_tabla <- f_tabla
+p_variables_fecha <- f_variables_fecha
+p_variable_agrupacion <- p_variable_pedido
+
+funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agrupacion){
+  funcion1 <- paste0('f_tabla <- p_tabla %>%group_by(',p_variable_agrupacion,') %>%summarise(')
+  funcion2 <- paste0(p_variables_fecha,'_min = min(', p_variables_fecha, ', na.rm = T)', collapse = ',')
+  funcion3 <- ','
+  funcion4 <- paste0(p_variables_fecha,'_max = max(', p_variables_fecha, ', na.rm = T)', collapse = ',')
+  funcion5 <- paste0(') %>% data.frame')
+  eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4,funcion5)))
+  f_fechas <- names(f_tabla)[str_detect(names(f_tabla),'min')]
+  f_fechas <- c(f_fechas,names(f_tabla)[str_detect(names(f_tabla),'max')])
+  resultado <- list()
+  resultado$tabla <- f_tabla
+  resultado$fechas <- f_fechas
+  return(resultado)
+}
+
+# (secondary - wrangling) ordena variables de fecha ------------------------------------------------------------------------------------------------------------------------------------------------
+
+# p_tabla <- f_tabla
+# p_fechas <- f_variables_fecha
+
+funcion_ordena_fechas <- function(p_tabla,p_fechas){
+  f_medias <- p_tabla %>% summarise_at(.vars = p_fechas,.funs = mean_x)
+  f_medias <- f_medias[order(f_medias)]
+  f_tabla_sin_fechas <- p_tabla %>% select(names(p_tabla)[-c(match(p_fechas,names(p_tabla)))])
+  f_tabla_con_fechas <- p_tabla %>% select(names(f_medias))
+  f_tabla <- cbind(f_tabla_sin_fechas,f_tabla_con_fechas)
+  f_resultado <- list()
+  f_resultado$tabla <- f_tabla
+  f_resultado$fechas <- names(f_medias)
+  return(f_resultado)
+}
+
+# (secondary - extra) media para usar en summarise_at -----------------------------------------------------------------------------------------------------------------------------------------------
+
+mean_x <- function(a){
+  b <- mean(a, na.rm = T)
+  return(b)
+}
+
+# (secondary - plotting) gráfica directa -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+p_tabla <- f_tabla
+p_variable_wrap <- p_variable_pedido
+p_variables_fecha <- f_variables_fecha
+
+funcion_grafica_pedidos_puntos <- function(p_tabla,p_variable_wrap){
+  
+  p_tabla$n <- 1:nrow(p_tabla)
+  
+  
+  f_vector_fechas <- paste0(p_variables_fecha,collapse = ',')
+  
+  eval(parse(text = paste0(
+    'p_tabla <- p_tabla %>%
+    mutate(
+    fecha_min = pmin(',f_vector_fechas,'),
+    fecha_max = pmax(',f_vector_fechas,')
+  )'
+  )))
+  
+  
+  f_colores <- rainbow(length(p_variables_fecha))
+  
+  funcion1 <- paste0(
+    'ggplot(p_tabla)'
+  )
+  
+  funcion2 <- paste0(
+    '+ geom_segment(aes(x = fecha_min, xend = fecha_max, y = n, yend = n))'
+  )
+  
+  funcion3 <- paste0(
+    '+ geom_point(aes(x = ',p_variables_fecha,', y = n),color = "',f_colores,'")',collapse = '' 
+  )
+  
+  
+  
+  
+  
+paste0(funcion1,funcion2, funcion3)  
+  
+parse(text = paste0(funcion1,funcion2, funcion3))  
+
+eval(parse(text = paste0(funcion1,funcion2, funcion3)))  
+
+
+  
+}
+
+
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+################
+
 
 # función para centrar las fechas ---------------------------------------------------------------------------------------------
 # esta cosa toma una tabla, y centra un conjunto de fechas tomando como día 0 la fecha focal, restando esta fecha focal de todas las demás

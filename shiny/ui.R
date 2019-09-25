@@ -32,7 +32,6 @@ sidebar <- dashboardSidebar(
     )
   ),
   
-  # visualización 1 sidebar -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
   conditionalPanel(condition = 'output.activa_visualizacion1',    
                    sidebarMenu(
@@ -40,10 +39,11 @@ sidebar <- dashboardSidebar(
                      menuItem(
                        'Visualización 1', tabName = 'visualizacion1'
                      )
-                     # uiOutput('ui_filtros_fecha_variable_visualizacion1'),
-                     # uiOutput('ui_filtros_fecha_rango_visualizacion1'),
                    )
   ),
+  
+  # filtros -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
   conditionalPanel(condition = 'output.activa_visualizacion1',
     sidebarMenu(
       id = 'menu_filtros_1',
@@ -76,7 +76,6 @@ sidebar <- dashboardSidebar(
                          options = list(`actions-box` = TRUE)
                        )
       ),
-      # uiOutput('ui_filtros_visualizacion1'),
       pickerInput(                                    # filtro fecha variable
         'filtro_fecha_variable',
         'Fecha para filtrar',
@@ -98,7 +97,7 @@ sidebar <- dashboardSidebar(
                    sidebarMenu(
                      id = 'menu_boton_1',
                      actionButton(
-                       inputId = 'boton_filtrar',
+                       inputId = 'boton_filtrar1',
                        label = 'Filtrar'
                      )
                    )
@@ -116,7 +115,10 @@ sidebar <- dashboardSidebar(
       textOutput('variables_user_role'),
       textOutput('variables_status_carga'),
       textOutput('variables_filtro_region'),
-      textOutput('variables_filtro_fecha_variable')
+      textOutput('variables_input_filtro1'),
+      textOutput('variables_input_filtro2'),
+      textOutput('variables_filtro_fecha_variable'),
+      textOutput('variables_filtro_fecha_rango')
     )
   )
 )
@@ -141,10 +143,17 @@ body <- dashboardBody(
   tags$head(tags$style(HTML('
 .skin-blue .main-header .logo {background-color: #66b3ff;}.skin-blue .main-header .navbar {background-color: #001a33;}'))),  
   tabItems(
+    
+    
+  # (body) login -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
     tabItem(                        # login
       'entrada',
       uiOutput('page')
     ),
+  
+  # (body) carga de los datos ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
     tabItem(                        # carga de los datos
       'preparacion',
         box(
@@ -175,66 +184,6 @@ body <- dashboardBody(
         tabPanel(
           'tiempo de los procesos',
           plotOutput('output_grafica_tiempo1',height = 600)
-        )
-      )
-    ),
-    tabItem(                    # visualizacion 2
-      'pedidos_abiertos',
-      box(
-        width = 12,
-        title = 'Filtros',
-        div(style="display:inline-block",
-            pickerInput(width = 100,
-                        'input_filtro_region_pa',
-                        'Región',
-                        selected = 'USA',
-                        multiple = FALSE,
-                        choices = c(
-                          'USA',
-                          'Doméstico',
-                          'Resto del mundo'
-                        )
-            )
-        ),
-        div(style="display:inline-block",
-              pickerInput(width = 200,
-                          'input_fecha_final_pa_141',
-                          'Fecha de evaluación',
-                          selected = NULL,
-                          multiple = FALSE,
-                          choices = c(
-                            'ninguno'
-                          )
-              )
-        ),
-        div(style="display:inline-block",
-         dateInput(
-            'input_filtro_fecha_1',
-           'fecha_inicial',
-           value = Sys.Date() -7
-          )
-        ),
-        div(style="display:inline-block",
-          dateInput(
-            'input_filtro_fecha_1',
-            'fecha_final',
-            value = Sys.Date()
-          )
-        ),
-        
-        actionButton(
-          inputId = 'boton_filtrar_pa',
-          label = 'Filtrar'
-        )
-      ),
-      tabBox(
-        title = 'pedidos abiertos',
-        id = 'tabset2',
-        width = 12,
-        tabPanel(
-          'status_pedidos',
-          'status',
-          plotOutput('output$output_grafica_pa_total')
         )
       )
     )
