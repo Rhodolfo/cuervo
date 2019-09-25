@@ -608,7 +608,11 @@ shinyServer(function(input, session, output) {
   # filtro 1 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
   # input <- list()
-  # input$input_filtro1 <- unique(tablas$usa$Cliente_Destinatario...30)
+  # input$input_filtro1 <- unique(tablas$row$Nombre_Región)
+  # input$input_filtro2 <- unique(tablas$row$País)
+  # input <- list()
+  # input$filtro_fecha_rango <- c('2019-06-01','2019-08-30')
+  # input$filtro_fecha_variable <- 'Fe.Orig.Pref'
   
   observeEvent(input$boton_filtrar1,{                                      # botón para filtrar
     
@@ -622,69 +626,83 @@ shinyServer(function(input, session, output) {
     
     f_filtros_contenido <- list()
     for(i in 1:length(f_filtros)){
-      f_filtros_contenido[[i]] <- eval(parse(text = paste0('input$input_filtro',1)))
+      f_filtros_contenido[[i]] <- eval(parse(text = paste0('as.character(input$input_filtro',i,')')))
+      f_filtros_contenido[[i]] <- paste0(f_filtros_contenido[[i]],collapse ='","')
     }
+
     
-    funcion1 <- paste0('tablas$',f_region,' %>% ')
+    funcion1 <- paste0('tablas$',f_region,' ')
     
-    funcion2 <- paste0('dplyr::filter(',f_filtros,' %in% ',f_filtros_contenido,') %>%' )
+    funcion2 <- paste0('%>% dplyr::filter(',f_filtros,' %in% c("',f_filtros_contenido,'")) ' ,collapse = ' ')
     
-    funcion3 <- eval(parse(text = paste0(
-      'dplyr::filter(',input$filtro_fecha_variable,' >= ', input$filtro_fecha_rango[1],') %>%'
-    )))
+    funcion3 <- paste0(
+      '%>% dplyr::filter(!is.na(',input$filtro_fecha_variable,'))'
+    )
     
-    funcion4 <- eval(parse(text = paste0(
-      'dplyr::filter(',input$filtro_fecha_variable,' <= ', input$filtro_fecha_rango[2],')'
-    )))
+    funcion4 <- paste0(
+      '%>% dplyr::filter(',input$filtro_fecha_variable,' >= "', input$filtro_fecha_rango[1],'") '
+    )
     
-    tablas$sub <- eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4)))
+    funcion5 <- paste0(
+      '%>% dplyr::filter(',input$filtro_fecha_variable,' <= "', input$filtro_fecha_rango[2],'")'
+    )
+    
+    tablas$sub <- eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4,funcion5)))
+    
+    
+    
+    
+    output$output_grafica_tiempo1 <- renderPlot({
+      g <- NULL
+      if(input$input_filtro_zona == 'USA')f_region <- 'usa'                  # regiones
+      if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+      if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+      
+      f_p_variables_fecha <- eval(parse(text = paste0(
+        'parametros$',f_region,'_fechas'
+      )))
+      f_p_variable_pedido <- eval(parse(text = paste0(
+        'parametros$',f_region,'_pedido[1]'
+      )))
+      
+      
+      cat('\n')
+      cat(names(tablas$sub))
+      cat('\n')
+      cat(f_p_variables_fecha)
+      cat('\n')
+      cat(f_p_variable_pedido)
+      cat('\n')
+      cat('\n')
+      cat('\n')
+      cat('\n')
+      cat('\n')
+      cat('\n')
+      cat('\n')
+      
+      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido)
+      
+      
+      # 
+      # oldw <- getOption("warn")
+      # options(warn=-1)
+      # 
+      # g <- tryCatch(funcion_grafica_tiempos_grande(tablas$vis, p_fecha_focal, p_compresion, 'días', 'tablas (con diferentes grados de información',3),error = function(e){return(NULL)})
+      # 
+      # options(warn = oldw)
+      # 
+      # validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      # 
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      
+      g
+    })
     
   })
   
+  # outputs visualización 1 -------------------------------------------------------------------------------------------
   
-  
-  
-  
-  output$output_grafica_tiempo1 <- renderPlot({
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    g <- NULL
- 
-    
-    
-    
-    
-    p_compresion <- FALSE
-    p_fecha_focal <- 'fecha_pedido'
-    if(input$input_filtro_region == 'Doméstico'){
-      p_fecha_focal = 'fecha_creacion_min'
-      p_compresion <- TRUE
-    }
-    
-    
-    
-    
-    
-    oldw <- getOption("warn")
-    options(warn=-1)
-    
-    g <- tryCatch(funcion_grafica_tiempos_grande(tablas$vis, p_fecha_focal, p_compresion, 'días', 'tablas (con diferentes grados de información',3),error = function(e){return(NULL)})
-    
-    options(warn = oldw)
-    
-    validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
-    
-    
-    
-    g
-  })
   
   
 

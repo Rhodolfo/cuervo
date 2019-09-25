@@ -93,6 +93,9 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
+  
+  # (sidebar) botón de filtro 1 ------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
   conditionalPanel(condition = 'output.activa_visualizacion1',
                    sidebarMenu(
                      id = 'menu_boton_1',
@@ -102,6 +105,8 @@ sidebar <- dashboardSidebar(
                      )
                    )
   ),
+  
+  # (sidebar) seguimiento de variables -----------------------------------------------------------------------------------------------------------------------------------------------------
   
   conditionalPanel(condition = 'output.es_administrador & output.',
     sidebarMenu(
@@ -181,9 +186,10 @@ body <- dashboardBody(
         title = 'análisis',
         id = 'tabset1',
         width = 12,
+        height = 800,
         tabPanel(
           'tiempo de los procesos',
-          plotOutput('output_grafica_tiempo1',height = 600)
+          plotOutput('output_grafica_tiempo1',height = 700)
         )
       )
     )
