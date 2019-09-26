@@ -44,7 +44,8 @@ shinyServer(function(input, session, output) {
   )
   
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
-    domestico_fechas = excel_parametros %>% 
+    
+    domestico_fechas = excel_parametros %>%        #fechas
       dplyr::filter(!is.na(domestico_fechas)) %>%
       dplyr::select(domestico_fechas) %>%
       unlist %>%
@@ -62,7 +63,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    domestico_cantidades = excel_parametros %>% 
+    domestico_cantidades = excel_parametros %>%     # cantidades
       dplyr::filter(!is.na(domestico_cantidades)) %>%
       dplyr::select(domestico_cantidades) %>%
       unlist %>%
@@ -80,7 +81,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    domestico_filtros = excel_parametros %>% 
+    domestico_filtros = excel_parametros %>%         # filtros
       dplyr::filter(!is.na(domestico_filtros)) %>%
       dplyr::select(domestico_filtros) %>%
       unlist %>%
@@ -98,7 +99,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    usa_carpeta = excel_parametros %>% 
+    usa_carpeta = excel_parametros %>%             # carpeta
       dplyr::filter(!is.na(usa_carpeta)) %>%
       dplyr::select(usa_carpeta) %>%
       unlist %>%
@@ -116,7 +117,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    usa_pedido = excel_parametros %>% 
+    usa_pedido = excel_parametros %>%                # pedido
       dplyr::filter(!is.na(usa_pedido)) %>%
       dplyr::select(usa_pedido) %>%
       unlist %>%
@@ -134,47 +135,89 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    usa_fecha_inicio = excel_parametros %>% 
+    usa_fecha_inicio = excel_parametros %>%         # fecha inicio
       dplyr::filter(!is.na(usa_fechas)) %>%
-      dplyr::select(usa_pedido) %>%
+      dplyr::select(usa_fechas) %>%
       unlist %>%
       as.character %>%
       head(.,n = 1),
     
     row_fecha_inicio = excel_parametros %>% 
-      dplyr::filter(!is.na(row_pedido)) %>%
-      dplyr::select(row_pedido) %>%
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
       unlist %>%
       as.character %>%
       head(.,n = 1),
     
     domestico_fecha_inicio = excel_parametros %>% 
-      dplyr::filter(!is.na(row_pedido)) %>%
-      dplyr::select(row_pedido) %>%
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
       unlist %>%
       as.character %>%
       head(.,n = 1),
     
-    usa_fecha_cerrado = excel_parametros %>% 
+    usa_fecha_cerrado = excel_parametros %>%     # fecha cerrado
       dplyr::filter(!is.na(usa_fechas)) %>%
-      dplyr::select(usa_pedido) %>%
+      dplyr::select(usa_fechas) %>%
       unlist %>%
       as.character %>%
       tail(.,n = 1),
     
     row_fecha_cerrado = excel_parametros %>% 
-      dplyr::filter(!is.na(row_pedido)) %>%
-      dplyr::select(row_pedido) %>%
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
       unlist %>%
       as.character %>%
       tail(.,n = 1),
     
     domestico_fecha_cerrado = excel_parametros %>% 
-      dplyr::filter(!is.na(row_pedido)) %>%
-      dplyr::select(row_pedido) %>%
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
       unlist %>%
       as.character %>%
       tail(.,n = 1),
+    
+    usa_cantidad_inicio = excel_parametros %>%         # cantidades inicio
+      dplyr::filter(!is.na(usa_cantidades)) %>%
+      dplyr::select(usa_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    row_cantidades_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_cantidades)) %>%
+      dplyr::select(row_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    domestico_cantidades_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_cantidades)) %>%
+      dplyr::select(row_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    usa_cantidades_cerrado = excel_parametros %>%     # cantidades cerrado
+      dplyr::filter(!is.na(usa_cantidades)) %>%
+      dplyr::select(usa_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    row_cantidades_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(row_cantidades)) %>%
+      dplyr::select(row_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    domestico_cantidades_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(row_cantidades)) %>%
+      dplyr::select(row_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1)
     
   )
   
@@ -273,6 +316,90 @@ shinyServer(function(input, session, output) {
   #   unlist %>%
   #   as.character
   # 
+  # usa_fecha_inicio = excel_parametros %>%      
+  #   dplyr::filter(!is.na(usa_fechas)) %>%
+  #   dplyr::select(usa_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # row_fecha_inicio = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # domestico_fecha_inicio = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # usa_fecha_cerrado = excel_parametros %>%    
+  #   dplyr::filter(!is.na(usa_fechas)) %>%
+  #   dplyr::select(usa_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # row_fecha_cerrado = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # domestico_fecha_cerrado = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # usa_cantidad_inicio = excel_parametros %>%     
+  #   dplyr::filter(!is.na(usa_cantidades)) %>%
+  #   dplyr::select(usa_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # row_cantidades_inicio = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_cantidades)) %>%
+  #   dplyr::select(row_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # domestico_cantidades_inicio = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_cantidades)) %>%
+  #   dplyr::select(row_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # usa_cantidades_cerrado = excel_parametros %>%   
+  #   dplyr::filter(!is.na(usa_cantidades)) %>%
+  #   dplyr::select(usa_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # row_cantidades_cerrado = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_cantidades)) %>%
+  #   dplyr::select(row_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # domestico_cantidades_cerrado = excel_parametros %>% 
+  #   dplyr::filter(!is.na(row_cantidades)) %>%
+  #   dplyr::select(row_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
   # tablas <- list()
   # 
   # tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido) %>%
@@ -284,12 +411,8 @@ shinyServer(function(input, session, output) {
   #   dplyr::filter(Nombre_Región != 'USA')
   # 
   # tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido)
-
-
   
   # login ------------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-
   
   ui1 <- function(){   # pantalla de logeo inicial
     tagList(
@@ -311,8 +434,6 @@ shinyServer(function(input, session, output) {
     label = 'Siguiente'
   )),tabPanel(user$role))}    
 
-  
-  
   observeEvent(input$boton_login_pre,{
     user$logged <- FALSE
     user$role <- ''
