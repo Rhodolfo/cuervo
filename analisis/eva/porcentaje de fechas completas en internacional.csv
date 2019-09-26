@@ -1,6 +1,0 @@
-"","zona_ventas_nombre","ex_fecha_carga","ex_fecha_disponibilidad","ex_fecha_pedido","ex_fecha_captura","ex_fecha_entrega_cliente","ex_fecha_entrega","ex_fecha_planeacion_transporte","ex_fecha_factura","ex_fecha_cruce","ex_fecha_programacion","ex_fecha_entrega_real","ex_fecha_impresion_factura","ex_fecha_impresion_transporte","ex_fecha_documento_cruce","ex_fecha_guia_fedex","ex_fecha_original_preferente","ex_fecha_estimada_partida","ex_fecha_estimada_llegada"
-"1","APAC",100,100,100,100,100,100,100,99.42,94.81,49.06,46.46,0,0,94.81,94.81,100,97.98,97.26
-"2","EMEA",100,100,100,100,100,100,100,100,94.18,54.22,50.57,0,0,94.18,94.18,100,99.66,99.2
-"3","LATAM",100,100,100,100,100,100,100,100,98.1,52.18,45.59,0,0,98.1,98.1,100,99.22,100
-"4","PUK",100,100,100,100,100,100,100,98.34,85.64,63.54,49.72,0,0,85.64,85.64,100,97.79,97.79
-"5","USA",100,100,100,100,100,100,100,99.71,0.04,68.19,3.19,0.92,0,0.04,0.04,100,0.08,0.08

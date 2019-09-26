@@ -136,8 +136,9 @@ shinyServer(function(input, session, output) {
     
   )
   
-  # prueba parámetros
+  # prueba
   # 
+  #
   # parametros <- list()
   # 
   # parametros$domestico_fechas = excel_parametros %>%
@@ -229,6 +230,19 @@ shinyServer(function(input, session, output) {
   #   dplyr::select(domestico_pedido) %>%
   #   unlist %>%
   #   as.character
+  # 
+  # tablas <- list()
+  # 
+  # tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido) %>%
+  #   dplyr::filter(Zona_de_ventas != 'ninguno') %>%
+  #   dplyr::filter(Nombre_Región == 'USA')
+  # 
+  # tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido) %>%
+  #   dplyr::filter(Zona_de_ventas != 'ninguno') %>%
+  #   dplyr::filter(Nombre_Región != 'USA')
+  # 
+  # tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido)
+
 
   
   # login ------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -527,9 +541,7 @@ shinyServer(function(input, session, output) {
 
   
   observeEvent(input$input_filtro_zona,{                # actualización dinámica de filtro 1
-    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
-    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
-    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    f_region <- funcion_asigna_region(input$input_filtro_zona)
     f_variable <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
     f_choices <- eval(parse(text = paste0('as.character(unique(tablas$',f_region,'$',f_variable,'))')))
     updatePickerInput(            
@@ -596,8 +608,8 @@ shinyServer(function(input, session, output) {
   
   observeEvent(input$input_filtro_fecha_variable,{                                                # actualización del filtro de fecha_rango dependiendo de fecha_variable
     f_fecha <- Sys.Date()
-    f_start = f_fecha - 370
-    f_end = f_fecha + 370
+    f_start = '2019-08-01'
+    f_end = '2019-08-31'
     f_min = f_fecha -30
     f_max = f_fecha
     updatePickerInput(

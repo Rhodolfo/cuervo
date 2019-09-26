@@ -1,37 +1,12 @@
-# (main) función para graficas sobre resumenes ------------------------------------------------------------------------------------------------
-
-# p_tabla <- tablas$zsdr159
-# p_fecha_focal <- 'Fecha_pedido'
-# p_texto_x <- 'x'
-# p_texto_y <- 'y'
-# p_variables_fecha <- parametros$row_fechas
-# p_variable_pedido <- parametros$row_pedido[1]
-# p_compresion <- TRUE
-
-
-
-funcion_grafica_tiempos_grande <- function(p_tabla, p_fecha_focal, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido){
-  if(p_compresion){
-    p_tabla <- funcion_compresion_fecha(p_tabla, p_variable_pedido)
-    p_fecha_focal <- paste0(p_fecha_focal,'_min')
-  }
-  f_tabla_centrada <- funcion_fechas_centradas(p_tabla,p_fecha_focal)
-  f_lista_tablas <- funcion_lista_tablas_fechas(f_tabla_centrada)
-  f_resumen <- lapply(f_lista_tablas,funcion_resumen_tiempos)
-  f_tabla_resumen <- do.call('rbind.fill',lapply(f_resumen,funcion_tabla1_tabla2))
-  f_tabla_resumen <- funcion_compresion_tabla(f_tabla_resumen)
-  g <- funcion_grafica_tiempos_puntos(f_tabla_resumen,p_texto_x,p_texto_y,p_variables_sobrantes_inicio)
-  return(g)
-}
 
 
 # (main) función para grafica 1 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# p_tabla <- tablas$row %>% dplyr::filter(Fe.Orig.Pref >= '2019-06-15') %>% dplyr::filter(Fe.Orig.Pref <= '2019-06-30')
+# p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07')
 # p_texto_x <- 'x'
 # p_texto_y <- 'y'
-# p_variables_fecha <- parametros$row_fechas
-# p_variable_pedido <- parametros$row_pedido[1]
+# p_variables_fecha <- parametros$domestico_fechas
+# p_variable_pedido <- parametros$domestico_pedido[1]
 # p_compresion <- TRUE
 
 
@@ -56,8 +31,6 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
 
 # (secondary - wrangling) comnpresión de fechas ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# p_tabla <- f_tabla
-# p_variables_fecha <- f_variables_fecha
 # p_variable_agrupacion <- p_variable_pedido
 
 funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agrupacion){
@@ -67,6 +40,9 @@ funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agru
   funcion4 <- paste0(p_variables_fecha,'_max = max(', p_variables_fecha, ', na.rm = T)', collapse = ',')
   funcion5 <- paste0(') %>% data.frame')
   eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4,funcion5)))
+  for(i in 1:length(f_tabla)){                           # al parecer un infinito en fechas se ve como NA pero para fines prácticos
+    f_tabla[,i][is.infinite(f_tabla[,i])] <- NA          # sigue siendo una fecha con valor infinito
+  }
   f_fechas <- names(f_tabla)[str_detect(names(f_tabla),'min')]
   f_fechas <- c(f_fechas,names(f_tabla)[str_detect(names(f_tabla),'max')])
   resultado <- list()
@@ -103,7 +79,10 @@ mean_x <- function(a){
 
 funcion_solo_variables_maximo <- function(p_tabla, p_variables){
   f_tabla <- p_tabla %>%
-    dplyr::select(-contains('_min'))
+    dplyr::select(-contains('_min')) %>%
+    data.frame
+  
+  
   f_variables <- p_variables[str_detect(p_variables,'_min',negate = TRUE)]
   resultado <- list()
   resultado$tabla <- f_tabla
@@ -116,8 +95,6 @@ funcion_solo_variables_maximo <- function(p_tabla, p_variables){
 # (secondary - plotting) gráfica directa -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # p_tabla <- f_tabla
-# a <- p_tabla
-# p_tabla <- p_tabla[1:10,]
 # p_variable_wrap <- p_variable_pedido
 # p_variables_fecha <- f_variables_fecha
 
@@ -135,11 +112,18 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha){
   eval(parse(text = paste0(
     'p_tabla <- p_tabla %>%
     mutate(
-    fecha_min = pmin(',f_vector_fechas,'),
-    fecha_max = pmax(',f_vector_fechas,')
+    fecha_min = pmin(',f_vector_fechas,', na.rm = T),
+    fecha_max = pmax(',f_vector_fechas,', na.rm = T)
   )'
   )))
+  # eval(parse(text = paste0(               pmin está buggeado y no elimina NA's
+  #   'p_tabla <- p_tabla %>%
+  #   mutate(
+  # fecha_min = pmin(',f_vector_fechas,', na.rm = T)
+  # )'
+  # )))
   
+
   f_tabla_leyenda <- data.frame(
     variables = factor(p_variables_fecha,levels = p_variables_fecha),
     colores = f_colores,

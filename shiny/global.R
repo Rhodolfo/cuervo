@@ -19,6 +19,7 @@ source('gs.R', encoding = "UTF-8")
 source('funciones_de_carga.R', encoding = "UTF-8")
 source('funciones_graficas.R', encoding = "UTF-8")
 source('funciones_interfaz.R', encoding = "UTF-8")
+source('funciones_extra.R', encoding = "UTF-8")
 
 excel_parametros <- read_excel('datos/setup/parametros.xlsx') %>% data.frame
 
