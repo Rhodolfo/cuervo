@@ -316,84 +316,84 @@ shinyServer(function(input, session, output) {
   #   unlist %>%
   #   as.character
   # 
-  # usa_fecha_inicio = excel_parametros %>%      
+  # usa_fecha_inicio = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_fechas)) %>%
   #   dplyr::select(usa_fechas) %>%
   #   unlist %>%
   #   as.character %>%
   #   head(.,n = 1)
   # 
-  # row_fecha_inicio = excel_parametros %>% 
+  # row_fecha_inicio = excel_parametros %>%
   #   dplyr::filter(!is.na(row_fechas)) %>%
   #   dplyr::select(row_fechas) %>%
   #   unlist %>%
   #   as.character %>%
   #   head(.,n = 1)
   # 
-  # domestico_fecha_inicio = excel_parametros %>% 
+  # domestico_fecha_inicio = excel_parametros %>%
   #   dplyr::filter(!is.na(row_fechas)) %>%
   #   dplyr::select(row_fechas) %>%
   #   unlist %>%
   #   as.character %>%
   #   head(.,n = 1)
   # 
-  # usa_fecha_cerrado = excel_parametros %>%    
+  # usa_fecha_cerrado = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_fechas)) %>%
   #   dplyr::select(usa_fechas) %>%
   #   unlist %>%
   #   as.character %>%
   #   tail(.,n = 1)
   # 
-  # row_fecha_cerrado = excel_parametros %>% 
+  # row_fecha_cerrado = excel_parametros %>%
   #   dplyr::filter(!is.na(row_fechas)) %>%
   #   dplyr::select(row_fechas) %>%
   #   unlist %>%
   #   as.character %>%
   #   tail(.,n = 1)
   # 
-  # domestico_fecha_cerrado = excel_parametros %>% 
+  # domestico_fecha_cerrado = excel_parametros %>%
   #   dplyr::filter(!is.na(row_fechas)) %>%
   #   dplyr::select(row_fechas) %>%
   #   unlist %>%
   #   as.character %>%
   #   tail(.,n = 1)
   # 
-  # usa_cantidad_inicio = excel_parametros %>%     
+  # usa_cantidad_inicio = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_cantidades)) %>%
   #   dplyr::select(usa_cantidades) %>%
   #   unlist %>%
   #   as.character %>%
   #   head(.,n = 1)
   # 
-  # row_cantidades_inicio = excel_parametros %>% 
+  # row_cantidades_inicio = excel_parametros %>%
   #   dplyr::filter(!is.na(row_cantidades)) %>%
   #   dplyr::select(row_cantidades) %>%
   #   unlist %>%
   #   as.character %>%
   #   head(.,n = 1)
   # 
-  # domestico_cantidades_inicio = excel_parametros %>% 
+  # domestico_cantidades_inicio = excel_parametros %>%
   #   dplyr::filter(!is.na(row_cantidades)) %>%
   #   dplyr::select(row_cantidades) %>%
   #   unlist %>%
   #   as.character %>%
   #   head(.,n = 1)
   # 
-  # usa_cantidades_cerrado = excel_parametros %>%   
+  # usa_cantidades_cerrado = excel_parametros %>%
   #   dplyr::filter(!is.na(usa_cantidades)) %>%
   #   dplyr::select(usa_cantidades) %>%
   #   unlist %>%
   #   as.character %>%
   #   tail(.,n = 1)
   # 
-  # row_cantidades_cerrado = excel_parametros %>% 
+  # row_cantidades_cerrado = excel_parametros %>%
   #   dplyr::filter(!is.na(row_cantidades)) %>%
   #   dplyr::select(row_cantidades) %>%
   #   unlist %>%
   #   as.character %>%
   #   tail(.,n = 1)
   # 
-  # domestico_cantidades_cerrado = excel_parametros %>% 
+  # domestico_cantidades_cerrado = excel_parametros %>%
   #   dplyr::filter(!is.na(row_cantidades)) %>%
   #   dplyr::select(row_cantidades) %>%
   #   unlist %>%

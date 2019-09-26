@@ -20,7 +20,6 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
   f_tabla <- f_resultado$tabla
   f_variables_fecha <- f_resultado$variables
   
-  
   f_resultado2 <- funcion_ordena_fechas(f_tabla,f_variables_fecha)
   f_tabla <- f_resultado2$tabla
   f_variables_fecha <- f_resultado2$fechas
@@ -30,12 +29,12 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
 
 # (main) función para grafica 2 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07')
-# p_texto_x <- 'x'
-# p_texto_y <- 'y'
-# p_variables_fecha <- parametros$domestico_fechas
-# p_variable_pedido <- parametros$domestico_pedido[1]
-# p_compresion <- TRUE
+p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07')
+p_texto_x <- 'x'
+p_texto_y <- 'y'
+p_variables_fecha <- parametros$domestico_fechas
+p_variable_pedido <- parametros$domestico_pedido[1]
+p_compresion <- TRUE
 p_variables_cantidades <- parametros$domestico_cantidades
 
 funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido){
@@ -44,7 +43,58 @@ funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
     f_tabla <- f_resultado[[1]]
     f_variables_fecha <- f_resultado[[2]]
   }
+  f_tabla_resumen <- funcion_parametros_grafica_2(f_tabla,p_variables_cantidades,f_variables_fecha)
+  funcion_grafica_barras(f_tabla_resumen$sumas)
 }
+
+
+# (secondary - plotting) ------------------------------------------------------------------------------------------------------------------------------------------
+
+# p_resumen <- f_tabla_resumen$sumas
+# p_texto_label <- 'entregas'
+
+funcion_grafica_barras <- function(p_resumen){
+  
+  f_tabla1 <- data.frame(variable = factor(names(p_resumen), levels = names(p_resumen)),valor = p_resumen[1,] %>% unlist %>% as.numeric)
+  
+  g1 <- ggplot(f_tabla) +
+    geom_col(aes(x = variable, y = valor), alpha = .5, fill = 'darkblue', color = 'black') +
+    geom_label(aes(x = variable, y = valor, label = paste0(round(valor,1),' ',p_texto_label))) +
+    xlab('checkpoint') +
+    ylab('cajas')
+  
+  f_tabla2 <- data.frame(variable = factor(names(p_resumen), levels = names(p_resumen)),valor = p_resumen[1,] %>% unlist %>% as.numeric)
+  
+  g2 <- ggplot(f_tabla) +
+    geom_col(aes(x = variable, y = valor), alpha = .5, fill = 'darkblue', color = 'black') +
+    geom_label(aes(x = variable, y = valor, label = paste0(round(valor,1),' ',p_texto_label))) +
+    xlab('checkpoint') +
+    ylab('cajas')
+}
+
+# (secondary - wrangling) resumen para la gráfica de barras -----------------------------------------------------------------------------------------------------------------------------------------
+
+# p_tabla <- f_tabla
+# p_variables_suma <- parametros$domestico_cantidades
+# p_variables_cuantos <- f_variables_fecha
+
+funcion_parametros_grafica_2 <- function(p_tabla, p_variables_suma,p_variables_cuantos){
+  n <- nrow(p_tabla)
+  sumas <- p_tabla %>% select(p_variables_suma) %>%
+    summarise_all(.,.funs = sum_x)
+  
+  fechas <- p_tabla %>% select(p_variables_cuantos) %>%
+    summarise_all(.,.funs = nona_x)
+  
+  resultado <- list()
+  resultado$n <- n
+  resultado$sumas <- sumas
+  resultado$cuantos <- fechas
+  
+  return(resultado)
+}
+
+
 
 # (secondary - wrangling) comnpresión de fechas ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +106,7 @@ funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agru
   funcion3 <- ','
   funcion4 <- paste0(p_variables_fecha,'_max = max(', p_variables_fecha, ', na.rm = T)', collapse = ',')
   funcion4a <- ','
-  funcion4b <- paste0(p_variables_cantidades,'_sum = sum(', p_variables_cantidades, ', na.rm = T)', collapse = ',')
+  funcion4b <- paste0(p_variables_cantidades,' = sum(', p_variables_cantidades, ', na.rm = T)', collapse = ',')
   funcion5 <- paste0(') %>% data.frame')
   eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4,funcion4a,funcion4b,funcion5)))
   for(i in 1:length(f_tabla)){                           # al parecer un infinito en fechas se ve como NA pero para fines prácticos
@@ -91,6 +141,17 @@ funcion_ordena_fechas <- function(p_tabla,p_fechas){
 
 mean_x <- function(a){
   b <- mean(a, na.rm = T)
+  return(b)
+}
+
+sum_x <- function(a){
+  b <- sum(a, na.rm = T)
+  if(is.na(b))b <- 0
+  return(b)
+}
+
+nona_x <- function(a){
+  b <- sum(!is.na(a))
   return(b)
 }
 
