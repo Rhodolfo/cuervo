@@ -6,16 +6,10 @@ header <- dashboardHeader(
           tags$li(class = "dropdown", textOutput("logged_user"), style = "padding-top: 15px; padding-bottom: 15px; padding-right: 15px; color: #66b3ff;"),
           tags$li(class = "dropdown", actionLink("boton_login_pre",textOutput('texto_link')))
           )
-  
 )
 
 header$children[[2]]$children <-  tags$a(href='wiii',
                                            tags$img(src='logo_arena.png'))
-
-
-
-
-
 
 sidebar <- dashboardSidebar(
   conditionalPanel(condition = 'output.esta_logeado',
@@ -26,39 +20,95 @@ sidebar <- dashboardSidebar(
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_administrador || output.es_tester',
+  
+  # carga de los datos -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'output.activa_carga',    
     sidebarMenu(
-      id = 'menu_proceso',
+      id = 'menu_preparacion',
       menuItem(
-        'Proceso', tabName = 'proceso'
+        'Preparación de los datos', tabName = 'preparacion'
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_servicio_cliente_nacional || output.es_administrador || output.es_tester',
+  
+  
+  conditionalPanel(condition = 'output.activa_visualizacion1',    
                    sidebarMenu(
-                     id = 'menu_servicio_cliente_nacional',
+                     id = 'menu_visualizacion1',
                      menuItem(
-                       'Pedidos', tabName = 'pedidos_nacional'
+                       'Visualización 1', tabName = 'visualizacion1'
                      )
                    )
   ),
-  conditionalPanel(condition = 'output.es_administrador || output.es_tester',
+  
+  # filtros -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'output.activa_visualizacion1',
     sidebarMenu(
-      id = 'menu_kpi',
-      menuItem(
-        'KPIs', tabName = 'kpi'
+      id = 'menu_filtros_1',
+      pickerInput(                  # filtro región
+        'input_filtro_zona',
+        'Región',
+        selected = NULL,
+        multiple = FALSE,
+        choices = c(
+          'USA',
+          'Doméstico',
+          'Resto del mundo'
+        )
+      ),
+      pickerInput(                   # filtro 1
+        'input_filtro1',
+        'filtro1',
+        selected = 'ninguna',
+        choices = 'ninguna',
+        multiple = TRUE,
+        options = list(`actions-box` = TRUE)
+      ),
+      conditionalPanel('output.activa_filtro2',
+                       pickerInput(                   # filtro 2
+                         'input_filtro2',
+                         'filtro2',
+                         selected = 'ninguna',
+                         choices = 'ninguna',
+                         multiple = TRUE,
+                         options = list(`actions-box` = TRUE)
+                       )
+      ),
+      pickerInput(                                    # filtro fecha variable
+        'filtro_fecha_variable',
+        'Fecha para filtrar',
+        choices = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)],
+        selected = excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)][1],
+        multiple = FALSE
+      ),
+      dateRangeInput(                     # filtro fecha rango
+        'filtro_fecha_rango',
+        'Rango de fechas',
+        start = '2019-01-01',
+        end = '2019-12-31',
+        min = '2019-01-01',
+        max = '2019-12-31'
       )
     )
   ),
-  conditionalPanel(condition = 'output.es_administrador || output.es_tester',    # visualizador de tablas
-    sidebarMenu(
-      id = 'menu_visualizador',
-      menuItem(
-        'Visualizador', tabName = 'visualizador'
-      )
-    )
+  
+  # (sidebar) botón de filtro 1 ------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'output.activa_visualizacion1',
+                   sidebarMenu(
+                     id = 'menu_boton_1',
+                     actionButton(
+                       inputId = 'boton_filtrar1',
+                       label = 'Filtrar'
+                     )
+                   )
   ),
-  conditionalPanel(condition = 'output.es_administrador',
+  
+  # (sidebar) seguimiento de variables -----------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'output.es_administrador & output.',
     sidebarMenu(
       id = 'menu_variables',
       h1('variables'),
@@ -67,53 +117,50 @@ sidebar <- dashboardSidebar(
       textOutput('variables_user_prelog'),
       textOutput('variables_user_logged'),
       textOutput('variables_user_name'),
-      textOutput('variables_user_role')
+      textOutput('variables_user_role'),
+      textOutput('variables_status_carga'),
+      textOutput('variables_filtro_region'),
+      textOutput('variables_input_filtro1'),
+      textOutput('variables_input_filtro2'),
+      textOutput('variables_filtro_fecha_variable'),
+      textOutput('variables_filtro_fecha_rango')
     )
   )
 )
 
 
+# body ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 body <- dashboardBody(
   
-
+  tags$script(HTML(                 # función para definir openTab
+        "                                             
+        var openTab = function(tabName){
+                   $('a', $('.sidebar')).each(function() {
+                   if(this.getAttribute('data-value') == tabName) {
+                   this.click()
+                   };
+                   });
+                   }
+                   ")),
   
   tags$head(tags$style(HTML('
-
-.skin-blue .main-header .logo {
-                              background-color: #66b3ff;
-                              }
-  .skin-blue .main-header .navbar {
-    background-color: #001a33;
-  }'))),  
+.skin-blue .main-header .logo {background-color: #66b3ff;}.skin-blue .main-header .navbar {background-color: #001a33;}'))),  
   tabItems(
-    tabItem(
+    
+    
+  # (body) login -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+    tabItem(                        # login
       'entrada',
       uiOutput('page')
     ),
-    tabItem(
-      'proceso',
-      box(
-        title = 'Proceso',
-        solidHeader = T,
-        width = 9,
-        status = 'warning',
-        sankeyNetworkOutput('grafica_proceso')
-      )
-    ),
-    tabItem(
-      'kpi',
-      box(
-        width = 6,
-        highchartOutput('grafica_fill_rate')
-      ),
-      box(
-        width = 6,
-        leafletOutput('mapa_fill_rate')
-      )
-    ),
-    tabItem(                            # carga de los datos
-      'visualizador',
-      conditionalPanel('input.boton_siguiente_carga == 0',
+  
+  # (body) carga de los datos ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+    tabItem(                        # carga de los datos
+      'preparacion',
         box(
           width = 12,
           title = 'Preparación de los datos',
@@ -121,55 +168,30 @@ body <- dashboardBody(
             inputId = 'boton_carga',
             label = 'Carga de los datos'
           ),
-          textOutput('o_texto_carga_zsdr141')
+          textOutput('o_texto_carga_usa'),
+          textOutput('o_texto_carga_row'),
+          textOutput('o_texto_carga_domestico')
+        ),
+        actionButton(
+          inputId = 'boton_siguiente_carga',
+          label = 'Siguiente'
         )
-      ),
-      conditionalPanel('input.boton_carga == 1 & input.boton_siguiente_carga == 0',
-                       actionButton(
-                         inputId = 'boton_siguiente_carga',
-                         label = 'Siguiente'
-                       )
-      ),
-      conditionalPanel('input.boton_siguiente_carga == 1',
-        box(
-          width = 12,
-          title = 'Filtros',
-          selectizeInput(
-            'input_filtro_region',
-            'Región',
-            selected = NULL,
-            multiple = TRUE,
-            options = c('USA','bla')
-          ),
-          selectizeInput(
-            'input_filtro_fecha_original',
-            'Fecha Original de Entrega',
-            selected = NULL,
-            multiple = TRUE,
-            options = c(
-              'enero',
-              'febrero',
-              'marzo',
-              'abril',
-              'mayo',
-              'junio',
-              'julio',
-              'agosto',
-              'septiembre',
-              'octubre',
-              'noviembre',
-              'diciembre'
-            )
-          ),
-          actionButton(
-            inputId = 'boton_filtrar',
-            label = 'Filtrar'
-          )
+    ),
+    
+  # (body) visualización 1  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    tabItem(                   
+      'visualizacion1',
+      tabBox(
+        title = 'análisis',
+        id = 'tabset1',
+        width = 12,
+        height = 800,
+        tabPanel(
+          'tiempo de los procesos',
+          plotOutput('output_grafica_tiempo1',height = 700)
         )
       )
-    ),
-    tabItem(
-      'pedidos_nacional'
     )
   )
 )

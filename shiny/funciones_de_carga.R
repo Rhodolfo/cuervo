@@ -1,5 +1,85 @@
-library(stringr)
 
+
+# (main) función carga ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# función de carga de los datos utilizando como punto de partida los parámetros
+
+# p_carpeta <- 'zsdr141'
+# p_fechas <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_fechas)) %>%
+#   dplyr::select(usa_fechas) %>%
+#   unlist
+# p_cantidades <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_cantidades)) %>%
+#   dplyr::select(usa_cantidades) %>%
+#   unlist
+# p_filtros <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_filtros)) %>%
+#   dplyr::select(usa_filtros) %>%
+#   unlist
+# p_pedido <- excel_parametros %>%
+#   dplyr::filter(!is.na(usa_pedido)) %>%
+#   dplyr::select(usa_pedido) %>%
+#   unlist
+
+funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido){
+  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido)
+}
+
+# (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
+
+
+# p_carpeta <- parametros$usa_carpeta
+# p_fechas <- parametros$usa_fechas
+# p_cantidades <- parametros$usa_cantidades
+# p_filtros <- parametros$usa_filtros
+# p_pedido <- parametros$usa_pedido
+
+
+
+funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido){
+  f_archivos <- list.files(paste0('datos/',p_carpeta))
+  f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
+  
+  
+  f_lista <- list()
+  for(i in 1:length(f_archivos)){
+    f_lista[[i]] <- read_excel(paste0('datos/',p_carpeta,'/',f_archivos[i])) %>% 
+      setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  }
+  f_lista <- do.call('rbind',f_lista)
+  f_lista <- as.data.frame(f_lista) %>% 
+    setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  
+
+
+  for(i in 1:length(p_filtros)){
+    eval(parse(text = paste0(
+      'f_lista$',p_filtros[i],'[is.na(f_lista$',p_filtros[i],')] <- "ninguno"' 
+    )))
+  }  
+  for(i in 1:length(p_pedido)){
+    eval(parse(text = paste0(
+      'f_lista$',p_pedido[i],'[is.na(f_lista$',p_pedido[i],')] <- "ninguno"' 
+    )))
+  }  
+  
+  f_lista <- f_lista %>%
+    mutate_at(.vars = p_fechas,.funs = as.Date) %>%
+    mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
+    mutate_at(.vars = p_pedido,.funs = as.character) %>%
+    mutate_at(.vars = p_filtros,.funs = as.factor) 
+  f_resultado <- f_lista %>%
+    dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros))
+  return(f_resultado)
+}
+
+# (terciary) función de sustitución de datos perdidos------------
+
+funcion_na_vacio <- function(a){
+  a <- as.character(a)
+  replace_na(a,'ninguno')
+}
 
 
 # función carga general de datos ---------------------------------------------------
@@ -12,6 +92,8 @@ library(stringr)
 funcion_carga_datos <- function(p_carpeta,p_tipo){
   f_archivos <- list.files(paste0('datos/',p_carpeta))
   f_lista <- list()
+  
+  
   for(i in 1:length(f_archivos)){
     f_lista[[i]] <- read_excel(paste0('datos/',p_carpeta,'/',f_archivos[i]))
     
@@ -19,14 +101,19 @@ funcion_carga_datos <- function(p_carpeta,p_tipo){
       f_lista[[i]] <- funcion_limpieza_zsdr141(f_lista[[i]])
     }
     
+    if(p_tipo == 'zsdr159'){
+      f_lista[[i]] <- funcion_limpieza_zsdr159(f_lista[[i]]) %>% data.frame
+    }
+    
+    
   }
   
   
   
   
-  f_condensado <- do.call('rbind',f_lista)
-  f_condensado <- as.data.frame(f_condensado)
-  return(f_condensado)
+  f_lista <- do.call('rbind',f_lista)
+  f_lista <- as.data.frame(f_lista)
+  return(f_lista)
 }
 
 # función para limpiar la tabla zsdr141 -------------------------------
@@ -57,10 +144,10 @@ funcion_limpieza_zsdr141 <- function(p_tabla){
   
     f_tabla <- p_tabla %>%
     setNames(                             #nombres
-      .,str_replace_all(names(.),' ','_')
+      .,stringr::str_replace_all(names(.),' ','_')
     ) %>%
-    filter(!is.na(Código_SAP)) %>%
-    mutate_at(                      # factores
+    dplyr::filter(!is.na(Pedido_SAP)) %>%          # quito los agregados
+    mutate_at(                   # factores
       .vars = c(
         'Nombre_Región',
         'Código_SAP',
@@ -209,6 +296,138 @@ funcion_limpieza_zsdr141 <- function(p_tabla){
     return(f_tabla)
 }
 
+# función de limpieza para la tabla zsdr159 ---------------------------------------------
+
+# p_tabla <- read_excel('datos/zsdr159/zsdr159_10_2019_ene_ago.XLSX') %>%
+#   setNames(                             #nombres
+#     .,str_replace_all(names(.),' ','_')
+#   ) %>%
+#   data.frame
+
+
+funcion_limpieza_zsdr159 <- function(p_tabla){
+  f_tabla <- p_tabla %>%
+    setNames(                             #nombres
+      .,str_replace_all(names(.),' ','_')
+    ) %>%
+    mutate_at(    # factores
+      .vars = c(
+        'Ofc.Ventas',
+        'Oficina_de_Ventas...2',
+        'Canal',
+        'Oficina_de_Ventas...4',
+        'Nombre',
+        'Cl.Ped....25',
+        'Cl.Ped....26',
+        'Pto.exped....28',
+        'Pto.exped....29',
+        'Gp.Ventas',
+        'Vendedor',
+        'Zona_vta.',
+        'Zona_de_Ventas',
+        'MR...34',
+        'Motivo_de_Rechazo',
+        'Denominación',
+        'MR...44',
+        'Motivo_de_BO',
+        'Gpo.Clientes'
+      ),
+      .funs = as.factor
+    ) %>%
+    mutate_at(   # numéricas
+      .vars = c(
+        
+        'Ctd._Ped._Cj._Nat.',
+        'Ctd._Ped._Cj._9_Lit',
+        'Ctd._a_entregar',
+        'Ctd._Entrega_9Lit',
+        'BO_Cj._Nat.',
+        'BO_Cj._9_Lit',
+        'Ctd.Factura',
+        'Ctd.Factura_9Lit',
+        'Ctd.Dev.',
+        'Ctd.Dev._9Lit',
+        'Importe_Ped.',
+        'Entrega',
+        'Transporte',
+        'Factura'
+      ),
+      .funs = as.numeric
+    ) %>%
+    mutate_at(   # fechas
+      .vars = c(
+        'Fe.Creación',
+        'Fe.Pre.Entr.',
+        'Fecha_de_cita',
+        'Fecha_Are',
+        'Fe.Factura',
+        'Acuse'
+      ),
+      .funs = as.Date
+    ) %>%
+    mutate(   # ad hoc
+      Pedido = as.factor(as.numeric(Pedido)),
+      Cliente = as.factor(as.numeric(Cliente)),
+      Pos = as.factor(as.numeric(Pos)),
+      Material = as.factor(as.numeric(Material))
+    ) %>%
+    setNames(
+      c(
+        'oficina_ventas_codigo',
+        'oficina_ventas_nombre',
+        'canal_codigo',
+        'canal_nombre',
+        'numero_pedido',
+        'pedido_sap',
+        'cliente_codigo',
+        'cliente_nombre',
+        'cajas_pedido_natural',
+        'cajas_pedido_9l',
+        'cajas_entrega_natural',
+        'cajas_entrega_9l',
+        'cajas_backorder_natural',
+        'cajas_backorder_9l',
+        'cajas_facturadas_natural',
+        'cajas_facturadas_9l',
+        'cajas_devolucion_natural',
+        'cajas_devolucion_9l',
+        'fecha_creacion',
+        'fecha_original_preferente',
+        'fecha_cita',
+        'fecha_are',
+        'fecha_factura',
+        'fecha_acuse',
+        'pedido_tipo_codigo',
+        'pedido_tipo_nombre',
+        'posicion',
+        'punto_expedicion_codigo',
+        'punto_expedicion_nombre',
+        'vendedor_codigo',
+        'vendedor_nombre',
+        'zona_venta_codigo',
+        'zona_venta_nombre',
+        'motivo_rechazo_codigo',
+        'motivo_rechazo_nombre',
+        'material_codigo',
+        'material_nombre',
+        'importe_pedido',
+        'entrega',
+        'transporte',
+        'bloque_factura',
+        'bloque_entrega',
+        'factura',
+        'motivo_backorder_codigo',
+        'motivo_backorder_nombre',
+        'grupo_cliente'
+        
+      )
+    )
+  
+  return(f_tabla)
+}
+
+
+
 # función para cambiar de meses en cadena a meses numéricos -----------------------------
 
 funcion_mes_a_numero <- function(p_mes){
@@ -253,4 +472,21 @@ funcion_mes_a_numero <- function(p_mes){
 # 
 # 
 
+# (secondary) función para extraer el año y el mes de una variable en una tabla y con ello crear un catálogo de selección --------------------------------------------
+
+# p_tabla <- tablas$zsdr159
+
+funcion_ano_mes <- function(p_tabla){
+    f_tabla <- p_tabla %>%
+      mutate(
+        ano = year(fecha_original_preferente),
+        mes = month(fecha_original_preferente),
+        ano_mes = paste0(
+          ano,
+          '_',
+          str_sub(paste0('0',mes),-2)
+        )
+      )
+    return(f_tabla)
+}
 
