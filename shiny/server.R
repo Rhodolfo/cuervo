@@ -132,7 +132,49 @@ shinyServer(function(input, session, output) {
       dplyr::filter(!is.na(domestico_pedido)) %>%
       dplyr::select(domestico_pedido) %>%
       unlist %>%
-      as.character
+      as.character,
+    
+    usa_fecha_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(usa_fechas)) %>%
+      dplyr::select(usa_pedido) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    row_fecha_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_pedido)) %>%
+      dplyr::select(row_pedido) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    domestico_fecha_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_pedido)) %>%
+      dplyr::select(row_pedido) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    usa_fecha_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(usa_fechas)) %>%
+      dplyr::select(usa_pedido) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    row_fecha_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(row_pedido)) %>%
+      dplyr::select(row_pedido) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    domestico_fecha_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(row_pedido)) %>%
+      dplyr::select(row_pedido) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
     
   )
   

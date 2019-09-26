@@ -102,7 +102,7 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha){
   
   p_tabla$n <- 1:nrow(p_tabla)
   
-  f_tamano_bolas <- 15/(log(nrow(p_tabla)))
+  f_tamano_bolas <- 14/(log(nrow(p_tabla)))
   
   
   f_vector_fechas <- paste0(p_variables_fecha,collapse = ',')
@@ -131,6 +131,9 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha){
     y = 1
   )
   
+  y_jitter <- 1:nrow(p_tabla) + rep(c(-.3,-.15,0,.15,.3,.15,0,-.15),nrow(p_tabla))[1:nrow(p_tabla)]
+  
+
   
   funcion1 <- paste0(
     'g <- ggplot(p_tabla)'
@@ -139,7 +142,7 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha){
     '+ geom_segment(aes(x = fecha_min, xend = fecha_max, y = n, yend = n),color = "darkgrey")'
   )
   funcion3 <- paste0(
-    '+ geom_point(aes(x = ',p_variables_fecha,', y = n),color = "',f_colores,'",size = ',f_tamano_bolas,', alpha = 1,shape = 124,size = 7)',collapse = '' 
+    '+ geom_point(aes(x = ',p_variables_fecha,', y = ',y_jitter,'),color = "',f_colores,'",size = ',f_tamano_bolas,', alpha = 1,shape = 18,size = ',f_tamano_bolas,')',collapse = ''
   )
   funcion4 <- paste0(
     '+ geom_point(data = f_tabla_leyenda, aes(x = x, y = y, color = variables), size = .1)'
