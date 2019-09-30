@@ -411,7 +411,7 @@ shinyServer(function(input, session, output) {
   #   dplyr::filter(Nombre_Región != 'USA')
   # 
   # tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido)
-  
+
   # login ------------------------------------------------------------------------------------------------------------------------------------------------------------
   
   ui1 <- function(){   # pantalla de logeo inicial
@@ -829,9 +829,8 @@ shinyServer(function(input, session, output) {
     
     output$output_grafica_tiempo1 <- renderPlot({    # gráfica de tiempos desagregadeos
       g <- NULL
-      if(input$input_filtro_zona == 'USA')f_region <- 'usa'                  # regiones
-      if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
-      if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+      
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
       
       f_p_variables_fecha <- eval(parse(text = paste0(
         'parametros$',f_region,'_fechas'
@@ -839,7 +838,10 @@ shinyServer(function(input, session, output) {
       f_p_variable_pedido <- eval(parse(text = paste0(
         'parametros$',f_region,'_pedido[1]'
       )))
-      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido)
+      
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      
+      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades)
       # 
       # oldw <- getOption("warn")
       # options(warn=-1)
@@ -855,37 +857,49 @@ shinyServer(function(input, session, output) {
     })
     
     output$grafica_entregas_pedidos <- renderPlot({  # output de grafica de entregas por proceso
-      
+      g <- NULL
       f_region <- funcion_asigna_region(input$input_filtro_zona)
-        
       f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
       f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
         
-      funcion_main_grafica_2(
+      g <- funcion_main_grafica_2(
         p_tabla <- tablas$sub,
         p_texto_x = 'prceso',
         p_texto_y = 'cantidad',
         p_variables_fecha = f_variables_fecha,
         p_variable_pedido = f_variable_pedido,
         p_compresion = TRUE,
-        p_variables_cantidades = parametros$domestico_cantidades,
-        p_texto_label = 'pedidos',
-        p_tipo_fgb = 'cuantos'
+        p_variables_cantidades = f_variables_cantidades,
+        p_texto_label = 'litros',
+        p_tipo_fgb = 'suma'
       )
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
     })
     
     output$grafica_entregas_litros <- renderPlot({  # output de grafica de litros por proceso
-      funcion_main_grafica_2(
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
+      f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
+      f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      
+      g <- funcion_main_grafica_2(
         p_tabla <- tablas$sub,
         p_texto_x = 'prceso',
         p_texto_y = 'cantidad',
-        p_variables_fecha = parametros$domestico_fechas,
-        p_variable_pedido = parametros$domestico_pedido[1],
+        p_variables_fecha = f_variables_fecha,
+        p_variable_pedido = f_variable_pedido,
         p_compresion = TRUE,
-        p_variables_cantidades = parametros$domestico_cantidades,
+        p_variables_cantidades = f_variables_cantidades,
         p_texto_label = 'entregas',
         p_tipo_fgb = 'cuantos'
       )
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
     })
     
   })

@@ -8,11 +8,11 @@
 # p_variables_fecha <- parametros$domestico_fechas
 # p_variable_pedido <- parametros$domestico_pedido[1]
 # p_compresion <- TRUE
+# p_variables_cantidades <- parametros$domestico_cantidades
 
-
-funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido){
+funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades){
   if(p_compresion){
-    f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido)
+    f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido,p_variables_cantidades)
     f_tabla <- f_resultado[[1]]
     f_variables_fecha <- f_resultado[[2]]
   }
@@ -29,15 +29,15 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
 
 # (main) función para grafica 2 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07')
-p_texto_x <- 'prceso'
-p_texto_y <- 'cantidad'
-p_variables_fecha <- parametros$domestico_fechas
-p_variable_pedido <- parametros$domestico_pedido[1]
-p_compresion <- TRUE
-p_variables_cantidades <- parametros$domestico_cantidades
-p_texto_label <- 'entregas'
-p_tipo_fgb <- 'conteos'
+# p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07')
+# p_texto_x <- 'prceso'
+# p_texto_y <- 'cantidad'
+# p_variables_fecha <- parametros$domestico_fechas
+# p_variable_pedido <- parametros$domestico_pedido[1]
+# p_compresion <- TRUE
+# p_variables_cantidades <- parametros$domestico_cantidades
+# p_texto_label <- 'entregas'
+# p_tipo_fgb <- 'conteos'
 
 funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE, p_texto_x, p_texto_y, p_variables_fecha, p_variable_pedido, p_variables_cantidades, p_texto_label, p_tipo_fgb){
   if(p_compresion){
