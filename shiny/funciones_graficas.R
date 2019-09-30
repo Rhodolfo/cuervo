@@ -30,46 +30,51 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
 # (main) función para grafica 2 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07')
-p_texto_x <- 'x'
-p_texto_y <- 'y'
+p_texto_x <- 'prceso'
+p_texto_y <- 'cantidad'
 p_variables_fecha <- parametros$domestico_fechas
 p_variable_pedido <- parametros$domestico_pedido[1]
 p_compresion <- TRUE
 p_variables_cantidades <- parametros$domestico_cantidades
+p_texto_label <- 'entregas'
+p_tipo_fgb <- 'conteos'
 
-funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido){
+funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE, p_texto_x, p_texto_y, p_variables_fecha, p_variable_pedido, p_variables_cantidades, p_texto_label, p_tipo_fgb){
   if(p_compresion){
     f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido, p_variables_cantidades)
     f_tabla <- f_resultado[[1]]
     f_variables_fecha <- f_resultado[[2]]
   }
-  f_tabla_resumen <- funcion_parametros_grafica_2(f_tabla,p_variables_cantidades,f_variables_fecha)
-  funcion_grafica_barras(f_tabla_resumen$sumas)
+  f_tabla_resumen <- funcion_parametros_grafica_2(f_tabla, p_variables_cantidades, f_variables_fecha)
+  f_variables <- eval(parse(text = paste0('c(names(f_tabla_resumen$',p_tipo_fgb,'))')))
+  f_valores <- eval(parse(text = paste0('c((f_tabla_resumen$',p_tipo_fgb,') %>% unlist %>% as.numeric)')))
+  f_g <- funcion_grafica_barras(f_variables, f_valores, p_texto_label, p_texto_x, p_texto_y)
+  return(f_g)
 }
+
+
 
 
 # (secondary - plotting) ------------------------------------------------------------------------------------------------------------------------------------------
 
-# p_resumen <- f_tabla_resumen$sumas
+# p_variables <- f_tabla_resumen$sumas %>% names
+# p_valores <- f_tabla_resumen$sumas %>% unlist %>% as.numeric
 # p_texto_label <- 'entregas'
+# p_texto_x <- 'proceso'
+# p_texto_y <- 'cantidad'
 
-funcion_grafica_barras <- function(p_resumen){
+
+funcion_grafica_barras <- function(p_variables, p_valores, p_texto_label, p_texto_x, p_texto_y){
   
-  f_tabla1 <- data.frame(variable = factor(names(p_resumen), levels = names(p_resumen)),valor = p_resumen[1,] %>% unlist %>% as.numeric)
+  f_tabla1 <- data.frame(variable = factor(p_variables, levels = p_variables), valor = p_valores)
   
-  g1 <- ggplot(f_tabla) +
+  g1 <- ggplot(f_tabla1) +
     geom_col(aes(x = variable, y = valor), alpha = .5, fill = 'darkblue', color = 'black') +
     geom_label(aes(x = variable, y = valor, label = paste0(round(valor,1),' ',p_texto_label))) +
-    xlab('checkpoint') +
-    ylab('cajas')
+    xlab(p_texto_x) +
+    ylab(p_texto_y)
   
-  f_tabla2 <- data.frame(variable = factor(names(p_resumen), levels = names(p_resumen)),valor = p_resumen[1,] %>% unlist %>% as.numeric)
-  
-  g2 <- ggplot(f_tabla) +
-    geom_col(aes(x = variable, y = valor), alpha = .5, fill = 'darkblue', color = 'black') +
-    geom_label(aes(x = variable, y = valor, label = paste0(round(valor,1),' ',p_texto_label))) +
-    xlab('checkpoint') +
-    ylab('cajas')
+  return(g1)
 }
 
 # (secondary - wrangling) resumen para la gráfica de barras -----------------------------------------------------------------------------------------------------------------------------------------

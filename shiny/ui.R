@@ -194,6 +194,14 @@ body <- dashboardBody(
         tabPanel(
           'tiempo de los procesos',
           plotOutput('output_grafica_tiempo1',height = 700)
+        ),
+        tabPanel(
+          'pedidos',
+          plotOutput('grafica_entregas_pedidos',height = 700)
+        ),
+        tabPanel(
+          'litros',
+          plotOutput('grafica_entregas_litros',height = 700)
         )
       )
     )
