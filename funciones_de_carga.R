@@ -22,8 +22,8 @@
 #   dplyr::select(usa_pedido) %>%
 #   unlist
 
-funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido){
-  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido)
+funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark){
+  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido,p_fecha_benchmark)
 }
 
 # (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_ped
 
 
 
-funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido){
+funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark){
   f_archivos <- list.files(paste0('datos/',p_carpeta))
   f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
   
@@ -66,11 +66,12 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   
   f_lista <- f_lista %>%
     mutate_at(.vars = p_fechas,.funs = as.Date) %>%
+    mutate_at(.vars = p_fecha_benchmark,.funs = as.Date) %>%
     mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
     mutate_at(.vars = p_pedido,.funs = as.character) %>%
     mutate_at(.vars = p_filtros,.funs = as.factor) 
   f_resultado <- f_lista %>%
-    dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros))
+    dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros,p_fecha_benchmark))
   return(f_resultado)
 }
 

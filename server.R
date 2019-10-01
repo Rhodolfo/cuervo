@@ -44,7 +44,8 @@ shinyServer(function(input, session, output) {
   )
   
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
-    domestico_fechas = excel_parametros %>% 
+    
+    domestico_fechas = excel_parametros %>%        #fechas
       dplyr::filter(!is.na(domestico_fechas)) %>%
       dplyr::select(domestico_fechas) %>%
       unlist %>%
@@ -62,7 +63,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    domestico_cantidades = excel_parametros %>% 
+    domestico_cantidades = excel_parametros %>%     # cantidades
       dplyr::filter(!is.na(domestico_cantidades)) %>%
       dplyr::select(domestico_cantidades) %>%
       unlist %>%
@@ -80,7 +81,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    domestico_filtros = excel_parametros %>% 
+    domestico_filtros = excel_parametros %>%         # filtros
       dplyr::filter(!is.na(domestico_filtros)) %>%
       dplyr::select(domestico_filtros) %>%
       unlist %>%
@@ -98,7 +99,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    usa_carpeta = excel_parametros %>% 
+    usa_carpeta = excel_parametros %>%             # carpeta
       dplyr::filter(!is.na(usa_carpeta)) %>%
       dplyr::select(usa_carpeta) %>%
       unlist %>%
@@ -116,7 +117,7 @@ shinyServer(function(input, session, output) {
       unlist %>%
       as.character,
     
-    usa_pedido = excel_parametros %>% 
+    usa_pedido = excel_parametros %>%                # pedido
       dplyr::filter(!is.na(usa_pedido)) %>%
       dplyr::select(usa_pedido) %>%
       unlist %>%
@@ -132,7 +133,112 @@ shinyServer(function(input, session, output) {
       dplyr::filter(!is.na(domestico_pedido)) %>%
       dplyr::select(domestico_pedido) %>%
       unlist %>%
-      as.character
+      as.character,
+    
+    usa_fecha_inicio = excel_parametros %>%         # fecha inicio
+      dplyr::filter(!is.na(usa_fechas)) %>%
+      dplyr::select(usa_fechas) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    row_fecha_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    domestico_fecha_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    usa_fecha_cerrado = excel_parametros %>%     # fecha cerrado
+      dplyr::filter(!is.na(usa_fechas)) %>%
+      dplyr::select(usa_fechas) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    row_fecha_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    domestico_fecha_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(row_fechas)) %>%
+      dplyr::select(row_fechas) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    usa_cantidad_inicio = excel_parametros %>%         # cantidades inicio
+      dplyr::filter(!is.na(usa_cantidades)) %>%
+      dplyr::select(usa_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    row_cantidades_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_cantidades)) %>%
+      dplyr::select(row_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    domestico_cantidades_inicio = excel_parametros %>% 
+      dplyr::filter(!is.na(row_cantidades)) %>%
+      dplyr::select(row_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      head(.,n = 1),
+    
+    usa_cantidades_cerrado = excel_parametros %>%     # cantidades cerrado
+      dplyr::filter(!is.na(usa_cantidades)) %>%
+      dplyr::select(usa_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    row_cantidades_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(row_cantidades)) %>%
+      dplyr::select(row_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    domestico_cantidades_cerrado = excel_parametros %>% 
+      dplyr::filter(!is.na(domestico_cantidades)) %>%
+      dplyr::select(domestico_cantidades) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    usa_fechas_benchmark = excel_parametros %>%
+      dplyr::filter(!is.na(usa_fechas_benchmark)) %>%
+      dplyr::select(usa_fechas_benchmark) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+
+    row_fechas_benchmark = excel_parametros %>%
+      dplyr::filter(!is.na(row_fechas_benchmark)) %>%
+      dplyr::select(row_fechas_benchmark) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+
+    domestico_fechas_benchmark = excel_parametros %>%
+      dplyr::filter(!is.na(domestico_fechas_benchmark)) %>%
+      dplyr::select(domestico_fechas_benchmark) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1)
     
   )
   
@@ -231,23 +337,124 @@ shinyServer(function(input, session, output) {
   #   unlist %>%
   #   as.character
   # 
+  # parametros$usa_fecha_inicio = excel_parametros %>%
+  #   dplyr::filter(!is.na(usa_fechas)) %>%
+  #   dplyr::select(usa_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # parametros$row_fecha_inicio = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # parametros$domestico_fecha_inicio = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # parametros$usa_fecha_cerrado = excel_parametros %>%
+  #   dplyr::filter(!is.na(usa_fechas)) %>%
+  #   dplyr::select(usa_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$row_fecha_cerrado = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$domestico_fecha_cerrado = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_fechas)) %>%
+  #   dplyr::select(row_fechas) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$usa_cantidad_inicio = excel_parametros %>%
+  #   dplyr::filter(!is.na(usa_cantidades)) %>%
+  #   dplyr::select(usa_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # parametros$row_cantidades_inicio = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_cantidades)) %>%
+  #   dplyr::select(row_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # parametros$domestico_cantidades_inicio = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_cantidades)) %>%
+  #   dplyr::select(row_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   head(.,n = 1)
+  # 
+  # parametros$usa_cantidades_cerrado = excel_parametros %>%
+  #   dplyr::filter(!is.na(usa_cantidades)) %>%
+  #   dplyr::select(usa_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$row_cantidades_cerrado = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_cantidades)) %>%
+  #   dplyr::select(row_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$domestico_cantidades_cerrado = excel_parametros %>%
+  #   dplyr::filter(!is.na(domestico_cantidades)) %>%
+  #   dplyr::select(domestico_cantidades) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$usa_fechas_benchmark = excel_parametros %>%
+  #   dplyr::filter(!is.na(usa_fechas_benchmark)) %>%
+  #   dplyr::select(usa_fechas_benchmark) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$row_fechas_benchmark = excel_parametros %>%
+  #   dplyr::filter(!is.na(row_fechas_benchmark)) %>%
+  #   dplyr::select(row_fechas_benchmark) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
+  # parametros$domestico_fechas_benchmark = excel_parametros %>%
+  #   dplyr::filter(!is.na(domestico_fechas_benchmark)) %>%
+  #   dplyr::select(domestico_fechas_benchmark) %>%
+  #   unlist %>%
+  #   as.character %>%
+  #   tail(.,n = 1)
+  # 
   # tablas <- list()
   # 
-  # tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido) %>%
+  # tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido, parametros$usa_fechas_benchmark) %>%
   #   dplyr::filter(Zona_de_ventas != 'ninguno') %>%
   #   dplyr::filter(Nombre_Región == 'USA')
   # 
-  # tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido) %>%
+  # tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido, parametros$row_fechas_benchmark) %>%
   #   dplyr::filter(Zona_de_ventas != 'ninguno') %>%
   #   dplyr::filter(Nombre_Región != 'USA')
   # 
-  # tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido)
+  # tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark)
 
-
-  
   # login ------------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-
   
   ui1 <- function(){   # pantalla de logeo inicial
     tagList(
@@ -269,8 +476,6 @@ shinyServer(function(input, session, output) {
     label = 'Siguiente'
   )),tabPanel(user$role))}    
 
-  
-  
   observeEvent(input$boton_login_pre,{
     user$logged <- FALSE
     user$role <- ''
@@ -481,21 +686,21 @@ shinyServer(function(input, session, output) {
     
     progress$set(message = "Cargando USA ", value = 0)
     Sys.sleep(1)
-    tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido) %>% 
+    tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido, parametros$usa_fechas_benchmark) %>% 
       dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región == 'USA')
 
 
     progress$set(message = "Cargando Resto del Mundo ", value = 0.3)
     Sys.sleep(1)
-    tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido) %>%
+    tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido, parametros$row_fechas_benchmark) %>%
       dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región != 'USA')
 
 
-    progress$set(message = "Doméstico ", value = 0.7)
+    progress$set(message = "Cargando Doméstico ", value = 0.7)
     Sys.sleep(1)
-    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido)
+    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark)
 
 
     progress$set(message = "Carga finalizada ", value = 1)
@@ -664,50 +869,91 @@ shinyServer(function(input, session, output) {
     
     
     
-    output$output_grafica_tiempo1 <- renderPlot({
-      g <- NULL
-      if(input$input_filtro_zona == 'USA')f_region <- 'usa'                  # regiones
-      if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
-      if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    output$output_grafica_tiempo1 <- renderPlot({    # gráfica de tiempos desagregadeos
       
+      
+      oldw <- getOption("warn")
+      options(warn=-1)
+      
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
       f_p_variables_fecha <- eval(parse(text = paste0(
         'parametros$',f_region,'_fechas'
       )))
       f_p_variable_pedido <- eval(parse(text = paste0(
         'parametros$',f_region,'_pedido[1]'
       )))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
       
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
       
-      cat('\n')
-      cat(names(tablas$sub))
-      cat('\n')
-      cat(f_p_variables_fecha)
-      cat('\n')
-      cat(f_p_variable_pedido)
-      cat('\n')
-      cat('\n')
-      cat('\n')
-      cat('\n')
-      cat('\n')
-      cat('\n')
-      cat('\n')
+      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
+
+      options(warn = oldw)
+    
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
+    })
+    
+    output$grafica_entregas_pedidos <- renderPlot({  # output de grafica de entregas por proceso
       
-      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido)
+      oldw <- getOption("warn")
+      options(warn=-1)
       
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
+      f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
+      f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+        
+      g <- funcion_main_grafica_2(
+        p_tabla <- tablas$sub,
+        p_texto_x = 'prceso',
+        p_texto_y = 'cantidad',
+        p_variables_fecha = f_variables_fecha,
+        p_variable_pedido = f_variable_pedido,
+        p_compresion = TRUE,
+        p_variables_cantidades = f_variables_cantidades,
+        p_texto_label = 'litros',
+        p_tipo_fgb = 'suma',
+        p_fecha_benchmark = f_fechas_benchmark
+      )
       
-      # 
-      # oldw <- getOption("warn")
-      # options(warn=-1)
-      # 
-      # g <- tryCatch(funcion_grafica_tiempos_grande(tablas$vis, p_fecha_focal, p_compresion, 'días', 'tablas (con diferentes grados de información',3),error = function(e){return(NULL)})
-      # 
-      # options(warn = oldw)
-      # 
-      # validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
-      # 
+      options(warn = oldw)
       
       validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
+    })
+    
+    output$grafica_entregas_litros <- renderPlot({  # output de grafica de litros por proceso
       
+      oldw <- getOption("warn")
+      options(warn=-1)
+      
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
+      f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
+      f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+      
+      g <- funcion_main_grafica_2(
+        p_tabla = tablas$sub,
+        p_texto_x = 'prceso',
+        p_texto_y = 'cantidad',
+        p_variables_fecha = f_variables_fecha,
+        p_variable_pedido = f_variable_pedido,
+        p_compresion = TRUE,
+        p_variables_cantidades = f_variables_cantidades,
+        p_texto_label = 'entregas',
+        p_tipo_fgb = 'cuantos',
+        p_fecha_benchmark = f_fechas_benchmark
+      )
+      
+      options(warn = oldw)
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
       g
     })
     
@@ -715,6 +961,27 @@ shinyServer(function(input, session, output) {
   
   # outputs visualización 1 -------------------------------------------------------------------------------------------
   
+  output$grafica_entregas <- renderPlot({
+    
+    oldw <- getOption("warn")
+    options(warn=-1)
+    
+    g <- funcion_main_grafica_2(
+      p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07'),
+      p_texto_x = 'prceso',
+      p_texto_y = 'cantidad',
+      p_variables_fecha = parametros$domestico_fechas,
+      p_variable_pedido = parametros$domestico_pedido[1],
+      p_compresion = TRUE,
+      p_variables_cantidades = parametros$domestico_cantidades,
+      p_texto_label = 'entregas',
+      p_tipo_fgb = 'cuantos'
+    )
+    
+    options(warn = oldw)
+    
+    return(g)
+  })
   
   
 

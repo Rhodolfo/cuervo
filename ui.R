@@ -86,8 +86,8 @@ sidebar <- dashboardSidebar(
       dateRangeInput(                     # filtro fecha rango
         'filtro_fecha_rango',
         'Rango de fechas',
-        start = '2019-01-01',
-        end = '2019-12-31',
+        start = '2019-08-01',
+        end = '2019-08-31',
         min = '2019-01-01',
         max = '2019-12-31'
       )
@@ -105,6 +105,10 @@ sidebar <- dashboardSidebar(
                      )
                    )
   ),
+  
+  # (sidebar) visualizacion pedidos abiertos ------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  
   
   # (sidebar) seguimiento de variables -----------------------------------------------------------------------------------------------------------------------------------------------------
   
@@ -190,6 +194,14 @@ body <- dashboardBody(
         tabPanel(
           'tiempo de los procesos',
           plotOutput('output_grafica_tiempo1',height = 700)
+        ),
+        tabPanel(
+          'pedidos',
+          plotOutput('grafica_entregas_pedidos',height = 700)
+        ),
+        tabPanel(
+          'litros',
+          plotOutput('grafica_entregas_litros',height = 700)
         )
       )
     )
