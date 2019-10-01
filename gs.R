@@ -18,3 +18,7 @@ while(e1 == TRUE){
   e1 = FALSE
   tryCatch(nube_cuervo_usuarios <- nube_cuervo %>% gs_read(ws = 'usuarios') ,error = function(e) {e1 <<- TRUE})
 }
+
+
+
+

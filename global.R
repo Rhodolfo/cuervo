@@ -13,7 +13,10 @@ library(dplyr)
 library(RColorBrewer)
 
 
-source('gs.R', encoding = "UTF-8")
+# source('gs.R', encoding = "UTF-8") #mientras vemos qué pedo
+
+nube_cuervo_usuarios <- read_csv('datos/contrasenas.csv')
+
 # source('proceso.R', encoding = "UTF-8")
 # source('grafica_fill_rate.R', encoding = "UTF-8")
 # source('mapa.R', encoding = "UTF-8")
