@@ -29,7 +29,7 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
   return(f_grafica)
 }
 
-
+# funcion_main_grafica_1(p_tabla, p_compresion = TRUE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark)
 
 # (main) función para grafica 2 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
 # p_fecha_benchmark <- parametros$domestico_fechas_benchmark
 
 
-funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE, p_texto_x, p_texto_y, p_variables_fecha, p_variable_pedido, p_variables_cantidades, p_texto_label, p_tipo_fgb,p_variables_benchmark){
+funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE, p_texto_x, p_texto_y, p_variables_fecha, p_variable_pedido, p_variables_cantidades, p_texto_label, p_tipo_fgb,p_fecha_benchmark){
   if(p_compresion){
     f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido, p_variables_cantidades,p_fecha_benchmark)
     f_tabla <- f_resultado$tabla
@@ -63,7 +63,8 @@ funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE, p_texto_x, p_t
   return(f_g)
 }
 
-
+# funcion_main_grafica_2(p_tabla, p_compresion = TRUE, p_texto_x, p_texto_y, p_variables_fecha, p_variable_pedido, p_variables_cantidades, p_texto_label, p_tipo_fgb,p_variables_benchmark)
+  
 
 
 # (secondary - plotting) ------------------------------------------------------------------------------------------------------------------------------------------
@@ -252,7 +253,7 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
     '+ geom_segment(aes(x = fecha_min, xend = fecha_max, y = n, yend = n),color = "darkgrey")'
   )
   funcion2a <- paste0(
-    '+ geom_point(aes(x = ',p_variables_benchmark,', y = n),color = "black",size = ',f_tamano_bolas * 1.7,', alpha = 1,shape = 108)',collapse = ''
+    '+ geom_point(aes(x = ',p_variables_benchmark,', y = n),color = "red",size = ',f_tamano_bolas * 1.5,', alpha = 1,shape = 108)',collapse = ''
   )
   funcion3a <- paste0(
     '+ geom_point(aes(x = ',p_variables_fecha,', y = n),color = "black",size = ',f_tamano_bolas * 1.3,', alpha = 1,shape = 18)',collapse = ''

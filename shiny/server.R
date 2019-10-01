@@ -885,7 +885,7 @@ shinyServer(function(input, session, output) {
       )))
       f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
       
-      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'fechas_benchmark')))
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
       
       g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
 
@@ -905,7 +905,7 @@ shinyServer(function(input, session, output) {
       f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
       f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
       f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
-      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'fechas_benchmark')))
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
         
       g <- funcion_main_grafica_2(
         p_tabla <- tablas$sub,
@@ -917,7 +917,7 @@ shinyServer(function(input, session, output) {
         p_variables_cantidades = f_variables_cantidades,
         p_texto_label = 'litros',
         p_tipo_fgb = 'suma',
-        p_variables_benchmark = f_fechas_benchmark
+        p_fecha_benchmark = f_fechas_benchmark
       )
       
       options(warn = oldw)
@@ -936,9 +936,10 @@ shinyServer(function(input, session, output) {
       f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
       f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
       f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
       
       g <- funcion_main_grafica_2(
-        p_tabla <- tablas$sub,
+        p_tabla = tablas$sub,
         p_texto_x = 'prceso',
         p_texto_y = 'cantidad',
         p_variables_fecha = f_variables_fecha,
@@ -946,7 +947,8 @@ shinyServer(function(input, session, output) {
         p_compresion = TRUE,
         p_variables_cantidades = f_variables_cantidades,
         p_texto_label = 'entregas',
-        p_tipo_fgb = 'cuantos'
+        p_tipo_fgb = 'cuantos',
+        p_fecha_benchmark = f_fechas_benchmark
       )
       
       options(warn = oldw)
