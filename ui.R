@@ -12,6 +12,9 @@ header$children[[2]]$children <-  tags$a(href='wiii',
                                            tags$img(src='logo_arena.png'))
 
 sidebar <- dashboardSidebar(
+  
+  # (sidebar) log in --------------------------------------------------------------------------------------------------------
+  
   conditionalPanel(condition = 'output.esta_logeado',
     sidebarMenu(
       id = 'menu',
@@ -21,7 +24,7 @@ sidebar <- dashboardSidebar(
     )
   ),
   
-  # carga de los datos -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  # (sidebar) carga de los datos -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
   conditionalPanel(condition = 'output.activa_carga',    
     sidebarMenu(
@@ -32,19 +35,25 @@ sidebar <- dashboardSidebar(
     )
   ),
   
+  # (sidebar) visualizaciones ------------------------------------------------------------------------
   
-  conditionalPanel(condition = 'output.activa_visualizacion1',    
+  
+  conditionalPanel(condition = 'output.datos_ok',    
                    sidebarMenu(
-                     id = 'menu_visualizacion1',
+                     id = 'menu_visualizacion',
                      menuItem(
                        'Visualización 1', tabName = 'visualizacion1'
+                     ),
+                     menuItem(
+                       'Vista Ejecutiva', tabName = 'vista_ejecutiva'
                      )
                    )
   ),
   
+  
   # filtros -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  conditionalPanel(condition = 'output.activa_visualizacion1',
+  conditionalPanel(condition = 'input.menu_visualizacion == "vista_ejecutiva" | input.menu_visualizacion == "vista_ejecutiva"',
     sidebarMenu(
       id = 'menu_filtros_1',
       pickerInput(                  # filtro región
@@ -94,9 +103,31 @@ sidebar <- dashboardSidebar(
     )
   ),
   
-  # (sidebar) botón de filtro 1 ------------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  conditionalPanel(condition = 'output.activa_visualizacion1',
+  # filtros abiertos ----------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'input.menu_visualizacion == "vista_ejecutiva"',
+                   pickerInput(                                    # filtro fecha variable
+                     'filtro_abierto',
+                     'Status',
+                     choices = c('abiertos','cerrados'),
+                     selected = 'cerrados',
+                     multiple = FALSE
+                   )
+  ),
+  
+  # filtro ejecutiva --------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'input.menu_visualizacion == "vista_ejecutiva"',
+                   actionButton(
+                     inputId = 've_boton_filtro',
+                     label = 'Filtrar_e'
+                   )
+  ),
+  
+  # filtro 1 ------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  conditionalPanel(condition = 'input.menu_visualizacion == "visualizacion1"',
                    sidebarMenu(
                      id = 'menu_boton_1',
                      actionButton(
@@ -106,11 +137,8 @@ sidebar <- dashboardSidebar(
                    )
   ),
   
-  # (sidebar) visualizacion pedidos abiertos ------------------------------------------------------------------------------------------------------------------------------------------------
   
-  
-  
-  # (sidebar) seguimiento de variables -----------------------------------------------------------------------------------------------------------------------------------------------------
+  #  seguimiento de variables -----------------------------------------------------------------------------------------------------------------------------------------------------
   
   conditionalPanel(condition = 'output.es_administrador & output.',
     sidebarMenu(
@@ -204,7 +232,21 @@ body <- dashboardBody(
           plotOutput('grafica_entregas_litros',height = 700)
         )
       )
+    ),
+  
+  # vista ejecutiva --------------------------------------------------------------------------------------
+  
+  tabItem(
+    'vista_ejecutiva',
+    fluidRow(
+      valueBoxOutput('ve_caja_pedidos'),
+      valueBoxOutput('ve_caja_litros'),
+      valueBoxOutput('ve_caja_otif')
     )
+      
+    
+  )
+  
   )
 )
 

@@ -29,7 +29,7 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
   return(f_grafica)
 }
 
-# funcion_main_grafica_1(p_tabla, p_compresion = TRUE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark)
+ # funcion_main_grafica_1(p_tabla, p_compresion = TRUE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark)
 
 # (main) función para grafica 2 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -116,7 +116,7 @@ funcion_parametros_grafica_2 <- function(p_tabla, p_variables_suma,p_variables_c
 # p_variable_agrupacion <- p_variable_pedido
 
 funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agrupacion,p_variables_cantidades,p_fecha_benchmark){
-  funcion1 <- paste0('f_tabla <- p_tabla %>%group_by(',p_variable_agrupacion,') %>%summarise(')
+  funcion1 <- paste0('f_tabla <- p_tabla %>% dplyr::group_by(',p_variable_agrupacion,') %>% dplyr::summarise(')
   funcion2 <- paste0(p_variables_fecha,'_min = min(', p_variables_fecha, ', na.rm = T)', collapse = ',')
   funcion3 <- ','
   funcion4 <- paste0(p_variables_fecha,'_max = max(', p_variables_fecha, ', na.rm = T)', collapse = ',')
