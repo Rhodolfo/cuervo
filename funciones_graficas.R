@@ -153,6 +153,44 @@ funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agru
   return(resultado)
 }
 
+funcion_compresion_fecha_extremo <- function(p_tabla, p_variables_fecha, p_variable_agrupacion,p_variables_cantidades,p_fecha_benchmark){
+  funcion1 <- paste0('f_tabla <- p_tabla %>% dplyr::group_by(',p_variable_agrupacion,') %>% dplyr::summarise(')
+  funcion2 <- paste0(p_variables_fecha,'_min = min(', p_variables_fecha, ', na.rm = F)', collapse = ',')
+  funcion3 <- ','
+  funcion4 <- paste0(p_variables_fecha,'_max = max(', p_variables_fecha, ', na.rm = F)', collapse = ',')
+  funcion4a <- ','
+  funcion4b <- paste0(p_variables_cantidades,' = sum(', p_variables_cantidades, ', na.rm = T)', collapse = ',')
+  funcion5 <- ','
+  funcion6a <- paste0(p_fecha_benchmark,'_min = min(', p_fecha_benchmark, ', na.rm = F)', collapse = ',')
+  funcion6b <- ','
+  funcion6c <- paste0(p_fecha_benchmark,'_max = max(', p_fecha_benchmark, ', na.rm = F)', collapse = ',')
+  funcion7 <- paste0(') %>% data.frame')
+  eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4,funcion4a,funcion4b,funcion5, funcion6a, funcion6b, funcion6c, funcion7)))
+  for(i in 1:length(f_tabla)){                           # al parecer un infinito en fechas se ve como NA pero para fines prácticos
+    f_tabla[,i][is.infinite(f_tabla[,i])] <- NA          # sigue siendo una fecha con valor infinito
+  }
+  f_fechas1 <- names(f_tabla)[str_detect(names(f_tabla),'min')]
+  f_fechas2 <- names(f_tabla)[str_detect(names(f_tabla),'max')]
+  
+  f_fechas <- NULL
+  
+  for(i in 1:(length(f_fechas1)-1)){
+    f_fechas <- c(f_fechas,f_fechas1[i])
+    f_fechas <- c(f_fechas,f_fechas2[i])
+  }
+  
+  f_fechas_benchmark <- NULL
+  
+  f_fechas_benchmark <- c(f_fechas_benchmark,f_fechas1[length(f_fechas1)])
+  f_fechas_benchmark <- c(f_fechas_benchmark,f_fechas2[length(f_fechas2)])
+  
+  resultado <- list()
+  resultado$tabla <- f_tabla
+  resultado$fechas <- f_fechas
+  resultado$fechas_benchmark <- f_fechas_benchmark
+  return(resultado)
+}
+
 # (secondary - wrangling) ordena variables de fecha ------------------------------------------------------------------------------------------------------------------------------------------------
 
 # p_tabla <- f_tabla

@@ -149,6 +149,7 @@ shinyServer(function(input, session, output) {
       as.character %>%
       head(.,n = 1),
     
+    
     domestico_fecha_inicio = excel_parametros %>% 
       dplyr::filter(!is.na(row_fechas)) %>%
       dplyr::select(row_fechas) %>%
@@ -236,6 +237,27 @@ shinyServer(function(input, session, output) {
     domestico_fechas_benchmark = excel_parametros %>%
       dplyr::filter(!is.na(domestico_fechas_benchmark)) %>%
       dplyr::select(domestico_fechas_benchmark) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    usa_cantidad_benchmark = excel_parametros %>%                    # cantidad benchmarck
+      dplyr::filter(!is.na(usa_cantidad_benchmark)) %>%
+      dplyr::select(usa_cantidad_benchmark) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    row_cantidad_benchmark = excel_parametros %>%
+      dplyr::filter(!is.na(row_cantidad_benchmark)) %>%
+      dplyr::select(row_cantidad_benchmark) %>%
+      unlist %>%
+      as.character %>%
+      tail(.,n = 1),
+    
+    domestico_cantidad_benchmark = excel_parametros %>%
+      dplyr::filter(!is.na(domestico_cantidad_benchmark)) %>%
+      dplyr::select(domestico_cantidad_benchmark) %>%
       unlist %>%
       as.character %>%
       tail(.,n = 1)
@@ -495,7 +517,19 @@ shinyServer(function(input, session, output) {
     progress$set(message = "Cargando Doméstico ", value = 0.7)
     Sys.sleep(1)
     tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark)
-
+    
+    if(str_detect(excel_parametros$domestico_benchmark_formula,'formula')){   # viendo el pedo de una variable custom
+      parametros$domestico_fechas_benchmark <- 'fecha_dom_bench_custom'
+      eval(parse(text = paste0(
+        'tablas$domestico <- tablas$domestico %>%
+        mutate(
+          fecha_dom_bench_custom = ',parametros$domestico_fechas[1],' + 5
+        )'
+      )))
+    }
+    
+    
+    
 
     progress$set(message = "Carga finalizada ", value = 1)
     tablas$ano_mes <- base::intersect(unique(tablas$zsdr141$ano_mes),unique(tablas$zsdr159$ano_mes))
@@ -777,94 +811,67 @@ shinyServer(function(input, session, output) {
     return(g)
   })
   
-  # vista ejecutiva  ----------------------------------------------------------------------------------------------------
+  # vista ejecutiva  -------------------------------------------------------------------------------------------------------------------
+  
+  
+  #
+  
+  # input <- list()
+  # input$input_filtro_zona <- 'Doméstico'
+  # tablas$sub <- tablas$domestico
   
   observeEvent(input$ve_boton_filtro,{
     
+    # variables de region
     
-   
+    f_region <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+
+    # filtro
     
+    tablas$sub <- funcion_filtro_vista_ejecutiva(tablas,f_region,input)
     
-    f_region <- funcion_asigna_region(input$input_filtro_zona)
-    f_filtros <- eval(parse(text = paste0(
-      'parametros$',f_region,'_filtros'
-    )))
-    f_variable_fin <- eval(parse(text = paste0(
-      'parametros$',f_region,'_fecha_fin'
-    )))
+    # filtro cantidades 0
     
-    f_filtros_contenido <- list()
-    for(i in 1:length(f_filtros)){
-      f_filtros_contenido[[i]] <- eval(parse(text = paste0('as.character(input$input_filtro',i,')')))
-      f_filtros_contenido[[i]] <- paste0(f_filtros_contenido[[i]],collapse ='","')
-    }
-    
-    
-    
-    funcion1 <- paste0('tablas$',f_region,' ')
-    funcion2 <- paste0('%>% dplyr::filter(',f_filtros,' %in% c("',f_filtros_contenido,'")) ' ,collapse = ' ')
-    funcion3 <- paste0(
-      '%>% dplyr::filter(!is.na(',input$filtro_fecha_variable,'))'
-    )
-    funcion4 <- paste0(
-      '%>% dplyr::filter(',input$filtro_fecha_variable,' >= "', input$filtro_fecha_rango[1],'") '
-    )
-    funcion5 <- paste0(
-      '%>% dplyr::filter(',input$filtro_fecha_variable,' <= "', input$filtro_fecha_rango[2],'")'
-    )
-    if(input$filtro_abierto == 'abiertos'){
-      funcion6 <- paste0(
-        '%>% dplyr::filter(is.na(',f_variable_fin,'))'
-      )
-    }
-    if(input$filtro_abierto == 'cerrados'){
-      funcion6 <- paste0(
-        '%>% dplyr::filter(!is.na(',f_variable_fin,'))'
-      )
-    }
-    
-    tablas$sub <- eval(parse(text = paste0(funcion1, funcion6, funcion2, funcion3, funcion4, funcion5)))
-    
-    
-    # variables auxiliares
-    
-    f_cantidad <- eval(parse(text = paste0(      # variable cantidad pedido
-      'parametros$',f_region,'_cantidades[1]'
-    )))
-    f_pedido <- eval(parse(text = paste0(       # variable pedido
-      'parametros$',f_region,'_pedido[1]'
-    )))
-    f_fin <- eval(parse(text = paste0(       # variable pedido
-      'parametros$',f_region,'_fecha_fin'
-    )))
-    f_benchmark <- eval(parse(text = paste0(       # variable pedido
-      'parametros$',f_region,'_fechas_benchmark'
+    tablas$sub <- eval(parse(text = paste0(
+      'tablas$sub %>% dplyr::filter(',f_region$variables_cantidades[1],' > 0)'
     )))
     
+    # compresión 
+    
+    f_res <- funcion_compresion_fecha_extremo(tablas$sub, f_region$fechas, f_region$pedido,f_region$variables_cantidades,f_region$fecha_benchmark)
+    f_tabla <- f_res$tabla
+    f_region$fechas <- f_res$fechas
+    f_region$fecha_benchmark <- paste0(f_region$fecha_benchmark,'_max')
+    
+    f_res2 <- funcion_solo_variables_maximo(f_tabla, f_region$fechas)
+    f_tabla <- f_res2$tabla
+    f_region$fechas <- f_res2$variables
+    f_region$fecha_fin <- paste0(f_region$fecha_fin,'_max')
     
     
+    # variables extra en la tabla de subconjunto
     
+    f_tabla <- funcion_variables_tabla_subconjunto_vista_ejecutiva(f_tabla,f_region)
     
-    eval(parse(text = paste0(
-      'tablas$sub <- tablas$sub %>%
-        mutate(
-          otif = (',f_fin,' <= ',f_benchmark,')
-        )'
-    )))
-    eval(parse(text = paste0(
-      'tablas$sub <- tablas$sub %>%
-      mutate(
-      fill_rate = (',f_fin,' <= ',f_benchmark,')
-      )'
-    )))
+    # variables para graficar
     
+    f_extras <- funcion_variables_extra_vista_ejecutiva(tablas$sub,f_tabla,input,f_region)
     
-    
+    # cajas
     
     output$ve_caja_pedidos <- renderValueBox({     # caja pedidos
       valueBox(
-        eval(parse(text = paste0('length(unique(tablas$sub$',f_pedido,', na.rm = T))'))),
+        nrow(f_tabla),
         'pedidos',
+        icon = icon("credit-card"),
+        color = 'blue'
+      )
+    })
+    
+    output$ve_caja_entregas <- renderValueBox({     # caja entregas
+      valueBox(
+        nrow(tablas$sub),
+        'entregas',
         icon = icon("credit-card"),
         color = 'blue'
       )
@@ -872,47 +879,34 @@ shinyServer(function(input, session, output) {
     
     output$ve_caja_litros <- renderValueBox({     # caja litros
       valueBox(
-        eval(parse(text = paste0('sum(tablas$sub$',f_cantidad,', na.rm = T)'))),
+        eval(parse(text = paste0('sum(tablas$sub$',f_region$cantidad,', na.rm = T)'))),
         'litros',
         icon = icon("fire",lib = 'font-awesome'),
         color = 'blue'
       )
     })
     
-    f_otif <- 'no aplica'
-    f_otif_color <- 'blue'
-    f_otif_icono <- 'kiwi-bird'
-    
-    if(input$filtro_abierto == 'cerrados'){
-      f_otif <- round(sum(tablas$sub$otif)/nrow(tablas$sub)*100,2)
-      
-      f_otif_color <- 'red'
-      if(f_otif > 75)f_otif_color <- 'yellow'
-      if(f_otif > 85)f_otif_color <- 'green'
-      
-      f_otif_icono <- 'frown'
-      if(f_otif > 75)f_otif_icono <- 'grin-beam-sweat'
-      if(f_otif > 85)f_otif_icono <- 'grin'
-      
-      f_otif <- paste0(f_otif,'%')
-    }
-    
-    
-    
-    
-    output$ve_caja_otif <- renderValueBox({     # caja OTIF
+    output$ve_caja_beforetime <- renderValueBox({     # caja BT
       valueBox(
-        f_otif,
-        'otif',
-        icon = icon(f_otif_icono,lib = 'font-awesome'),
-        color = f_otif_color
+        f_extras$beforetime,
+        'on time',
+        icon = icon(f_extras$beforetime_icono,lib = 'font-awesome'),
+        color = f_extras$beforetime_color
+      )
+    })
+    
+    output$ve_caja_fillrate <- renderValueBox({     # caja BT
+      valueBox(
+        f_extras$fillrate,
+        'fillrate',
+        icon = icon(f_extras$fillrate_icono,lib = 'font-awesome'),
+        color = f_extras$fillrate_color
       )
     })
     
   })
 
-  # vista ejecutiva cajas -------------------------------------------------------------------------------------
-  
+
   
   
   

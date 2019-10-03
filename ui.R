@@ -106,15 +106,15 @@ sidebar <- dashboardSidebar(
   
   # filtros abiertos ----------------------------------------------------------------------------------------------------
   
-  conditionalPanel(condition = 'input.menu_visualizacion == "vista_ejecutiva"',
-                   pickerInput(                                    # filtro fecha variable
-                     'filtro_abierto',
-                     'Status',
-                     choices = c('abiertos','cerrados'),
-                     selected = 'cerrados',
-                     multiple = FALSE
-                   )
-  ),
+  # conditionalPanel(condition = 'input.menu_visualizacion == "vista_ejecutiva"',
+  #                  pickerInput(                                    # filtro fecha variable
+  #                    'filtro_abierto',
+  #                    'Status',
+  #                    choices = c('abiertos','cerrados'),
+  #                    selected = 'cerrados',
+  #                    multiple = FALSE
+  #                  )
+  # ),
   
   # filtro ejecutiva --------------------------------------------------------------------------------------
   
@@ -240,8 +240,10 @@ body <- dashboardBody(
     'vista_ejecutiva',
     fluidRow(
       valueBoxOutput('ve_caja_pedidos'),
+      valueBoxOutput('ve_caja_entregas'),
       valueBoxOutput('ve_caja_litros'),
-      valueBoxOutput('ve_caja_otif')
+      valueBoxOutput('ve_caja_beforetime'),
+      valueBoxOutput('ve_caja_fillrate')
     )
       
     
