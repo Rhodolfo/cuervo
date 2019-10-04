@@ -814,8 +814,6 @@ shinyServer(function(input, session, output) {
   # vista ejecutiva  -------------------------------------------------------------------------------------------------------------------
   
   
-  #
-  
   # input <- list()
   # input$input_filtro_zona <- 'Doméstico'
   # tablas$sub <- tablas$domestico
@@ -824,7 +822,7 @@ shinyServer(function(input, session, output) {
     
     # variables de region
     
-    f_region <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+    f_region_original <- f_region <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
 
     # filtro
     
@@ -872,16 +870,16 @@ shinyServer(function(input, session, output) {
       valueBox(
         nrow(tablas$sub),
         'entregas',
-        icon = icon("credit-card"),
+        icon = icon("bicycle",lib = 'font-awesome'),
         color = 'blue'
       )
     })
-    
-    output$ve_caja_litros <- renderValueBox({     # caja litros
+
+    output$ve_caja_cajas <- renderValueBox({     # caja cajas
       valueBox(
-        eval(parse(text = paste0('sum(tablas$sub$',f_region$cantidad,', na.rm = T)'))),
-        'litros',
-        icon = icon("fire",lib = 'font-awesome'),
+        paste0(eval(parse(text = paste0('round(sum(tablas$sub$',f_region$cantidad,', na.rm = T)/1000,1)'))),'k'),
+        'cajas 9L',
+        icon = icon("archive",lib = 'font-awesome'),
         color = 'blue'
       )
     })
@@ -902,6 +900,66 @@ shinyServer(function(input, session, output) {
         icon = icon(f_extras$fillrate_icono,lib = 'font-awesome'),
         color = f_extras$fillrate_color
       )
+    })
+    
+    output$grafica_tiempo_procesos <- renderPlot({
+      funcion_revisar_fechas_coherentes(tablas$sub,f_region_original)
+    })
+    
+    output$grafica_entregas_desagregadas <- renderPlot({    # gráfica de tiempos desagregadeos
+      
+      oldw <- getOption("warn")
+      options(warn=-1)
+      
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
+      f_p_variables_fecha <- eval(parse(text = paste0(
+        'parametros$',f_region,'_fechas'
+      )))
+      f_p_variable_pedido <- eval(parse(text = paste0(
+        'parametros$',f_region,'_pedido[1]'
+      )))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+      
+      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
+      
+      options(warn = oldw)
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
+    })
+    
+    output$grafica_litros <- renderPlot({  # output de grafica de entregas por proceso
+      
+      oldw <- getOption("warn")
+      options(warn=-1)
+      
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
+      f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
+      f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+      
+      g <- funcion_main_grafica_2(
+        p_tabla <- tablas$sub,
+        p_texto_x = 'prceso',
+        p_texto_y = 'volumen',
+        p_variables_fecha = f_variables_fecha,
+        p_variable_pedido = f_variable_pedido,
+        p_compresion = TRUE,
+        p_variables_cantidades = f_variables_cantidades,
+        p_texto_label = 'litros',
+        p_tipo_fgb = 'suma',
+        p_fecha_benchmark = f_fechas_benchmark
+      )
+      
+      options(warn = oldw)
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
     })
     
   })

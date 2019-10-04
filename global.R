@@ -11,6 +11,7 @@ library(tidyr)
 library(plyr)
 library(dplyr)
 library(RColorBrewer)
+library(reshape2)
 
 
 # source('gs.R', encoding = "UTF-8") #mientras vemos qué pedo

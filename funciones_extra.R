@@ -174,33 +174,9 @@ funcion_variables_extra_vista_ejecutiva <- function(p_tabla,p_tabla_comprimida, 
       }
       f_fillrate <- paste0(round(f_fillrate*100,1),'%')
       
-      
     }
-    
-    
-    
   }
-  
-  
-  # f_otif <- 'no aplica'
-  # f_otif_color <- 'blue'
-  # f_otif_icono <- 'kiwi-bird'
-  # 
-  
-  # 
-  # if(input$filtro_abierto == 'cerrados'){
-  #   f_otif <- round(sum(p_tabla$otif)/nrow(p_tabla)*100,2)
-  #   
-  #   f_otif_color <- 'red'
-  #   if(f_otif > 75)f_otif_color <- 'yellow'
-  #   if(f_otif > 85)f_otif_color <- 'green'
-  #   
-  #   f_otif_icono <- 'frown'
-  #   if(f_otif > 75)f_otif_icono <- 'grin-beam-sweat'
-  #   if(f_otif > 85)f_otif_icono <- 'grin'
-  #   
-  #   f_otif <- paste0(f_otif,'%')
-  # }
+
   
   f_resultado <- list()
   f_resultado$beforetime <- f_beforetime

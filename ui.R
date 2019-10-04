@@ -204,10 +204,13 @@ body <- dashboardBody(
           textOutput('o_texto_carga_row'),
           textOutput('o_texto_carga_domestico')
         ),
+      conditionalPanel('input.boton_carga > 0',
         actionButton(
           inputId = 'boton_siguiente_carga',
           label = 'Siguiente'
         )
+      )
+        
     ),
     
   # (body) visualización 1  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -239,11 +242,31 @@ body <- dashboardBody(
   tabItem(
     'vista_ejecutiva',
     fluidRow(
-      valueBoxOutput('ve_caja_pedidos'),
-      valueBoxOutput('ve_caja_entregas'),
-      valueBoxOutput('ve_caja_litros'),
-      valueBoxOutput('ve_caja_beforetime'),
-      valueBoxOutput('ve_caja_fillrate')
+      valueBoxOutput('ve_caja_pedidos',width = 2),
+      valueBoxOutput('ve_caja_entregas',width = 2),
+      valueBoxOutput('ve_caja_cajas',width = 2),
+      valueBoxOutput('ve_caja_beforetime',width = 2),
+      valueBoxOutput('ve_caja_fillrate',width = 2)
+    ),
+    fluidRow(
+      tabBox(
+        title = 'análisis de tiempos',
+        id = 'analisis_vista_ejecutiva',
+        width = 12,
+        height = 800,
+        tabPanel(
+          'tiempos',
+          plotOutput('grafica_tiempo_procesos')
+        ),
+        tabPanel(
+          'pedidos',
+          plotOutput('grafica_entregas_desagregadas',height = 750)
+        ),
+        tabPanel(
+          'litros',
+          plotOutput('grafica_litros')
+        )
+      )
     )
       
     

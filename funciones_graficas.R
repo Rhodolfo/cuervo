@@ -256,7 +256,6 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   
   f_tamano_bolas <- 14/(log(nrow(p_tabla)))
   
-  
   f_vector_fechas <- paste0(p_variables_fecha,collapse = ',')
   
   f_colores <- rainbow(length(p_variables_fecha))
@@ -321,6 +320,48 @@ eval(parse(text = paste0(funcion0, funcion1, funcion2a, funcion3a, funcion3b, fu
 return(g)
   
 }
+
+# input <- list()
+# input$input_filtro_zona <- 'Doméstico'
+# tablas$sub <- tablas$domestico
+
+# p_region <- f_region
+# p_tabla <- tablas$sub
+
+
+funcion_revisar_fechas_coherentes <- function(p_tabla,p_region){
+  
+
+    
+    funcion1 <- paste0(
+      'f_resumen <- data.frame('
+    )
+    funcion2 <- paste0(
+      p_region$fechas[2:length(p_region$fechas)], ' = as.numeric(p_tabla$',p_region$fechas[2:length(p_region$fechas)], ' - p_tabla$',p_region$fechas[1],')',collapse = ','
+    )
+    funcion3 <- ')'
+    
+    # funcion4 <- 'geom_text(',,''
+    
+    
+    eval(parse(text = paste0(funcion1,funcion2,funcion3)))
+    
+    f_resumen_m <- melt(f_resumen)
+    
+    
+    g <- ggplot(f_resumen_m, aes(value, color = variable, fill = variable)) + 
+      geom_density(adjust = 2, alpha = .5) + 
+      xlim(0,50)
+    
+    return(g)
+    
+    
+    
+  
+  
+}
+
+
 
 
 ################
