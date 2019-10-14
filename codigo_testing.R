@@ -33,7 +33,10 @@ for(i in 1:nrow(excel_parametros)){
   }
 }
 
+
 parametros <- list()
+
+incluir_tabla_domestico = excel_incluir_tabla_domestico
 
 parametros$domestico_fechas = excel_parametros %>%        #fechas
   dplyr::filter(!is.na(domestico_fechas)) %>%

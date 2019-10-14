@@ -45,6 +45,15 @@ shinyServer(function(input, session, output) {
   
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
     
+    domestico_procesos_tabla = excel_domestico_procesos_tabla,        # tablas de procesos
+    domestico_procesos_incluir = excel_domestico_procesos_incluir,
+    
+    usa_procesos_tabla = excel_usa_procesos_tabla,
+    usa_procesos_incluir = excel_usa_procesos_incluir,
+    
+    row_procesos_tabla = excel_row_procesos_tabla,
+    row_procesos_incluir = excel_row_procesos_incluir,
+    
     domestico_fechas = excel_parametros %>%        #fechas
       dplyr::filter(!is.na(domestico_fechas)) %>%
       dplyr::select(domestico_fechas) %>%
@@ -516,8 +525,14 @@ shinyServer(function(input, session, output) {
 
     progress$set(message = "Cargando Doméstico ", value = 0.7)
     Sys.sleep(1)
-    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark)
     
+    if(parametros$incluir_tabla_domestico == FALSE){
+      tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark)
+    }else{
+      tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$)
+      
+    }
+      
     if(str_detect(excel_parametros$domestico_benchmark_formula,'formula')){   # viendo el pedo de una variable custom
       parametros$domestico_fechas_benchmark <- 'fecha_dom_bench_custom'
       eval(parse(text = paste0(
@@ -581,8 +596,8 @@ shinyServer(function(input, session, output) {
       session,
       inputId = 'input_filtro1',
       label = f_variable,
-      choices = f_choices,
-      selected = f_choices
+      choices = f_choices[order(f_choices)],
+      selected = f_choices[order(f_choices)]
     )
   })
   
@@ -611,8 +626,8 @@ shinyServer(function(input, session, output) {
         session,
         inputId = 'input_filtro2',
         label = f_variable_2,
-        choices = f_choices,
-        selected = f_choices
+        choices = f_choices[order(f_choices)],
+        selected = f_choices[order(f_choices)]
       )
     }
   })
