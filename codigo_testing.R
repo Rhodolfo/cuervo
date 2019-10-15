@@ -33,10 +33,40 @@ for(i in 1:nrow(excel_parametros)){
   }
 }
 
+# lectura de las matrices de procesos y flag para ver si se incluyen o no --------------------------------------------------------
+
+excel_domestico_procesos_tabla <- read_excel('datos/setup/matriz_procesos.xlsx',sheet = 'domestico') %>% data.frame
+excel_domestico_procesos_incluir <- FALSE
+if(excel_domestico_procesos_tabla$activar[1] == 'si'){
+  excel_domestico_procesos_incluir <- TRUE
+}
+
+excel_usa_procesos_tabla <- read_excel('datos/setup/matriz_procesos.xlsx',sheet = 'usa') %>% data.frame
+excel_usa_procesos_incluir <- FALSE
+if(excel_usa_procesos_tabla$activar[1] == 'si'){
+  excel_usadomestico_procesos_incluir <- TRUE
+}
+
+excel_row_procesos_tabla <- read_excel('datos/setup/matriz_procesos.xlsx',sheet = 'row') %>% data.frame
+excel_row_procesos_incluir <- FALSE
+if(excel_row_procesos_tabla$activar[1] == 'si'){
+  excel_row_procesos_incluir <- TRUE
+}
+
+
+
+
 
 parametros <- list()
 
-incluir_tabla_domestico = excel_incluir_tabla_domestico
+parametros$domestico_procesos_tabla = excel_domestico_procesos_tabla        # tablas de procesos
+parametros$domestico_procesos_incluir = excel_domestico_procesos_incluir
+
+parametros$usa_procesos_tabla = excel_usa_procesos_tabla
+parametros$usa_procesos_incluir = excel_usa_procesos_incluir
+
+parametros$row_procesos_tabla = excel_row_procesos_tabla
+parametros$row_procesos_incluir = excel_row_procesos_incluir
 
 parametros$domestico_fechas = excel_parametros %>%        #fechas
   dplyr::filter(!is.na(domestico_fechas)) %>%
@@ -265,7 +295,7 @@ tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,
   dplyr::filter(Zona_de_ventas != 'ninguno') %>%
   dplyr::filter(Nombre_Región != 'USA')
 
-tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark)
+tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir)
 
 
 if(str_detect(excel_parametros$domestico_benchmark_formula[1],'formula')){   # viendo el pedo de una variable custom

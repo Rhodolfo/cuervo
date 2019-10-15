@@ -229,7 +229,7 @@ shinyServer(function(input, session, output) {
       as.character %>%
       tail(.,n = 1),
     
-    usa_fechas_benchmark = excel_parametros %>%
+    usa_fechas_benchmark = excel_parametros %>%                # fechas benchmark
       dplyr::filter(!is.na(usa_fechas_benchmark)) %>%
       dplyr::select(usa_fechas_benchmark) %>%
       unlist %>%
@@ -526,12 +526,9 @@ shinyServer(function(input, session, output) {
     progress$set(message = "Cargando Doméstico ", value = 0.7)
     Sys.sleep(1)
     
-    if(parametros$incluir_tabla_domestico == FALSE){
-      tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark)
-    }else{
-      tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$)
-      
-    }
+    
+    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir)
+    
       
     if(str_detect(excel_parametros$domestico_benchmark_formula,'formula')){   # viendo el pedo de una variable custom
       parametros$domestico_fechas_benchmark <- 'fecha_dom_bench_custom'
@@ -920,6 +917,75 @@ shinyServer(function(input, session, output) {
     output$grafica_tiempo_procesos <- renderPlot({
       funcion_revisar_fechas_coherentes(tablas$sub,f_region_original)
     })
+    
+    output$grafica_pedidos_cerrados_1 <- renderPlot({   # grafica pedidos cerrados 1
+      oldw <- getOption("warn")
+      options(warn=-1)
+      
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
+      f_p_variables_fecha <- eval(parse(text = paste0(
+        'parametros$',f_region,'_fechas'
+      )))
+      f_p_variable_pedido <- eval(parse(text = paste0(
+        'parametros$',f_region,'_pedido[1]'
+      )))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+      
+      f_fecha_fin <- eval(parse(text = paste0('parametros$',f_region,'_fecha_fin')))
+      
+      
+      tabla_cerrados <- eval(parse(text = paste0(
+        'tablas$sub %>%
+          dplyr::filter(!is.na(',f_fecha_fin,'))'
+      )))
+
+      
+      g <- funcion_main_grafica_1(tabla_cerrados, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
+      
+      options(warn = oldw)
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
+      
+    })
+    
+    output$grafica_pedidos_abiertos_1 <- renderPlot({   # grafica pedidos abiertos 1
+      oldw <- getOption("warn")
+      options(warn=-1)
+      
+      g <- NULL
+      f_region <- funcion_asigna_region(input$input_filtro_zona)
+      f_p_variables_fecha <- eval(parse(text = paste0(
+        'parametros$',f_region,'_fechas'
+      )))
+      f_p_variable_pedido <- eval(parse(text = paste0(
+        'parametros$',f_region,'_pedido[1]'
+      )))
+      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      
+      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+      
+      f_fecha_fin <- eval(parse(text = paste0('parametros$',f_region,'_fecha_fin')))
+      
+      
+      tabla_abiertos <- eval(parse(text = paste0(
+        'tablas$sub %>%
+          dplyr::filter(is.na(',f_fecha_fin,'))'
+      )))
+      
+      
+      g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
+      
+      options(warn = oldw)
+      
+      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      g
+      
+    })
+    
     
     output$grafica_entregas_desagregadas <- renderPlot({    # gráfica de tiempos desagregadeos
       

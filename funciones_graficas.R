@@ -10,8 +10,9 @@
 # p_compresion <- TRUE
 # p_variables_cantidades <- parametros$domestico_cantidades
 # p_fecha_benchmark <- parametros$domestico_fechas_benchmark
+# p_procesos <- parametros$domestico_procesos_tabla$procesos
 
-funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark){
+funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL){
   if(p_compresion){
     f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido,p_variables_cantidades,p_fecha_benchmark)
     f_tabla <- f_resultado$tabla
@@ -250,7 +251,7 @@ funcion_solo_variables_maximo <- function(p_tabla, p_variables){
 # p_variables_fecha <- f_variables_fecha
 # p_variables_benchmark <- f_variables_benchmark
 
-funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variables_benchmark){
+funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variables_benchmark, p_procesos = NULL){
   
   p_tabla$n <- 1:nrow(p_tabla)
   
@@ -308,7 +309,7 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
     '+ guides(colour = guide_legend(override.aes = list(size=5, alpha = 1)))'
   )
   funcion7 <- paste0(
-    '+ scale_x_date(date_labels="%y %b %d",date_breaks  ="1 week")'
+    '+ scale_x_date(date_labels="%y %b %d",date_breaks  ="5 days")'
   )
   funcion8 <- paste0(
     '+ theme(axis.text.x = element_text(angle = 90, hjust = 1))'

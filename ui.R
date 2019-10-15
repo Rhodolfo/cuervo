@@ -255,12 +255,20 @@ body <- dashboardBody(
         width = 12,
         height = 800,
         tabPanel(
-          'tiempos',
-          plotOutput('grafica_tiempo_procesos')
-        ),
-        tabPanel(
           'pedidos',
           plotOutput('grafica_entregas_desagregadas',height = 750)
+        ),
+        tabPanel(
+          'pedidos cerrados',
+          plotOutput('grafica_pedidos_cerrados_1',height = 750)
+        ),
+        tabPanel(
+          'pedidos abiertos',
+          plotOutput('grafica_pedidos_abiertos_1',height = 750)
+        ),
+        tabPanel(
+          'tiempos',
+          plotOutput('grafica_tiempo_procesos')
         ),
         tabPanel(
           'litros',

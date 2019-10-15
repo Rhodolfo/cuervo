@@ -22,22 +22,24 @@
 #   dplyr::select(usa_pedido) %>%
 #   unlist
 
-funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark){
-  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido,p_fecha_benchmark)
+funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL,p_procesos = NULL){
+  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido,p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla,p_procesos)
 }
 
 # (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
 
 
-# p_carpeta <- parametros$usa_carpeta
-# p_fechas <- parametros$usa_fechas
-# p_cantidades <- parametros$usa_cantidades
-# p_filtros <- parametros$usa_filtros
-# p_pedido <- parametros$usa_pedido
+# p_carpeta <- parametros$domestico_carpeta
+# p_fechas <- parametros$domestico_fechas
+# p_cantidades <- parametros$domestico_cantidades
+# p_filtros <- parametros$domestico_filtros
+# p_pedido <- parametros$domestico_pedido
+# p_procesos_incluir <- parametros$domestico_procesos_incluir
+# p_procesos_tabla <- parametros$domestico_procesos_tabla
+# p_procesos <- NULL
+# p_fecha_benchmark <- parametros$domestico_fechas_benchmark
 
-
-
-funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark){
+funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla,p_procesos){
   f_archivos <- list.files(paste0('datos/',p_carpeta))
   f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
   
@@ -52,6 +54,8 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
     setNames(.,stringr::str_replace_all(names(.),' ','_'))
   
 
+  
+  
 
   for(i in 1:length(p_filtros)){
     eval(parse(text = paste0(
@@ -64,15 +68,40 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
     )))
   }  
   
-  f_lista <- f_lista %>%
-    mutate_at(.vars = p_fechas,.funs = as.Date) %>%
-    mutate_at(.vars = p_fecha_benchmark,.funs = as.Date) %>%
-    mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
-    mutate_at(.vars = p_pedido,.funs = as.character) %>%
-    mutate_at(.vars = p_filtros,.funs = as.factor) 
-  f_resultado <- f_lista %>%
-    dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros,p_fecha_benchmark))
+  
+  if(!p_procesos_incluir){
+    f_lista <- f_lista %>%
+      mutate_at(.vars = p_fechas,.funs = as.Date) %>%
+      mutate_at(.vars = p_fecha_benchmark,.funs = as.Date) %>%
+      mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
+      mutate_at(.vars = p_pedido,.funs = as.character) %>%
+      mutate_at(.vars = p_filtros,.funs = as.factor) 
+    f_resultado <- f_lista %>%
+      dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros,p_fecha_benchmark))
+  }else{
+    p_procesos <- p_procesos_tabla$procesos
+    
+    f_lista <- f_lista %>%
+      mutate_at(.vars = p_fechas,.funs = as.Date) %>%
+      mutate_at(.vars = p_fecha_benchmark,.funs = as.Date) %>%
+      mutate_at(.vars = p_cantidades,.funs = function(a){as.numeric(as.character(a))}) %>%
+      mutate_at(.vars = p_pedido,.funs = as.character) %>%
+      mutate_at(.vars = p_filtros,.funs = as.factor) %>%
+      mutate_at(.vars = p_procesos,.funs = funcion_booleano)
+    f_resultado <- f_lista %>%
+      dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros,p_fecha_benchmark,p_procesos))
+  }
+  
+  
   return(f_resultado)
+}
+
+
+# (terciary) funcion para regresar booleanos checando existencia de las variables ----------------
+
+funcion_booleano <- function(a){
+  a[is.na(a)] <- 0
+  return(a)
 }
 
 # (terciary) función de sustitución de datos perdidos------------

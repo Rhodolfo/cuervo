@@ -93,12 +93,6 @@ funcion_filtro_vista_ejecutiva <- function(tablas,p_resultado,input){
   # }
   f_resultado <- eval(parse(text = paste0(funcion1, funcion2, funcion3, funcion4, funcion5)))
   
-  
-  
-  
-  
-  
-  
   return(f_resultado)
 }
 
