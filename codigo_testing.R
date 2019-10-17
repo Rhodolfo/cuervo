@@ -10,7 +10,7 @@ library(formattable)
 library(tidyr)
 library(plyr)
 library(dplyr)
-library(RColorBrewer)
+library(RColorBrewer) 
 
 
 # source('gs.R', encoding = "UTF-8") #mientras vemos qué pedo
@@ -58,6 +58,12 @@ if(excel_row_procesos_tabla$activar[1] == 'si'){
 
 
 parametros <- list()
+
+parametros$fecha_actual = as.Date('2019-08-03')   # fecha
+
+parametros$status_morado = -1
+parametros$status_rojo = 0
+parametros$status_amarillo = 2
 
 parametros$domestico_procesos_tabla = excel_domestico_procesos_tabla        # tablas de procesos
 parametros$domestico_procesos_incluir = excel_domestico_procesos_incluir

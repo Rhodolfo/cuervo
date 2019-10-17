@@ -2,7 +2,7 @@
 
 # (main) función para grafica 1 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07')
+# p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-03')
 # p_texto_x <- 'x'
 # p_texto_y <- 'y'
 # p_variables_fecha <- parametros$domestico_fechas
@@ -11,8 +11,12 @@
 # p_variables_cantidades <- parametros$domestico_cantidades
 # p_fecha_benchmark <- parametros$domestico_fechas_benchmark
 # p_procesos <- parametros$domestico_procesos_tabla$procesos
+# p_procesos_incluir = FALSE
+# p_colorear = TRUE
+# p_fecha_actual = parametros$fecha_actual
+# p_parametros = parametros
 
-funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL){
+funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL,p_colorear = FALSE, p_fecha_actual = p_parametros$fecha_actual,p_parametros){
   if(p_compresion){
     f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido,p_variables_cantidades,p_fecha_benchmark)
     f_tabla <- f_resultado$tabla
@@ -26,7 +30,12 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
   f_resultado <- funcion_ordena_fechas(f_tabla,f_variables_fecha)
   f_tabla <- f_resultado$tabla
   f_variables_fecha <- f_resultado$fechas
-  f_grafica <- funcion_grafica_pedidos_puntos(f_tabla, f_variables_fecha,f_variables_benchmark)
+  
+  #
+  
+  #
+  
+  f_grafica <- funcion_grafica_pedidos_puntos(f_tabla, f_variables_fecha,f_variables_benchmark,NULL,p_colorear,p_fecha_actual,p_parametros)
   return(f_grafica)
 }
 
@@ -250,10 +259,14 @@ funcion_solo_variables_maximo <- function(p_tabla, p_variables){
 # p_variable_wrap <- p_variable_pedido
 # p_variables_fecha <- f_variables_fecha
 # p_variables_benchmark <- f_variables_benchmark
+# p_colorear <- TRUE
+# p_fecha_actual <- parametros$fecha_actual
 
-funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variables_benchmark, p_procesos = NULL){
+funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variables_benchmark, p_procesos = NULL, p_colorear, p_fecha_actual,p_parametros){
   
-  p_tabla$n <- 1:nrow(p_tabla)
+  names(p_tabla)[1] <- 'pedido'
+  
+ 
   
   f_tamano_bolas <- 14/(log(nrow(p_tabla)))
   
@@ -275,6 +288,8 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   # )'
   # )))
   
+  # p_tabla <- tail(p_tabla)
+  
 
   f_tabla_leyenda <- data.frame(
     variables = factor(p_variables_fecha,levels = p_variables_fecha),
@@ -282,14 +297,43 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
     x = max(p_tabla$fecha_max, na.rm = T),
     y = 1
   )
+  
+  
+  #
+  
+
+  if(p_colorear == TRUE){
+    p_tabla <- eval(parse(text = paste0(
+      'p_tabla %>%
+      mutate(
+      color_valor = as.numeric(',p_variables_benchmark,' - p_fecha_actual),
+      color = cut(
+      color_valor,
+      breaks = c(-Inf,',p_parametros$status_morado,',',p_parametros$status_rojo,',',p_parametros$status_amarillo,',Inf),
+      labels = c("purple","red","yellow","green")
+      )
+      ) %>%
+      arrange(color_valor)'
+    )))
+  }
+  
+  
+  p_tabla$n <- 1:nrow(p_tabla)
 
   
   funcion0 <- paste0(
     'g <- ggplot(p_tabla)'
   )
-  funcion1 <- paste0(
-    '+ geom_segment(aes(x = fecha_min, xend = fecha_max, y = n, yend = n),color = "darkgrey")'
-  )
+  if(!p_colorear){
+    funcion1 <- paste0(
+      '+ geom_segment(aes(x = fecha_min, xend = fecha_max, y = n, yend = n),color = "darkgrey")'
+    )
+  }else{
+    funcion1 <- paste0(
+      '+ geom_segment(aes(x = fecha_min, xend = fecha_max, y = n, yend = n),color = p_tabla$color)'
+    )
+  }
+  
   funcion2a <- paste0(
     '+ geom_point(aes(x = ',p_variables_benchmark,', y = n),color = "red",size = ',f_tamano_bolas * 1.5,', alpha = 1,shape = 108)',collapse = ''
   )
@@ -302,6 +346,18 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   funcion4 <- paste0(
     '+ geom_point(data = f_tabla_leyenda, aes(x = x, y = y, color = variables), size = .1)'
   )
+  
+  if(nrow(p_tabla)<=40){
+    funcion4b <- paste0(
+      '+ geom_text(aes(x = fecha_min-3, y = n, label = pedido),size = ',f_tamano_bolas * 1,')'
+    )
+  }else{
+    funcion4b <- ''
+  }
+  
+  
+  
+    
   funcion5 <- paste0(
     '+ scale_color_manual(labels = c("',paste0(p_variables_fecha,collapse = '","'),'"),values = c("',paste0(f_colores,collapse = '","'),'"))'
   )
@@ -315,24 +371,37 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
     '+ theme(axis.text.x = element_text(angle = 90, hjust = 1))'
   )
   
+  if(!p_colorear){
+    funcion9 = ''
+  }else{
+    funcion9 <- paste0(
+      '+ ggtitle("día de comparación:',p_fecha_actual,'")'
+    )
+  }
+  
+  
+  
 
-eval(parse(text = paste0(funcion0, funcion1, funcion2a, funcion3a, funcion3b, funcion4,funcion5, funcion6, funcion7, funcion8)))  
+eval(parse(text = paste0(funcion0, funcion1, funcion2a, funcion3a, funcion3b, funcion4, funcion4b, funcion5, funcion6, funcion7, funcion8, funcion9)))  
 
 return(g)
   
 }
 
+# funcion grafica distribuciones ----------------------------------------------------------------------------------------------
+
 # input <- list()
 # input$input_filtro_zona <- 'Doméstico'
 # tablas$sub <- tablas$domestico
-
 # p_region <- f_region
-# p_tabla <- tablas$sub
+# p_tabla <- tablas$usa
 
 
 funcion_revisar_fechas_coherentes <- function(p_tabla,p_region){
   
-
+    
+  
+  
     
     funcion1 <- paste0(
       'f_resumen <- data.frame('
@@ -341,17 +410,31 @@ funcion_revisar_fechas_coherentes <- function(p_tabla,p_region){
       p_region$fechas[2:length(p_region$fechas)], ' = as.numeric(p_tabla$',p_region$fechas[2:length(p_region$fechas)], ' - p_tabla$',p_region$fechas[1],')',collapse = ','
     )
     funcion3 <- ')'
-    
-    # funcion4 <- 'geom_text(',,''
-    
-    
     eval(parse(text = paste0(funcion1,funcion2,funcion3)))
+    
+    
+    
+    
+    cuantiles <- list()
+    for(i in 1:length(f_resumen)){
+      cuantiles[[i]] <- quantile(f_resumen[,i],na.rm=T)[c(2,4)]
+    }
+    f_tabla_cuantiles <- data.frame(matrix(unlist(cuantiles),ncol = 2, byrow = TRUE))
+    f_tabla_cuantiles$variable <- names(f_resumen)
+    f_tabla_cuantiles$media <- f_resumen %>%
+      summarise_all(.,.funs=mean,na.rm = T) %>% unlist
+    f_tabla_cuantiles$y <- seq(.35,.2,length.out = length(f_resumen))
+    f_tabla_cuantiles$y2 <- seq(.35,.2,length.out = length(f_resumen))
+    
     
     f_resumen_m <- melt(f_resumen)
     
     
     g <- ggplot(f_resumen_m, aes(value, color = variable, fill = variable)) + 
       geom_density(adjust = 2, alpha = .5) + 
+      geom_text(data = f_tabla_cuantiles,aes(x = 50*.25, y = y, label = variable),size = 8) + 
+      geom_text(data = f_tabla_cuantiles,aes(x = 50*.5, y = y, label = paste0('media = ',round(media,1),' días')),size = 8) + 
+      geom_text(data = f_tabla_cuantiles,aes(x = 50*.75, y = y, label = paste0('50% entre = ',round(X1,1),' y ',round(X2,1),' días')),size = 8) + 
       xlim(0,50)
     
     return(g)

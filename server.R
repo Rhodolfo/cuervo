@@ -44,6 +44,13 @@ shinyServer(function(input, session, output) {
   )
   
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
+  
+    
+    fecha_actual = as.Date('2019-08-17'),   # fecha
+    
+    status_morado = -1,  # parametros del semaforo
+    status_rojo = 0,
+    status_amarillo = 2,
     
     domestico_procesos_tabla = excel_domestico_procesos_tabla,        # tablas de procesos
     domestico_procesos_incluir = excel_domestico_procesos_incluir,
@@ -509,21 +516,21 @@ shinyServer(function(input, session, output) {
     progress <- shiny::Progress$new(style = style)
     
     
-    progress$set(message = "Cargando USA ", value = 0)
+    progress$set(message = "Cargando USA ", value = 0)  # carga usa
     Sys.sleep(1)
     tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido, parametros$usa_fechas_benchmark) %>% 
       dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región == 'USA')
 
 
-    progress$set(message = "Cargando Resto del Mundo ", value = 0.3)
+    progress$set(message = "Cargando Resto del Mundo ", value = 0.3)   # carga resto del mundo
     Sys.sleep(1)
     tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido, parametros$row_fechas_benchmark) %>%
       dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región != 'USA')
 
 
-    progress$set(message = "Cargando Doméstico ", value = 0.7)
+    progress$set(message = "Cargando Doméstico ", value = 0.7)   # carga domestico
     Sys.sleep(1)
     
     
@@ -539,12 +546,8 @@ shinyServer(function(input, session, output) {
         )'
       )))
     }
-    
-    
-    
 
     progress$set(message = "Carga finalizada ", value = 1)
-    tablas$ano_mes <- base::intersect(unique(tablas$zsdr141$ano_mes),unique(tablas$zsdr159$ano_mes))
     Sys.sleep(1)
     progress$close()
     options(warn = oldw)
@@ -562,23 +565,20 @@ shinyServer(function(input, session, output) {
     
   })
   
-  output$o_texto_carga_usa <- renderText({
+  output$o_texto_carga_usa <- renderText({         # textos de terminacion
     validate(need(tablas$usa,'nop'))
     'Carga de las transacciones usa finalizada exitosamente'
   })
-  
   output$o_texto_carga_row <- renderText({
     validate(need(tablas$row,'nop'))
     'Carga de las transacciones row finalizada exitosamente'
   })
-  
   output$o_texto_carga_domestico <- renderText({
     validate(need(tablas$domestico,'nop'))
     'Carga de las transacciones doméstico finalizada exitosamente'
   })
-  
   observeEvent(input$boton_siguiente_carga, {
-    updateTabsetPanel(session, "menu_visualizacion1",selected = "visualizacion1")
+    updateTabsetPanel(session, "menu_visualizacion",selected = "vista_ejecutiva")
   })
   
   
@@ -597,17 +597,13 @@ shinyServer(function(input, session, output) {
       selected = f_choices[order(f_choices)]
     )
   })
-  
-  
-  output$activa_filtro2 <- reactive({                             # condicionante para que aparezca el filtro 2
-    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
-    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
-    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
-    eval(parse(text = paste0('length(parametros$',f_region,'_filtros) >= 2')))
+
+  output$activa_filtro2 <- reactive({               # condicionante para que aparezca el filtro 2
+    f_region_parametros <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+    length(f_region_parametros$filtros) >= 2
   })
   outputOptions(output, "activa_filtro2", suspendWhenHidden = FALSE)
-  
-  
+
   observeEvent(input$input_filtro1,{                # actualización dinámica de filtro 2
     if(input$input_filtro_zona == 'USA')f_region <- 'usa'
     if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
@@ -628,9 +624,8 @@ shinyServer(function(input, session, output) {
       )
     }
   })
-  
-  
-  observeEvent(input$input_filtro_zona,{                                                # actualización del filtro de fecha_variable dependiendo de la zona
+
+  observeEvent(input$input_filtro_zona,{                                       # actualización del filtro de fecha_variable dependiendo de la zona
     a <-excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)]
     b <- excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)][1]
     if(input$input_filtro_zona == 'Resto del mundo'){
@@ -649,9 +644,8 @@ shinyServer(function(input, session, output) {
       session,'filtro_fecha_variable', choices = a, selected = b
     )
   })
-  
-  
-  observeEvent(input$input_filtro_fecha_variable,{                                                # actualización del filtro de fecha_rango dependiendo de fecha_variable
+
+  observeEvent(input$input_filtro_fecha_variable,{                           # actualización del filtro de fecha_rango dependiendo de
     f_fecha <- Sys.Date()
     f_start = '2019-08-01'
     f_end = '2019-08-31'
@@ -662,172 +656,32 @@ shinyServer(function(input, session, output) {
     )
   })
   
-  # filtro 1 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  # input <- list()
-  # input$input_filtro1 <- unique(tablas$row$Nombre_Región)
-  # input$input_filtro2 <- unique(tablas$row$País)
-  # input <- list()
-  # input$filtro_fecha_rango <- c('2019-06-01','2019-08-30')
-  # input$filtro_fecha_variable <- 'Fe.Orig.Pref'
-  
-  observeEvent(input$boton_filtrar1,{                                      # botón para filtrar
-    
-    if(input$input_filtro_zona == 'USA')f_region <- 'usa'                  # regiones
-    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
-    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
-    
-    f_filtros <- eval(parse(text = paste0(
-      'parametros$',f_region,'_filtros'
-    )))
-    
-    f_filtros_contenido <- list()
-    for(i in 1:length(f_filtros)){
-      f_filtros_contenido[[i]] <- eval(parse(text = paste0('as.character(input$input_filtro',i,')')))
-      f_filtros_contenido[[i]] <- paste0(f_filtros_contenido[[i]],collapse ='","')
+  observeEvent({   # actualizando los pedidos disponibles de acuerdo a los filtros
+    input$input_filtro_zona
+    input$input_filtro1
+    input$input_filtro2
+    input$filtro_fecha_variable
+    input$filtro_fecha_rango
+  },{
+    if(!is.null(tablas$usa)){
+      f_region_parametros <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+      temp <- funcion_filtro_vista_ejecutiva(tablas,f_region_parametros,input)
+      temp <- eval(parse(text = paste('unique(temp$',f_region_parametros$pedido,')')))
+      temp <- temp[order(temp)]
+      updatePickerInput(
+        session,'filtro_pedido', choices = temp,selected = temp
+      )
     }
-
     
-    funcion1 <- paste0('tablas$',f_region,' ')
-    
-    funcion2 <- paste0('%>% dplyr::filter(',f_filtros,' %in% c("',f_filtros_contenido,'")) ' ,collapse = ' ')
-    
-    funcion3 <- paste0(
-      '%>% dplyr::filter(!is.na(',input$filtro_fecha_variable,'))'
-    )
-    
-    funcion4 <- paste0(
-      '%>% dplyr::filter(',input$filtro_fecha_variable,' >= "', input$filtro_fecha_rango[1],'") '
-    )
-    
-    funcion5 <- paste0(
-      '%>% dplyr::filter(',input$filtro_fecha_variable,' <= "', input$filtro_fecha_rango[2],'")'
-    )
-    
-    tablas$sub <- eval(parse(text = paste0(funcion1,funcion2,funcion3,funcion4,funcion5)))
-    
-    
-    
-    
-    output$output_grafica_tiempo1 <- renderPlot({    # gráfica de tiempos desagregadeos
-      
-      
-      oldw <- getOption("warn")
-      options(warn=-1)
-      
-      g <- NULL
-      f_region <- funcion_asigna_region(input$input_filtro_zona)
-      f_p_variables_fecha <- eval(parse(text = paste0(
-        'parametros$',f_region,'_fechas'
-      )))
-      f_p_variable_pedido <- eval(parse(text = paste0(
-        'parametros$',f_region,'_pedido[1]'
-      )))
-      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
-      
-      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
-      
-      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
-
-      options(warn = oldw)
-    
-      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
-      g
-    })
-    
-    output$grafica_entregas_pedidos <- renderPlot({  # output de grafica de entregas por proceso
-      
-      oldw <- getOption("warn")
-      options(warn=-1)
-      
-      g <- NULL
-      f_region <- funcion_asigna_region(input$input_filtro_zona)
-      f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
-      f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
-      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
-      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
-        
-      g <- funcion_main_grafica_2(
-        p_tabla <- tablas$sub,
-        p_texto_x = 'prceso',
-        p_texto_y = 'cantidad',
-        p_variables_fecha = f_variables_fecha,
-        p_variable_pedido = f_variable_pedido,
-        p_compresion = TRUE,
-        p_variables_cantidades = f_variables_cantidades,
-        p_texto_label = 'litros',
-        p_tipo_fgb = 'suma',
-        p_fecha_benchmark = f_fechas_benchmark
-      )
-      
-      options(warn = oldw)
-      
-      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
-      g
-    })
-    
-    output$grafica_entregas_litros <- renderPlot({  # output de grafica de litros por proceso
-      
-      oldw <- getOption("warn")
-      options(warn=-1)
-      
-      g <- NULL
-      f_region <- funcion_asigna_region(input$input_filtro_zona)
-      f_variables_fecha <- eval(parse(text = paste0('parametros$',f_region,'_fechas')))
-      f_variable_pedido <- eval(parse(text = paste0('parametros$',f_region,'_pedido[1]')))
-      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
-      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
-      
-      g <- funcion_main_grafica_2(
-        p_tabla = tablas$sub,
-        p_texto_x = 'prceso',
-        p_texto_y = 'cantidad',
-        p_variables_fecha = f_variables_fecha,
-        p_variable_pedido = f_variable_pedido,
-        p_compresion = TRUE,
-        p_variables_cantidades = f_variables_cantidades,
-        p_texto_label = 'entregas',
-        p_tipo_fgb = 'cuantos',
-        p_fecha_benchmark = f_fechas_benchmark
-      )
-      
-      options(warn = oldw)
-      
-      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
-      g
-    })
     
   })
   
-  # outputs visualización 1 -------------------------------------------------------------------------------------------
-  
-  output$grafica_entregas <- renderPlot({
-    
-    oldw <- getOption("warn")
-    options(warn=-1)
-    
-    g <- funcion_main_grafica_2(
-      p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-07'),
-      p_texto_x = 'prceso',
-      p_texto_y = 'cantidad',
-      p_variables_fecha = parametros$domestico_fechas,
-      p_variable_pedido = parametros$domestico_pedido[1],
-      p_compresion = TRUE,
-      p_variables_cantidades = parametros$domestico_cantidades,
-      p_texto_label = 'entregas',
-      p_tipo_fgb = 'cuantos'
-    )
-    
-    options(warn = oldw)
-    
-    return(g)
-  })
   
   # vista ejecutiva  -------------------------------------------------------------------------------------------------------------------
   
   
   # input <- list()
-  # input$input_filtro_zona <- 'Doméstico'
+  # input$input_filtro_zona <- 'USA'
   # tablas$sub <- tablas$domestico
   
   observeEvent(input$ve_boton_filtro,{
@@ -943,11 +797,11 @@ shinyServer(function(input, session, output) {
       )))
 
       
-      g <- funcion_main_grafica_1(tabla_cerrados, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
+      tryCatch(g <- funcion_main_grafica_1(tabla_cerrados, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark),error = function(e){})
       
       options(warn = oldw)
       
-      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      validate(need(!is.null(g),'Esta tabla no tiene datos'))
       g
       
     })
@@ -977,11 +831,13 @@ shinyServer(function(input, session, output) {
       )))
       
       
-      g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
+      tryCatch(g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark,NULL,p_colorear = TRUE, p_fecha_actual = parametros$fecha_actual,p_parametros = parametros),error = function(e){})
+      
+      
       
       options(warn = oldw)
       
-      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      validate(need(!is.null(g),'Esta tabla no tiene datos'))
       g
       
     })
@@ -1004,11 +860,11 @@ shinyServer(function(input, session, output) {
       
       f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
       
-      g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark)
+      tryCatch(g <- funcion_main_grafica_1(tablas$sub, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark),error = function(e){})
       
       options(warn = oldw)
       
-      validate(need(!is.null(g),'una vez seleccionados los filtros pulsa filtrar para ver la gráfica'))
+      validate(need(!is.null(g),'Esta tabla no tiene datos'))
       g
     })
     

@@ -81,16 +81,6 @@ funcion_filtro_vista_ejecutiva <- function(tablas,p_resultado,input){
   funcion5 <- paste0(
     '%>% dplyr::filter(',input$filtro_fecha_variable,' <= "', input$filtro_fecha_rango[2],'")'
   )
-  # if(input$filtro_abierto == 'abiertos'){
-  #   funcion6 <- paste0(
-  #     '%>% dplyr::filter(is.na(',p_resultado$fecha_fin,'))'
-  #   )
-  # }
-  # if(input$filtro_abierto == 'cerrados'){
-  #   funcion6 <- paste0(
-  #     '%>% dplyr::filter(!is.na(',p_resultado$fecha_fin,'))'
-  #   )
-  # }
   f_resultado <- eval(parse(text = paste0(funcion1, funcion2, funcion3, funcion4, funcion5)))
   
   return(f_resultado)
@@ -107,11 +97,7 @@ funcion_variables_tabla_subconjunto_vista_ejecutiva <- function(p_tabla,p_region
     ontime = ifelse(ontime %in% c(TRUE, FALSE), ontime, FALSE),
     )'
     )))
-  
-  
 
-
-  
   # eval(parse(text = paste0(
   #   'p_tabla <- p_tabla %>%
   #   mutate(

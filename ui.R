@@ -41,9 +41,9 @@ sidebar <- dashboardSidebar(
   conditionalPanel(condition = 'output.datos_ok',    
                    sidebarMenu(
                      id = 'menu_visualizacion',
-                     menuItem(
-                       'Visualización 1', tabName = 'visualizacion1'
-                     ),
+                     # menuItem(
+                     #   'Visualización 1', tabName = 'visualizacion1'
+                     # ),
                      menuItem(
                        'Vista Ejecutiva', tabName = 'vista_ejecutiva'
                      )
@@ -73,7 +73,7 @@ sidebar <- dashboardSidebar(
         selected = 'ninguna',
         choices = 'ninguna',
         multiple = TRUE,
-        options = list(`actions-box` = TRUE)
+        options = pickerOptions(actionsBox = TRUE, size = 10, liveSearch = TRUE)
       ),
       conditionalPanel('output.activa_filtro2',
                        pickerInput(                   # filtro 2
@@ -82,7 +82,7 @@ sidebar <- dashboardSidebar(
                          selected = 'ninguna',
                          choices = 'ninguna',
                          multiple = TRUE,
-                         options = list(`actions-box` = TRUE)
+                         options = pickerOptions(actionsBox = TRUE, size = 10, liveSearch = TRUE)
                        )
       ),
       pickerInput(                                    # filtro fecha variable
@@ -99,6 +99,14 @@ sidebar <- dashboardSidebar(
         end = '2019-08-31',
         min = '2019-01-01',
         max = '2019-12-31'
+      ),
+      pickerInput(                   # filtro pedido      
+        'filtro_pedido',
+        'Pedido',
+        selected = 'ninguna',
+        choices = 'ninguna',
+        multiple = TRUE,
+        options = pickerOptions(actionsBox = TRUE, size = 10, liveSearch = TRUE)
       )
     )
   ),
@@ -127,15 +135,15 @@ sidebar <- dashboardSidebar(
   
   # filtro 1 ------------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  conditionalPanel(condition = 'input.menu_visualizacion == "visualizacion1"',
-                   sidebarMenu(
-                     id = 'menu_boton_1',
-                     actionButton(
-                       inputId = 'boton_filtrar1',
-                       label = 'Filtrar'
-                     )
-                   )
-  ),
+  # conditionalPanel(condition = 'input.menu_visualizacion == "visualizacion1"',
+  #                  sidebarMenu(
+  #                    id = 'menu_boton_1',
+  #                    actionButton(
+  #                      inputId = 'boton_filtrar1',
+  #                      label = 'Filtrar'
+  #                    )
+  #                  )
+  # ),
   
   
   #  seguimiento de variables -----------------------------------------------------------------------------------------------------------------------------------------------------
