@@ -4,26 +4,8 @@
 
 # función de carga de los datos utilizando como punto de partida los parámetros
 
-# p_carpeta <- 'zsdr141'
-# p_fechas <- excel_parametros %>%
-#   dplyr::filter(!is.na(usa_fechas)) %>%
-#   dplyr::select(usa_fechas) %>%
-#   unlist
-# p_cantidades <- excel_parametros %>%
-#   dplyr::filter(!is.na(usa_cantidades)) %>%
-#   dplyr::select(usa_cantidades) %>%
-#   unlist
-# p_filtros <- excel_parametros %>%
-#   dplyr::filter(!is.na(usa_filtros)) %>%
-#   dplyr::select(usa_filtros) %>%
-#   unlist
-# p_pedido <- excel_parametros %>%
-#   dplyr::filter(!is.na(usa_pedido)) %>%
-#   dplyr::select(usa_pedido) %>%
-#   unlist
-
-funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL,p_procesos = NULL){
-  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido,p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla,p_procesos)
+funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL){
+  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido,p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla)
 }
 
 # (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +21,7 @@ funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_ped
 # p_procesos <- NULL
 # p_fecha_benchmark <- parametros$domestico_fechas_benchmark
 
-funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla,p_procesos){
+funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla){
   f_archivos <- list.files(paste0('datos/',p_carpeta))
   f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
   

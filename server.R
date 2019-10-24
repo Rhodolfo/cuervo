@@ -534,7 +534,7 @@ shinyServer(function(input, session, output) {
     Sys.sleep(1)
     
     
-    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir)
+    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir,parametros$domestico_procesos_tabla)
     
       
     if(str_detect(excel_parametros$domestico_benchmark_formula,'formula')){   # viendo el pedo de una variable custom

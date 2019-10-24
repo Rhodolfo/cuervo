@@ -301,7 +301,7 @@ tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,
   dplyr::filter(Zona_de_ventas != 'ninguno') %>%
   dplyr::filter(Nombre_Región != 'USA')
 
-tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir)
+tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir,parametros$domestico_procesos_tabla)
 
 
 if(str_detect(excel_parametros$domestico_benchmark_formula[1],'formula')){   # viendo el pedo de una variable custom

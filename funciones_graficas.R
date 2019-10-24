@@ -2,26 +2,27 @@
 
 # (main) función para grafica 1 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-03')
-# p_texto_x <- 'x'
-# p_texto_y <- 'y'
-# p_variables_fecha <- parametros$domestico_fechas
-# p_variable_pedido <- parametros$domestico_pedido[1]
-# p_compresion <- TRUE
-# p_variables_cantidades <- parametros$domestico_cantidades
-# p_fecha_benchmark <- parametros$domestico_fechas_benchmark
-# p_procesos <- parametros$domestico_procesos_tabla$procesos
-# p_procesos_incluir = FALSE
-# p_colorear = TRUE
-# p_fecha_actual = parametros$fecha_actual
-# p_parametros = parametros
+p_tabla <- tablas$domestico %>% dplyr::filter(Fecha_Are >= '2019-08-01') %>% dplyr::filter(Fecha_Are <= '2019-08-31') %>% dplyr::filter(Gpo.Clientes == 'DUFRY')
+p_texto_x <- 'x'
+p_texto_y <- 'y'
+p_variables_fecha <- parametros$domestico_fechas
+p_variable_pedido <- parametros$domestico_pedido[1]
+p_compresion <- TRUE
+p_variables_cantidades <- parametros$domestico_cantidades
+p_fecha_benchmark <- parametros$domestico_fechas_benchmark
+p_procesos <- parametros$domestico_procesos_tabla$procesos
+p_procesos_incluir = TRUE
+p_colorear = TRUE
+p_fecha_actual = parametros$fecha_actual
+p_parametros = parametros
 
 funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL,p_colorear = FALSE, p_fecha_actual = p_parametros$fecha_actual,p_parametros){
   if(p_compresion){
-    f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido,p_variables_cantidades,p_fecha_benchmark)
+    f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido,p_variables_cantidades,p_fecha_benchmark,p_procesos_incluir, p_procesos_tabla)
     f_tabla <- f_resultado$tabla
     f_variables_fecha <- f_resultado$fechas
     f_variables_benchmark <- f_resultado$fechas_benchmark
+    f_variables_procesos <- f_resultado$variables_procesos
   }
   f_resultado <- funcion_solo_variables_maximo(f_tabla,c(f_variables_fecha,f_variables_benchmark))
   f_tabla <- f_resultado$tabla
@@ -31,11 +32,8 @@ funcion_main_grafica_1 <- function(p_tabla, p_compresion = FALSE,p_texto_x,p_tex
   f_tabla <- f_resultado$tabla
   f_variables_fecha <- f_resultado$fechas
   
-  #
   
-  #
-  
-  f_grafica <- funcion_grafica_pedidos_puntos(f_tabla, f_variables_fecha,f_variables_benchmark,NULL,p_colorear,p_fecha_actual,p_parametros)
+  f_grafica <- funcion_grafica_pedidos_puntos(f_tabla, f_variables_fecha,f_variables_benchmark,NULL,p_colorear,p_fecha_actual,p_parametros,p_procesos_incluir, p_procesos_tabla, p_variables_procesos = NULL)
   return(f_grafica)
 }
 
@@ -125,7 +123,7 @@ funcion_parametros_grafica_2 <- function(p_tabla, p_variables_suma,p_variables_c
 
 # p_variable_agrupacion <- p_variable_pedido
 
-funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agrupacion,p_variables_cantidades,p_fecha_benchmark){
+funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agrupacion, p_variables_cantidades, p_fecha_benchmark, p_procesos_incluir = FALSE, p_procesos_tabla = NULL){
   funcion1 <- paste0('f_tabla <- p_tabla %>% dplyr::group_by(',p_variable_agrupacion,') %>% dplyr::summarise(')
   funcion2 <- paste0(p_variables_fecha,'_min = min(', p_variables_fecha, ', na.rm = T)', collapse = ',')
   funcion3 <- ','
@@ -155,11 +153,50 @@ funcion_compresion_fecha <- function(p_tabla, p_variables_fecha, p_variable_agru
   
     f_fechas_benchmark <- c(f_fechas_benchmark,f_fechas1[length(f_fechas1)])
     f_fechas_benchmark <- c(f_fechas_benchmark,f_fechas2[length(f_fechas2)])
+    
+    
+ f_variables_procesos <- NULL
+    
+  if(p_procesos_incluir == TRUE){   # inclusion de los procesos
+    f1 <- 'p_tabla'
+    f2 <- paste0(' %>% group_by(',p_variable_agrupacion,')')
+    f3 <- paste0(' %>% summarise(')
+    f4 <- paste0(p_procesos_tabla$procesos,' = sum(',p_procesos_tabla$procesos,')/n()',collapse = ',')
+    f5 <- ')'
+    
+    f_resumen_procesos <- eval(parse(text = paste0(f1,f2,f3,f4,f5))) %>% as.data.frame
+    
+    f_coincidencia <- eval(parse(text = paste0(
+      'match(p_tabla$',p_procesos_tabla$variable[1],',names(p_procesos_tabla))'
+    )))
+    
+    
+    for(i in 1:nrow(f_resumen_procesos)){
+      if(is.na(f_coincidencia[i])){
+        f_resumen_procesos[i,2:length(f_resumen_procesos)] <- NA
+      }else{
+        f_checador <- p_procesos_tabla[f_coincidencia[i]] == 'x' & !is.na(p_procesos_tabla[f_coincidencia[i]])
+        f_checador[which(!f_checador)] <- NA
+        f_resumen_procesos[i,2:length(f_resumen_procesos)] <- f_resumen_procesos[i,2:length(f_resumen_procesos)] * f_checador
+        f_resumen_procesos[i,2:length(f_resumen_procesos)][(f_resumen_procesos[i,2:length(f_resumen_procesos)])>0] <- 1
+      }
+    }
+    f_resumen_procesos <- f_resumen_procesos[,!is.na(f_resumen_procesos[1,])]
+    
+    f_variables_procesos <- names(f_resumen_procesos)[-1]
+  
+    f_tabla <- cbind(f_tabla,f_resumen_procesos[,-1])
+    
+      
+  }
+    
+  
   
   resultado <- list()
   resultado$tabla <- f_tabla
   resultado$fechas <- f_fechas
   resultado$fechas_benchmark <- f_fechas_benchmark
+  resultado$variables_procesos <-f_variables_procesos
   return(resultado)
 }
 
@@ -261,8 +298,9 @@ funcion_solo_variables_maximo <- function(p_tabla, p_variables){
 # p_variables_benchmark <- f_variables_benchmark
 # p_colorear <- TRUE
 # p_fecha_actual <- parametros$fecha_actual
+# p_variables_procesos <- f_variables_procesos
 
-funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variables_benchmark, p_procesos = NULL, p_colorear, p_fecha_actual,p_parametros){
+funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variables_benchmark, p_procesos = NULL, p_colorear, p_fecha_actual,p_parametros, p_procesos_incluir = FALSE, p_procesos_tabla = NULL, p_variables_procesos = NULL){
   
   names(p_tabla)[1] <- 'pedido'
   
@@ -292,7 +330,7 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   
 
   f_tabla_leyenda <- data.frame(
-    variables = factor(p_variables_fecha,levels = p_variables_fecha),
+    variables = factor(c(p_variables_fecha),levels = c(p_variables_fecha)),
     colores = f_colores,
     x = max(p_tabla$fecha_max, na.rm = T),
     y = 1
@@ -303,6 +341,9 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   
 
   if(p_colorear == TRUE){
+    
+    f_colores <- rainbow(length(p_variables_fecha) + length(p_variables_procesos))
+    
     p_tabla <- eval(parse(text = paste0(
       'p_tabla %>%
       mutate(
@@ -315,7 +356,18 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
       ) %>%
       arrange(color_valor)'
     )))
+    f_tabla_leyenda <- data.frame(
+      variables = factor(c(p_variables_fecha,p_variables_procesos),levels = c(p_variables_fecha,p_variables_procesos)),
+      colores = f_colores,
+      x = max(p_tabla$fecha_max, na.rm = T),
+      y = 1
+    )
   }
+  
+    
+    
+  }
+  
   
   
   p_tabla$n <- 1:nrow(p_tabla)
@@ -341,15 +393,29 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
     '+ geom_point(aes(x = ',p_variables_fecha,', y = n),color = "black",size = ',f_tamano_bolas * 1.3,', alpha = 1,shape = 18)',collapse = ''
   )
   funcion3b <- paste0(
-    '+ geom_point(aes(x = ',p_variables_fecha,', y = n),color = "',f_colores,'",size = ',f_tamano_bolas,', alpha = 1,shape = 18)',collapse = ''
+    '+ geom_point(aes(x = ',p_variables_fecha,', y = n),color = "',f_colores[1:length(p_variables_fecha)],'",size = ',f_tamano_bolas,', alpha = 1,shape = 18)',collapse = ''
   )
   funcion4 <- paste0(
     '+ geom_point(data = f_tabla_leyenda, aes(x = x, y = y, color = variables), size = .1)'
   )
   
+  
+  funcion10 <- ''
+  funcion11 <- ''
+  
+  if(p_procesos_incluir == TRUE){
+    funcion10 <- paste0(
+      '+ geom_point(aes(x = fecha_min- ',(1:length(p_variables_procesos)+11),', y = n),color = "',f_colores[(length(p_variables_fecha)+1):length(f_colores)],'",size = ',f_tamano_bolas,', alpha = 1,shape = 18)',collapse = ''
+    )
+    funcion11 <- paste0(
+      '+ geom_text(aes(x = fecha_min- ',(1:length(p_variables_procesos)+11),', y = n, label = ',p_variables_procesos,'),size = ',f_tamano_bolas * .7,')'
+    )
+    
+  }
+  
   if(nrow(p_tabla)<=40){
     funcion4b <- paste0(
-      '+ geom_text(aes(x = fecha_min-3, y = n, label = pedido),size = ',f_tamano_bolas * 1,')'
+      '+ geom_text(aes(x = fecha_min-6, y = n, label = pedido),size = ',f_tamano_bolas * 1,')'
     )
   }else{
     funcion4b <- ''
@@ -359,7 +425,7 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   
     
   funcion5 <- paste0(
-    '+ scale_color_manual(labels = c("',paste0(p_variables_fecha,collapse = '","'),'"),values = c("',paste0(f_colores,collapse = '","'),'"))'
+    '+ scale_color_manual(labels = c("',paste0(f_tabla_leyenda$variables,collapse = '","'),'"),values = c("',paste0(f_colores,collapse = '","'),'"))'
   )
   funcion6 <- paste0(
     '+ guides(colour = guide_legend(override.aes = list(size=5, alpha = 1)))'
@@ -382,7 +448,7 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   
   
 
-eval(parse(text = paste0(funcion0, funcion1, funcion2a, funcion3a, funcion3b, funcion4, funcion4b, funcion5, funcion6, funcion7, funcion8, funcion9)))  
+eval(parse(text = paste0(funcion0, funcion1, funcion2a, funcion3a, funcion3b, funcion4,funcion10,funcion11,funcion4b, funcion5, funcion6, funcion7, funcion8, funcion9)))  
 
 return(g)
   
