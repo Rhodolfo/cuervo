@@ -1,0 +1,21 @@
+g/\s\{1,}TOTAL/d
+%s/|//g
+g/^\s\{1,}CASA CUERVO/,/.\{,}Periodo.\{1,}FACTURAS/d
+g/^-\{1,}$/d
+g/^\s\{,}$/d
+2,$g/PAIS.\{1,}FECHA FACTURA/d
+g/^\s\{,}a 40/d
+%s/\t\{1,}/|/g
+%s/|\s\{1,}/|/g
+%s/\s\{1,}|/|/g
+1s/%/Porcentaje/
+2,$s/^\([^|]\{,}|[^|]\{,}|[^|]\{,}|[^|]\{,}\)|\([^|]\{,}\)|/\1 \2|/
+
+# df <- read.csv("coste3.txt",sep="|",header=TRUE,fileEncoding="UTF-16LE")
+
+# 1s/CERTIFICADO|//g
+
+# 1s/Pedimento.\{1,}\(Fecha Pedimento\)/\1/
+# 1s/Pedimento.\{1,}\(Fecha Pedimento\)/\1/
+# 1s/Lote.\{1,}\(Fe.Pre.Ent\)/\1/
+

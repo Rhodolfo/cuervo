@@ -4,8 +4,10 @@
 
 # función de carga de los datos utilizando como punto de partida los parámetros
 
-funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir = FALSE,p_procesos_tabla = NULL){
-  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido,p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla)
+funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,
+  p_procesos_incluir = FALSE,p_procesos_tabla = NULL,p_aux_carpetas=list(),p_aux_x=list(),p_aux_y=list()) {
+  f_tabla <- funcion_juntar_tablas_carpeta(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido,p_fecha_benchmark,
+    p_procesos_incluir,p_procesos_tabla,p_aux_carpetas,p_aux_x,p_aux_y)
 }
 
 # (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
@@ -21,11 +23,12 @@ funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_ped
 # p_procesos <- NULL
 # p_fecha_benchmark <- parametros$domestico_fechas_benchmark
 
-funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,p_procesos_incluir,p_procesos_tabla){
+funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_pedido, p_fecha_benchmark,
+  p_procesos_incluir,p_procesos_tabla,p_aux_carpetas,p_aux_x,p_aux_y) {
+
+  # Carga de archivos principales
   f_archivos <- list.files(paste0('datos/',p_carpeta))
-  f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
-  
-  
+  f_archivos <- f_archivos[!str_detect(f_archivos,'~')] 
   f_lista <- list()
   for(i in 1:length(f_archivos)){
     f_lista[[i]] <- read_excel(paste0('datos/',p_carpeta,'/',f_archivos[i])) %>% 
@@ -34,22 +37,48 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   f_lista <- do.call('rbind',f_lista)
   f_lista <- as.data.frame(f_lista) %>% 
     setNames(.,stringr::str_replace_all(names(.),' ','_'))
+
+  # Carga de archivos auxiliares
+  f_aux <- list()
+  if (length(p_aux_carpetas)>0) {
+    for (ii in 1:length(p_aux_carpetas)) {
+      dir <- p_aux_carpetas[ii]
+      byX <- p_aux_x[ii]
+      byY <- p_aux_y[ii]
+      f_archivos <- list.files(paste0('datos/',dir))
+      f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
+      dfTemp <- list()
+      for (jj in 1:length(f_archivos)) {
+        dfTemp[[jj]] <- read_excel(paste0('datos/',dir,'/',f_archivos[jj])) %>%
+	  setNames(.,stringr::str_replace_all(names(.),' ','_'))
+      }
+      dfTemp <- do.call('rbind',dfTemp)
+      dfTemp <- as.data.frame(dfTemp) %>% setNames(.,stringr::str_replace_all(names(.),' ','_'))
+      dfRes <- eval(parse(text = paste0(
+        "f_lista %>% left_join(dfTemp, by = c('",byX,"'='",byY,"'))"
+      )))
+      f_lista <- dfRes
+    }
+  }
   
 
-  
-  
 
   for(i in 1:length(p_filtros)){
-    eval(parse(text = paste0(
-      'f_lista$',p_filtros[i],'[is.na(f_lista$',p_filtros[i],')] <- "ninguno"' 
-    )))
-  }  
+    if (!is.na(p_filtros[i])) {
+      eval(parse(text = paste0(
+        'f_lista$',p_filtros[i],'[is.na(f_lista$',p_filtros[i],')] <- "ninguno"' 
+      )))
+    }
+  }
   for(i in 1:length(p_pedido)){
-    eval(parse(text = paste0(
-      'f_lista$',p_pedido[i],'[is.na(f_lista$',p_pedido[i],')] <- "ninguno"' 
-    )))
-  }  
-  
+    if (!is.na(p_pedido[i])) {
+      eval(parse(text = paste0(
+        'f_lista$',p_pedido[i],'[is.na(f_lista$',p_pedido[i],')] <- "ninguno"' 
+      )))
+    }
+  }
+
+
   
   if(!p_procesos_incluir){
     f_lista <- f_lista %>%
