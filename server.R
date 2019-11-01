@@ -46,7 +46,7 @@ shinyServer(function(input, session, output) {
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
   
     
-    fecha_actual = as.Date('2019-08-17'),   # fecha
+    fecha_actual = as.Date('2019-08-17'),   # fecha contra la que se calcula el fill rate
     
     status_morado = -1,  # parametros del semaforo
     status_rojo = 0,
@@ -837,7 +837,7 @@ shinyServer(function(input, session, output) {
       # funcion_main_grafica_1(p_tabla, p_compresion = TRUE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark,p_procesos_incluir = TRUE,p_procesos_tabla = parametros$domestico_procesos_tabla,p_colorear = TRUE, p_fecha_actual = p_parametros$fecha_actual,p_parametros)  
       # tryCatch(g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_region$fechas,f_region$pedido,f_region$variables_cantidades,f_region$fecha_benchmark,p_procesos_incluir = TRUE,p_procesos_tabla = f_region$procesos_tabla,p_colorear = TRUE, p_fecha_actual = parametros$fecha_actual,p_parametros =parametros),error = function(e){})
       
-      g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_region$fechas,f_region$pedido,f_region$variables_cantidades,f_region$fecha_benchmark,p_procesos_incluir = TRUE,p_procesos_tabla = f_region$procesos_tabla,p_colorear = TRUE, p_fecha_actual = parametros$fecha_actual,p_parametros =parametros)
+      tryCatch(g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_region$fechas,f_region$pedido,f_region$variables_cantidades,f_region$fecha_benchmark,p_procesos_incluir = TRUE,p_procesos_tabla = f_region$procesos_tabla,p_colorear = TRUE, p_fecha_actual = parametros$fecha_actual,p_parametros =parametros),error = function(e){})
       
       options(warn = oldw)
       
