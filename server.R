@@ -46,7 +46,7 @@ shinyServer(function(input, session, output) {
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
   
     
-    fecha_actual = as.Date('2019-08-17'),   # fecha
+    fecha_actual = as.Date('2019-08-17'),   # fecha contra la que se calcula el fill rate
     
     status_morado = -1,  # parametros del semaforo
     status_rojo = 0,
@@ -811,29 +811,33 @@ shinyServer(function(input, session, output) {
       options(warn=-1)
       
       g <- NULL
-      f_region <- funcion_asigna_region(input$input_filtro_zona)
-      f_p_variables_fecha <- eval(parse(text = paste0(
-        'parametros$',f_region,'_fechas'
-      )))
-      f_p_variable_pedido <- eval(parse(text = paste0(
-        'parametros$',f_region,'_pedido[1]'
-      )))
-      f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+     
       
-      f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+      f_region <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
       
-      f_fecha_fin <- eval(parse(text = paste0('parametros$',f_region,'_fecha_fin')))
-      
+      # f_p_variables_fecha <- eval(parse(text = paste0(
+      #   'parametros$',f_region,'_fechas'
+      # )))
+      # f_p_variable_pedido <- eval(parse(text = paste0(
+      #   'parametros$',f_region,'_pedido[1]'
+      # )))
+      # f_variables_cantidades <- eval(parse(text = paste0('parametros$',f_region,'_cantidades')))
+      # 
+      # f_fechas_benchmark <- eval(parse(text = paste0('parametros$',f_region,'_fechas_benchmark')))
+      # 
+      # f_fecha_fin <- eval(parse(text = paste0('parametros$',f_region,'_fecha_fin')))
+      # 
       
       tabla_abiertos <- eval(parse(text = paste0(
         'tablas$sub %>%
-          dplyr::filter(is.na(',f_fecha_fin,'))'
+          dplyr::filter(is.na(',f_region$fecha_fin,'))'
       )))
       
       
-      tryCatch(g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_p_variables_fecha,f_p_variable_pedido,f_variables_cantidades,f_fechas_benchmark,NULL,p_colorear = TRUE, p_fecha_actual = parametros$fecha_actual,p_parametros = parametros),error = function(e){})
+      # funcion_main_grafica_1(p_tabla, p_compresion = TRUE,p_texto_x,p_texto_y,p_variables_fecha,p_variable_pedido,p_variables_cantidades, p_fecha_benchmark,p_procesos_incluir = TRUE,p_procesos_tabla = parametros$domestico_procesos_tabla,p_colorear = TRUE, p_fecha_actual = p_parametros$fecha_actual,p_parametros)  
+      # tryCatch(g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_region$fechas,f_region$pedido,f_region$variables_cantidades,f_region$fecha_benchmark,p_procesos_incluir = TRUE,p_procesos_tabla = f_region$procesos_tabla,p_colorear = TRUE, p_fecha_actual = parametros$fecha_actual,p_parametros =parametros),error = function(e){})
       
-      
+      tryCatch(g <- funcion_main_grafica_1(tabla_abiertos, p_compresion = TRUE,'x','y',f_region$fechas,f_region$pedido,f_region$variables_cantidades,f_region$fecha_benchmark,p_procesos_incluir = TRUE,p_procesos_tabla = f_region$procesos_tabla,p_colorear = TRUE, p_fecha_actual = parametros$fecha_actual,p_parametros =parametros),error = function(e){})
       
       options(warn = oldw)
       

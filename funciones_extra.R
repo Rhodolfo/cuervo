@@ -50,6 +50,10 @@ funcion_asigna_region_variables <- function(p_region,p_parametros,p_input){
     'p_parametros$',f_region,'_cantidad_benchmark'
   )))
   
+  f_procesos_tabla <- eval(parse(text = paste0(       # variable pedido
+    'p_parametros$',f_region,'_procesos_tabla'
+  )))
+  
   f_resultado <- list()
   f_resultado$region <- f_region
   f_resultado$filtros <- f_filtros
@@ -61,6 +65,7 @@ funcion_asigna_region_variables <- function(p_region,p_parametros,p_input){
   f_resultado$fechas <- f_fechas
   f_resultado$variables_cantidades <- f_variables_cantidades
   f_resultado$cantidad_benchmark <- f_cantidad_benchmark
+  f_resultado$procesos_tabla <- f_procesos_tabla
   
   return(f_resultado)
 }
