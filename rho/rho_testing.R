@@ -25,12 +25,12 @@ for(i in 1:nrow(excel_parametros)){
   }
 }
 
-dfI <- funcion_cargar_datos(parametros$aux_carpeta,parametros$aux_fechas,parametros$aux_cantidades,parametros$aux_filtros,parametros$aux_pedido,parametros$aux_fechas)
 
-dfA <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido,parametros$row_fechas)
+dfA <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades[[2]],parametros$row_filtros,parametros$row_pedido,parametros$row_fechas_benchmark)
 
 dfB <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,
-  c(parametros$row_cantidades),parametros$row_filtros,parametros$row_pedido,parametros$row_fechas,p_aux_carpetas=parametros$row_aux_carpetas,p_aux_x=parametros$row_aux_x,p_aux_y=parametros$row_aux_y)
+  parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido,parametros$row_fechas_benchmark,
+  p_aux_carpetas=parametros$row_aux_carpetas,p_aux_x=parametros$row_aux_x,p_aux_y=parametros$row_aux_y)
 
 
 

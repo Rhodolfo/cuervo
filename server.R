@@ -598,15 +598,15 @@ shinyServer(function(input, session, output) {
   })
   
   output$o_texto_carga_usa <- renderText({         # textos de terminacion
-    validate(need(tablas$usa,'nop'))
+    validate(need(tablas$usa,'Carga de datos USA'))
     'Carga de las transacciones usa finalizada exitosamente'
   })
   output$o_texto_carga_row <- renderText({
-    validate(need(tablas$row,'nop'))
+    validate(need(tablas$row,'Carga de datos RoW'))
     'Carga de las transacciones row finalizada exitosamente'
   })
   output$o_texto_carga_domestico <- renderText({
-    validate(need(tablas$domestico,'nop'))
+    validate(need(tablas$domestico,'Carga de datos domésticos'))
     'Carga de las transacciones doméstico finalizada exitosamente'
   })
   observeEvent(input$boton_siguiente_carga, {
