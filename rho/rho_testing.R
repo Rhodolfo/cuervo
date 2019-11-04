@@ -12,16 +12,6 @@ library(plyr)
 library(dplyr)
 library(RColorBrewer) 
 
-# source('gs.R', encoding = "UTF-8") #mientras vemos qué pedo
-nube_cuervo_usuarios <- read_csv('datos/contrasenas.csv')
-
-# Quitar .x de los izquierdo
-df %>% left_join(df2, by = c("pa"="pc")) %>% setNames(stringr::str_replace_all(names(.),".x",""))
-
-# source('proceso.R', encoding = "UTF-8")
-# source('grafica_fill_rate.R', encoding = "UTF-8")
-# source('mapa.R', encoding = "UTF-8")
-
 source('funciones_de_carga.R', encoding = "UTF-8")
 
 # source('funciones_graficas.R', encoding = "UTF-8")
@@ -40,7 +30,7 @@ dfI <- funcion_cargar_datos(parametros$aux_carpeta,parametros$aux_fechas,paramet
 dfA <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido,parametros$row_fechas)
 
 dfB <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,
-  c(parametros$row_cantidades,parametros$aux_cantidades),parametros$row_filtros,parametros$row_pedido,parametros$row_fechas,p_aux_carpetas=parametros$row_aux_carpetas,p_aux_x=parametros$row_aux_x,p_aux_y=parametros$row_aux_y)
+  c(parametros$row_cantidades),parametros$row_filtros,parametros$row_pedido,parametros$row_fechas,p_aux_carpetas=parametros$row_aux_carpetas,p_aux_x=parametros$row_aux_x,p_aux_y=parametros$row_aux_y)
 
 
 

@@ -55,30 +55,38 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
       }
       dfTemp <- do.call('rbind',dfTemp)
       dfTemp <- as.data.frame(dfTemp) %>% setNames(.,stringr::str_replace_all(names(.),' ','_'))
-      sss <- "c("
+      sBy <- "c("
+      sGr <- "group_by("
       for (jj in 1:mnB) {
         by1 <- byX[[jj]]
         by2 <- byY[[jj]]
-        sss <- paste0(sss,"'",by1,"'='",by2,"'")
-        if (jj<mnB) sss <- paste0(sss,",")
+        sBy <- paste0(sBy,"'",by1,"'='",by2,"'")
+	sGr <- paste0(sGr,"'",by2,"'")
+        if (jj<mnB) sBy <- paste0(sBy,",")
+        if (jj<mnB) sGr <- paste0(sGr,",")
       }
-      sss <- paste0(sss,")")
-      dfRes <- eval(parse(text = paste0(
-        "f_lista %>% left_join(dfTemp, by = ",sss,")"
-      )))
+      sBy <- paste0(sBy,")")
+      sGr <- paste0(sGr,")")
+      sBy <- paste0("f_lista %>% left_join(dfTemp, by = ",sBy,")")
+      sGr <- paste0("dfTemp %>% ",sGr," %>% filter(row_number()==1) %>% ungroup()")
+      dfTemp <- eval(parse(text = sGr)) # Elimino registros duplicados
+      dfRes <- eval(parse(text = sBy)) # Cruce de variables
       f_lista <- dfRes
     }
   }
   
 
-
+  print("AAA")
+  print(names(f_lista))
   for(i in 1:length(p_filtros)){
     if (!is.na(p_filtros[i])) {
+      print(paste0('f_lista$',p_filtros[i],'[is.na(f_lista$',p_filtros[i],')] <- "ninguno"'))
       eval(parse(text = paste0(
         'f_lista$',p_filtros[i],'[is.na(f_lista$',p_filtros[i],')] <- "ninguno"' 
       )))
     }
   }
+  print("BBB")
   for(i in 1:length(p_pedido)){
     if (!is.na(p_pedido[i])) {
       eval(parse(text = paste0(

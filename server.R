@@ -276,7 +276,39 @@ shinyServer(function(input, session, output) {
       dplyr::select(domestico_cantidad_benchmark) %>%
       unlist %>%
       as.character %>%
-      tail(.,n = 1)
+      tail(.,n = 1), 
+
+    row_aux_carpetas = excel_parametros %>% 
+      dplyr::filter(!is.na(row_aux_carpetas)) %>%
+      dplyr::select(row_aux_carpetas) %>%
+      unlist %>%
+      as.character,
+    row_aux_x = excel_parametros %>% 
+      dplyr::filter(!is.na(row_aux_x)) %>%
+      dplyr::select(row_aux_x) %>%
+      unlist %>%
+      as.character,
+    row_aux_y = excel_parametros %>% 
+      dplyr::filter(!is.na(row_aux_y)) %>%
+      dplyr::select(row_aux_y) %>%
+      unlist %>%
+      as.character,
+    usa_aux_carpetas = excel_parametros %>% 
+      dplyr::filter(!is.na(usa_aux_carpetas)) %>%
+      dplyr::select(usa_aux_carpetas) %>%
+      unlist %>%
+      as.character,
+    usa_aux_x = excel_parametros %>% 
+      dplyr::filter(!is.na(usa_aux_x)) %>%
+      dplyr::select(usa_aux_x) %>%
+      unlist %>%
+      as.character,
+    usa_aux_y = excel_parametros %>% 
+      dplyr::filter(!is.na(usa_aux_y)) %>%
+      dplyr::select(usa_aux_y) %>%
+      unlist %>%
+      as.character
+
     
   )
   
@@ -518,14 +550,14 @@ shinyServer(function(input, session, output) {
     
     progress$set(message = "Cargando USA ", value = 0)  # carga usa
     Sys.sleep(1)
-    tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido, parametros$usa_fechas_benchmark) %>% 
+    tablas$usa <- funcion_cargar_datos(parametros$usa_carpeta,parametros$usa_fechas,parametros$usa_cantidades,parametros$usa_filtros,parametros$usa_pedido, parametros$usa_fechas_benchmark,p_aux_carpetas=parametros$usa_aux_carpetas,p_aux_x=parametros$usa_aux_x,p_aux_y=parametros$usa_aux_y) %>% 
       dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región == 'USA')
 
 
     progress$set(message = "Cargando Resto del Mundo ", value = 0.3)   # carga resto del mundo
     Sys.sleep(1)
-    tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido, parametros$row_fechas_benchmark) %>%
+    tablas$row <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido, parametros$row_fechas_benchmark, p_aux_carpetas=parametros$row_aux_carpetas,p_aux_x=parametros$row_aux_x,p_aux_y=parametros$row_aux_y) %>%
       dplyr::filter(Zona_de_ventas != 'ninguno') %>%
       dplyr::filter(Nombre_Región != 'USA')
 
