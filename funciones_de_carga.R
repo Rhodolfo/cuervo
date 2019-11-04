@@ -43,8 +43,9 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   if (length(p_aux_carpetas)>0) {
     for (ii in 1:length(p_aux_carpetas)) {
       dir <- p_aux_carpetas[ii]
-      byX <- p_aux_x[ii]
-      byY <- p_aux_y[ii]
+      byX <- unlist(strsplit(p_aux_x[ii],"::"))
+      byY <- unlist(strsplit(p_aux_y[ii],"::"))
+      mnB <- min(length(byX),length(byY))
       f_archivos <- list.files(paste0('datos/',dir))
       f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
       dfTemp <- list()
@@ -54,8 +55,16 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
       }
       dfTemp <- do.call('rbind',dfTemp)
       dfTemp <- as.data.frame(dfTemp) %>% setNames(.,stringr::str_replace_all(names(.),' ','_'))
+      sss <- "c("
+      for (jj in 1:mnB) {
+        by1 <- byX[[jj]]
+        by2 <- byY[[jj]]
+        sss <- paste0(sss,"'",by1,"'='",by2,"'")
+        if (jj<mnB) sss <- paste0(sss,",")
+      }
+      sss <- paste0(sss,")")
       dfRes <- eval(parse(text = paste0(
-        "f_lista %>% left_join(dfTemp, by = c('",byX,"'='",byY,"'))"
+        "f_lista %>% left_join(dfTemp, by = ",sss,")"
       )))
       f_lista <- dfRes
     }

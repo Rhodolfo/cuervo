@@ -60,34 +60,19 @@ parametros$row_aux_y = excel_parametros %>%
   dplyr::select(row_aux_y) %>%
   unlist %>%
   as.character
-parametros$aux_fechas = excel_parametros %>% 
-  dplyr::filter(!is.na(aux_fechas)) %>%
-  dplyr::select(aux_fechas) %>%
+parametros$usa_aux_carpetas = excel_parametros %>% 
+  dplyr::filter(!is.na(usa_aux_carpetas)) %>%
+  dplyr::select(usa_aux_carpetas) %>%
   unlist %>%
   as.character
-parametros$aux_cantidades = excel_parametros %>%
-  dplyr::filter(!is.na(aux_cantidades)) %>%
-  dplyr::select(aux_cantidades) %>%
+parametros$usa_aux_x = excel_parametros %>% 
+  dplyr::filter(!is.na(usa_aux_x)) %>%
+  dplyr::select(usa_aux_x) %>%
   unlist %>%
   as.character
-parametros$aux_filtros = excel_parametros %>% 
-  dplyr::filter(!is.na(aux_filtros)) %>%
-  dplyr::select(aux_filtros) %>%
-  unlist %>%
-  as.character
-parametros$aux_carpeta = excel_parametros %>%             # carpeta
-  dplyr::filter(!is.na(aux_carpeta)) %>%
-  dplyr::select(aux_carpeta) %>%
-  unlist %>%
-  as.character
-parametros$aux_pedido = excel_parametros %>% 
-  dplyr::filter(!is.na(aux_pedido)) %>%
-  dplyr::select(aux_pedido) %>%
-  unlist %>%
-  as.character
-parametros$aux_fechas_benchmark = excel_parametros %>% 
-  dplyr::filter(!is.na(aux_fechas_benchmark)) %>%
-  dplyr::select(aux_fechas_benchmark) %>%
+parametros$usa_aux_y = excel_parametros %>% 
+  dplyr::filter(!is.na(usa_aux_y)) %>%
+  dplyr::select(usa_aux_y) %>%
   unlist %>%
   as.character
 excel_domestico_procesos_tabla <- read_excel('datos/setup/matriz_procesos.xlsx',sheet = 'domestico') %>% data.frame
