@@ -444,94 +444,94 @@ shinyServer(function(input, session, output) {
   
   # seguimiento de las inputs ---------------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  output$variables_boton_login_pre <- renderText({
-    paste(
-      'boton_login_pre',
-      input$boton_login_pre
-    )
-  })
-  
-  output$variables_boton_login <- renderText({
-    paste(
-      'boton_login',
-      input$boton_login
-    )
-  })
+  # output$variables_boton_login_pre <- renderText({
+  #   paste(
+  #     'boton_login_pre',
+  #     input$boton_login_pre
+  #   )
+  # })
+  # 
+  # output$variables_boton_login <- renderText({
+  #   paste(
+  #     'boton_login',
+  #     input$boton_login
+  #   )
+  # })
   
   # seguimiento de las variables reactivas ----------------------------------------------------------------------------------------------------------------------------------------------------
   
-  output$variables_user_prelog <- renderText({
-    paste(
-      'user_prelog',
-      user$prelog
-    )
-  })
-  output$variables_user_logged <- renderText({
-    paste(
-      'user_logged',
-      user$logged
-    )
-  })
-  output$variables_user_role <- renderText({
-    paste(
-      'user_role',
-      user$role
-    )
-  })
-  output$variables_user_name <- renderText({
-    paste(
-      'user_name',
-      user$name
-    )
-  })
-  output$variables_filtro_region <- renderText({
-    paste(
-      'filtro_region',
-      input$input_filtro_region
-    )
-  })
-  output$variables_filtro_ano_mes <- renderText({
-    paste(
-      'ano_mes',
-      input$input_filtro_fecha_original
-    )
-  })
-  output$variables_status_carga <- renderText({
-    paste(
-      'status_carga',
-      status$carga
-    )
-  })
-  output$variables_filtro_region <- renderText({
-    paste(
-      'region',
-      input$input_filtro_zona
-    )
-  })
-  output$variables_input_filtro1 <- renderText({
-    f_var <- paste0(input$input_filtro1,collapse = ',')
-    paste(
-      'filtro1',f_var
-    )
-  })
-  output$variables_input_filtro2 <- renderText({
-    f_var <- paste0(input$input_filtro2,collapse = ',')
-    paste(
-      'filtro2',f_var
-    )
-  })
-  output$variables_filtro_fecha_variable <- renderText({
-    f_var <- paste0(input$filtro_fecha_variable,collapse = ',')
-    paste(
-      'fecha_variable',f_var
-    )
-  })
-  output$variables_filtro_fecha_rango <- renderText({
-    f_var <- paste0(input$filtro_fecha_rango,collapse = ',')
-    paste(
-      'fecha_rango',f_var
-    )
-  })
+  # output$variables_user_prelog <- renderText({
+  #   paste(
+  #     'user_prelog',
+  #     user$prelog
+  #   )
+  # })
+  # output$variables_user_logged <- renderText({
+  #   paste(
+  #     'user_logged',
+  #     user$logged
+  #   )
+  # })
+  # output$variables_user_role <- renderText({
+  #   paste(
+  #     'user_role',
+  #     user$role
+  #   )
+  # })
+  # output$variables_user_name <- renderText({
+  #   paste(
+  #     'user_name',
+  #     user$name
+  #   )
+  # })
+  # output$variables_filtro_region <- renderText({
+  #   paste(
+  #     'filtro_region',
+  #     input$input_filtro_region
+  #   )
+  # })
+  # output$variables_filtro_ano_mes <- renderText({
+  #   paste(
+  #     'ano_mes',
+  #     input$input_filtro_fecha_original
+  #   )
+  # })
+  # output$variables_status_carga <- renderText({
+  #   paste(
+  #     'status_carga',
+  #     status$carga
+  #   )
+  # })
+  # output$variables_filtro_region <- renderText({
+  #   paste(
+  #     'region',
+  #     input$input_filtro_zona
+  #   )
+  # })
+  # output$variables_input_filtro1 <- renderText({
+  #   f_var <- paste0(input$input_filtro1,collapse = ',')
+  #   paste(
+  #     'filtro1',f_var
+  #   )
+  # })
+  # output$variables_input_filtro2 <- renderText({
+  #   f_var <- paste0(input$input_filtro2,collapse = ',')
+  #   paste(
+  #     'filtro2',f_var
+  #   )
+  # })
+  # output$variables_filtro_fecha_variable <- renderText({
+  #   f_var <- paste0(input$filtro_fecha_variable,collapse = ',')
+  #   paste(
+  #     'fecha_variable',f_var
+  #   )
+  # })
+  # output$variables_filtro_fecha_rango <- renderText({
+  #   f_var <- paste0(input$filtro_fecha_rango,collapse = ',')
+  #   paste(
+  #     'fecha_rango',f_var
+  #   )
+  # })
   
 
   
