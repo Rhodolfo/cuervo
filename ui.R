@@ -239,7 +239,7 @@ body <- dashboardBody(
           plotOutput('grafica_entregas_pedidos',height = 700)
         ),
         tabPanel(
-          'litros',
+          'volumen',
           plotOutput('grafica_entregas_litros',height = 700)
         )
       )
@@ -279,7 +279,7 @@ body <- dashboardBody(
           plotOutput('grafica_tiempo_procesos')
         ),
         tabPanel(
-          'litros',
+          'volumen',
           plotOutput('grafica_litros')
         )
       )

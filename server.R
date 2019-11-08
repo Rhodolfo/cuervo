@@ -776,7 +776,7 @@ shinyServer(function(input, session, output) {
     output$ve_caja_cajas <- renderValueBox({     # caja cajas
       valueBox(
         paste0(eval(parse(text = paste0('round(sum(tablas$sub$',f_region$cantidad,', na.rm = T)/1000,1)'))),'k'),
-        'cajas 9L',
+        'volumen',
         icon = icon("archive",lib = 'font-awesome'),
         color = 'blue'
       )
@@ -924,7 +924,7 @@ shinyServer(function(input, session, output) {
         p_variable_pedido = f_variable_pedido,
         p_compresion = TRUE,
         p_variables_cantidades = f_variables_cantidades,
-        p_texto_label = 'litros',
+        p_texto_label = 'volumen',
         p_tipo_fgb = 'suma',
         p_fecha_benchmark = f_fechas_benchmark
       )
