@@ -14,7 +14,7 @@ funcion_renombra_columnas <- function(df) {
     }
     return(df)
   } else {
-    return(data.frame())
+    return(df)
   }
 }
 
