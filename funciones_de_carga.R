@@ -1,3 +1,23 @@
+# No hay tiempo para dimentar esto
+funcion_renombra_columnas <- function(df) {
+  nameList <- names(df)
+  renamedCandidates <- nameList[grepl("\\.{3,3}\\d{1,}$", nameList)]
+  roots <- gsub("\\.{3,3}\\d{1,}$","",renamedCandidates)
+  roots <- unique(roots[duplicated(roots)])
+  if (length(roots)>0) {
+    firstMatches <- vector()
+    for (ii in 1:length(roots)) {
+      newName <- roots[[ii]]
+      oldName <- renamedCandidates[grepl(paste0("^",newName),renamedCandidates)][[1]]
+      txt <- paste0("df <- rename(df,",newName,"=",oldName,")")
+      eval(parse(text = txt))
+    }
+    return(df)
+  } else {
+    return(data.frame())
+  }
+}
+
 
 
 # (main) función carga ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
