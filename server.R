@@ -278,6 +278,21 @@ shinyServer(function(input, session, output) {
       as.character %>%
       tail(.,n = 1), 
 
+    domestico_aux_carpetas = excel_parametros %>% 
+      dplyr::filter(!is.na(domestico_aux_carpetas)) %>%
+      dplyr::select(domestico_aux_carpetas) %>%
+      unlist %>%
+      as.character,
+    domestico_aux_x = excel_parametros %>% 
+      dplyr::filter(!is.na(domestico_aux_x)) %>%
+      dplyr::select(domestico_aux_x) %>%
+      unlist %>%
+      as.character,
+    domestico_aux_y = excel_parametros %>% 
+      dplyr::filter(!is.na(domestico_aux_y)) %>%
+      dplyr::select(domestico_aux_y) %>%
+      unlist %>%
+      as.character,
     row_aux_carpetas = excel_parametros %>% 
       dplyr::filter(!is.na(row_aux_carpetas)) %>%
       dplyr::select(row_aux_carpetas) %>%
@@ -564,9 +579,7 @@ shinyServer(function(input, session, output) {
 
     progress$set(message = "Cargando Doméstico ", value = 0.7)   # carga domestico
     Sys.sleep(1)
-    
-    
-    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir,parametros$domestico_procesos_tabla)
+    tablas$domestico <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido, parametros$domestico_fechas_benchmark,parametros$domestico_procesos_incluir,parametros$domestico_procesos_tabla,p_aux_carpetas=parametros$domestico_aux_carpetas,p_aux_x=parametros$domestico_aux_x,p_aux_y=parametros$domestico_aux_y)
     
       
     if(str_detect(excel_parametros$domestico_benchmark_formula,'formula')){   # viendo el pedo de una variable custom

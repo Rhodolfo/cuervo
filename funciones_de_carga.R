@@ -37,6 +37,7 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   f_lista <- do.call('rbind',f_lista)
   f_lista <- as.data.frame(f_lista) %>% 
     setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  #print(names(f_lista))
 
   # Carga de archivos auxiliares
   f_aux <- list()
