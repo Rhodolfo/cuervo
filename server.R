@@ -46,7 +46,7 @@ shinyServer(function(input, session, output) {
   parametros <- reactiveValues(             # parámetros que se leen desde el excel
   
     
-    fecha_actual = as.Date('2019-08-17'),   # fecha contra la que se calcula el fill rate
+    fecha_actual = Sys.Date(),   # fecha contra la que se calcula el fill rate
     
     status_morado = -1,  # parametros del semaforo
     status_rojo = 0,
