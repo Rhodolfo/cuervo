@@ -32,6 +32,31 @@ funcion_cargar_datos <- function(p_carpeta,p_fechas,p_cantidades,p_filtros,p_ped
 
 # (secondary) función para cargar todos los archivos de una carpeta -------------------------------------------------------------------------------------------------------------------------
 
+funcion_lee_archivo <- function(p_path) {
+    f_path <- p_path
+    f_extn <- tolower(tools::file_ext(f_path))
+    if (f_extn=="csv" | f_extn=="txt") {
+      return(read.csv(p_path))
+    } else {
+      return(read_excel(p_path))
+    }
+}
+
+funcion_lee_carpeta <- function(p_carpeta) {
+  f_archivos <- list.files(paste0('datos/',p_carpeta))
+  f_archivos <- f_archivos[!str_detect(f_archivos,'~')] 
+  f_lista <- list()
+  for(i in 1:length(f_archivos)) {
+    f_path <- paste0('datos/',p_carpeta,'/',f_archivos[i])
+    f_lista[[i]] <- funcion_lee_archivo(f_path) %>% 
+      setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  }
+  f_lista <- do.call('rbind',f_lista)
+  f_lista <- as.data.frame(f_lista) %>% 
+    setNames(.,stringr::str_replace_all(names(.),' ','_'))
+  return(f_lista)
+}
+ 
 
 # p_carpeta <- parametros$domestico_carpeta
 # p_fechas <- parametros$domestico_fechas
@@ -47,17 +72,8 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   p_procesos_incluir,p_procesos_tabla,p_aux_carpetas,p_aux_x,p_aux_y) {
 
   # Carga de archivos principales
-  f_archivos <- list.files(paste0('datos/',p_carpeta))
-  f_archivos <- f_archivos[!str_detect(f_archivos,'~')] 
-  f_lista <- list()
-  for(i in 1:length(f_archivos)){
-    f_lista[[i]] <- read_excel(paste0('datos/',p_carpeta,'/',f_archivos[i])) %>% 
-      setNames(.,stringr::str_replace_all(names(.),' ','_'))
-  }
-  f_lista <- do.call('rbind',f_lista)
-  f_lista <- as.data.frame(f_lista) %>% 
-    setNames(.,stringr::str_replace_all(names(.),' ','_'))
-  #print(names(f_lista))
+  f_lista <- funcion_lee_carpeta(p_carpeta)
+  # print(names(f_lista))
 
   # Carga de archivos auxiliares
   f_aux <- list()
@@ -67,15 +83,7 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
       byX <- unlist(strsplit(p_aux_x[ii],"::"))
       byY <- unlist(strsplit(p_aux_y[ii],"::"))
       mnB <- min(length(byX),length(byY))
-      f_archivos <- list.files(paste0('datos/',dir))
-      f_archivos <- f_archivos[!str_detect(f_archivos,'~')]
-      dfTemp <- list()
-      for (jj in 1:length(f_archivos)) {
-        dfTemp[[jj]] <- read_excel(paste0('datos/',dir,'/',f_archivos[jj])) %>%
-	  setNames(.,stringr::str_replace_all(names(.),' ','_'))
-      }
-      dfTemp <- do.call('rbind',dfTemp)
-      dfTemp <- as.data.frame(dfTemp) %>% setNames(.,stringr::str_replace_all(names(.),' ','_'))
+      dfTemp <- funcion_lee_carpeta(dir)
       sBy <- "c("
       sGr <- "group_by("
       for (jj in 1:mnB) {
@@ -95,7 +103,6 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
       f_lista <- dfRes
     }
   }
-  
 
   for(i in 1:length(p_filtros)){
     if (!is.na(p_filtros[i])) {
@@ -113,8 +120,11 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
   }
 
 
-  
+  #toDate <- function(x) {
+  #}
+
   if(!p_procesos_incluir){
+    # Modify dates as.Date(Fecha.Are, format=c("%d/%m/%Y","%d/%m/%Y")
     f_lista <- f_lista %>%
       mutate_at(.vars = p_fechas,.funs = as.Date) %>%
       mutate_at(.vars = p_fecha_benchmark,.funs = as.Date) %>%
@@ -125,7 +135,6 @@ funcion_juntar_tablas_carpeta <- function(p_carpeta,p_fechas,p_cantidades,p_filt
       dplyr::select(c(p_fechas,p_cantidades,p_pedido,p_filtros,p_fecha_benchmark))
   }else{
     p_procesos <- p_procesos_tabla$procesos
-    
     f_lista <- f_lista %>%
       mutate_at(.vars = p_fechas,.funs = as.Date) %>%
       mutate_at(.vars = p_fecha_benchmark,.funs = as.Date) %>%

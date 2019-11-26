@@ -931,7 +931,7 @@ shinyServer(function(input, session, output) {
       
       g <- funcion_main_grafica_2(
         p_tabla <- tablas$sub,
-        p_texto_x = 'prceso',
+        p_texto_x = 'proceso',
         p_texto_y = 'volumen',
         p_variables_fecha = f_variables_fecha,
         p_variable_pedido = f_variable_pedido,
