@@ -363,20 +363,20 @@ shinyServer(function(input, session, output) {
           if (input$boton_login > 0) {
             username <- isolate(input$input_usuario)
             Password <- isolate(input$passwd)
-            Id.username <- which(nube$usuarios$usuario == username)
-            Id.password <- which(nube$usuarios$contrasena == Password)
-            if (length(Id.username) > 0 & length(Id.password) > 0) {
-              if (Id.username == Id.password) {
+	    Id.index <- as.integer(which(nube$usuarios$usuario == username))
+            Id.username <- nube$usuarios$usuario[Id.index]
+	    Id.password <- nube$usuarios$contrasena[Id.index]
+            if (length(Id.index) > 0 & length(Id.username) > 0 & length(Id.password) > 0) {
+              if (Password == Id.password) {
                 user$logged <- TRUE
-                user$role = nube$usuarios$rol[Id.username] 
-                user$name <- nube$usuarios$nombre[Id.username]
+                user$role = nube$usuarios$rol[Id.index] 
+                user$name <- nube$usuarios$nombre[Id.index]
               }
             } 
           }
         }
       }
     }
-    
   })
   observe({
     if (user$logged == FALSE) {

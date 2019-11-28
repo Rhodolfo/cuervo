@@ -151,7 +151,7 @@ sidebar <- dashboardSidebar(
   conditionalPanel(condition = 'output.es_administrador & output.',
     sidebarMenu(
       id = 'menu_variables',
-      h1('variables'),
+      # h1('variables'),
       textOutput('variables_boton_login_pre'),
       textOutput('variables_boton_login'),
       textOutput('variables_user_prelog'),
