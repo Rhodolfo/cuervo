@@ -74,7 +74,7 @@ funcion_asigna_region_variables <- function(p_region,p_parametros,p_input){
 # función de filtro vista ejecutiva -------------------------------------------------------------------------------------------------
 
 
-funcion_filtro_vista_ejecutiva <- function(tablas,p_resultado,input){
+funcion_filtro_vista_ejecutiva <- function(tablas,p_resultado,input,campoPedido="Pedido"){
   funcion1 <- paste0('tablas$',p_resultado$region,' ')
   funcion2 <- paste0('%>% dplyr::filter(',p_resultado$filtros,' %in% c("',p_resultado$filtros_contenido,'")) ' ,collapse = ' ')
   funcion3 <- paste0(
@@ -86,7 +86,19 @@ funcion_filtro_vista_ejecutiva <- function(tablas,p_resultado,input){
   funcion5 <- paste0(
     '%>% dplyr::filter(',input$filtro_fecha_variable,' <= "', input$filtro_fecha_rango[2],'")'
   )
-  f_resultado <- eval(parse(text = paste0(funcion1, funcion2, funcion3, funcion4, funcion5)))
+  tableNames <- eval(parse(text=paste0("names(",funcion1,")")))
+  pedidoName <- which(startsWith(tableNames, campoPedido))
+  funcion6 <- " "
+  if (length(pedidoName)>0 & length(input$filtro_pedido)>0 & length(input$filtro_pedido)<15)
+    if (input$filtro_pedido[1]!="ninguna") {
+      pedidoArr <- paste0(input$filtro_pedido,collapse='","')
+      funcion6 <- paste0(
+        '%>% dplyr::filter(',tableNames[pedidoName],' %in% c("',pedidoArr,'")) '
+      )
+  } else {
+    funcion6 <- " "
+  }
+  f_resultado <- eval(parse(text = paste0(funcion1, funcion2, funcion3, funcion4, funcion5, funcion6)))
   
   return(f_resultado)
 }
