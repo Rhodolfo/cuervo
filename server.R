@@ -641,6 +641,7 @@ shinyServer(function(input, session, output) {
       choices = f_choices[order(f_choices)],
       selected = f_choices[order(f_choices)]
     )
+    #click(input$ve_boton_filtro)
   })
 
   output$activa_filtro2 <- reactive({               # condicionante para que aparezca el filtro 2
@@ -710,12 +711,22 @@ shinyServer(function(input, session, output) {
   },{
     if(!is.null(tablas$usa)){
       f_region_parametros <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
-      temp <- funcion_filtro_vista_ejecutiva(tablas,f_region_parametros,input)
+      cat(file=stderr(), "LLAMADO FILTRO", "\n")
+      temp <- funcion_filtro_vista_ejecutiva(tablas,f_region_parametros,input,filtraPedido=FALSE)
       temp <- eval(parse(text = paste('unique(temp$',f_region_parametros$pedido,')')))
       temp <- temp[order(temp)]
-      updatePickerInput(
-        session,'filtro_pedido', choices = temp,selected = temp
-      )
+      if (length(temp)<=0) {
+        #temp <- eval(parse(text = paste0('tablas$',f_region_parametros$region)))
+	#temp <- eval(parse(text = paste0("temp$",f_region_parametros$pedido)))
+        #temp <- f_region_parametros$pedido
+        #temp <- eval(parse(text = paste('unique(temp$',f_region_parametros$pedido,')')))
+        #temp <- temp[order(temp)] 
+      }
+      if (length(temp) > 0) {
+        updatePickerInput(
+          session,'filtro_pedido', choices = temp,selected = temp
+        )
+      }
     }
     
     
