@@ -79,7 +79,7 @@ funcion_main_grafica_1 <- function(
 
 
 funcion_main_grafica_2 <- function(p_tabla, p_compresion = FALSE, p_texto_x, p_texto_y, p_variables_fecha, p_variable_pedido, p_variables_cantidades, p_texto_label, p_tipo_fgb,p_fecha_benchmark){
-  if(p_compresion){
+  if(p_compresion) {
     f_resultado <- funcion_compresion_fecha(p_tabla,p_variables_fecha ,p_variable_pedido, p_variables_cantidades,p_fecha_benchmark)
     f_tabla <- f_resultado$tabla
     f_variables_fecha <- f_resultado$fechas
@@ -334,8 +334,11 @@ funcion_grafica_pedidos_puntos <- function(p_tabla, p_variables_fecha,p_variable
   names(p_tabla)[1] <- 'pedido'
 
 
-
-  f_tamano_bolas <- 14/(log(nrow(p_tabla)))
+  if (nrow(p_tabla)>8) {
+  	f_tamano_bolas <- 14/(log(nrow(p_tabla)))
+  } else {
+  	f_tamano_bolas <- 12/log(8)
+  }
 
   f_vector_fechas <- paste0(p_variables_fecha,collapse = ',')
 

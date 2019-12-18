@@ -671,6 +671,114 @@ shinyServer(function(input, session, output) {
     }
   })
 
+  output$activa_filtro3 <- reactive({               # condicionante para que aparezca el filtro 3
+    f_region_parametros <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+    length(f_region_parametros$filtros) >= 3
+  })
+  outputOptions(output, "activa_filtro3", suspendWhenHidden = FALSE)
+
+  observeEvent(input$input_filtro1,{                # actualización dinámica de filtro 3
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    eval(parse(text = paste0('a <- (length(parametros$',f_region,'_filtros) >= 3)')))
+    if(a){
+      f_variable_1 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
+      f_filtro1 <- paste0('c("',paste0(input$input_filtro1,collapse = '","'),'")')
+      f_variable_3 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[3]')))
+      f_tabla <- eval(parse(text=paste0('tablas$',f_region,' %>% dplyr::filter(',f_variable_1,' %in% ',f_filtro1,')')))
+      f_choices <- eval(parse(text = paste0('as.character(unique(f_tabla$',f_variable_3,'))')))
+      updatePickerInput(            
+        session,
+        inputId = 'input_filtro3',
+        label = f_variable_3,
+        choices = f_choices[order(f_choices)],
+        selected = f_choices[order(f_choices)]
+      )
+    }
+  })
+
+  output$activa_filtro4 <- reactive({               # condicionante para que aparezca el filtro 4
+    f_region_parametros <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+    length(f_region_parametros$filtros) >= 4
+  })
+  outputOptions(output, "activa_filtro4", suspendWhenHidden = FALSE)
+
+  observeEvent(input$input_filtro1,{                # actualización dinámica de filtro 4
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    eval(parse(text = paste0('a <- (length(parametros$',f_region,'_filtros) >= 4)')))
+    if(a){
+      f_variable_1 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
+      f_filtro1 <- paste0('c("',paste0(input$input_filtro1,collapse = '","'),'")')
+      f_variable_4 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[4]')))
+      f_tabla <- eval(parse(text=paste0('tablas$',f_region,' %>% dplyr::filter(',f_variable_1,' %in% ',f_filtro1,')')))
+      f_choices <- eval(parse(text = paste0('as.character(unique(f_tabla$',f_variable_4,'))')))
+      updatePickerInput(            
+        session,
+        inputId = 'input_filtro4',
+        label = f_variable_4,
+        choices = f_choices[order(f_choices)],
+        selected = f_choices[order(f_choices)]
+      )
+    }
+  })
+
+  output$activa_filtro5 <- reactive({               # condicionante para que aparezca el filtro 5
+    f_region_parametros <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+    length(f_region_parametros$filtros) >= 5
+  })
+  outputOptions(output, "activa_filtro5", suspendWhenHidden = FALSE)
+
+  observeEvent(input$input_filtro1,{                # actualización dinámica de filtro 5
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    eval(parse(text = paste0('a <- (length(parametros$',f_region,'_filtros) >= 5)')))
+    if(a){
+      f_variable_1 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
+      f_filtro1 <- paste0('c("',paste0(input$input_filtro1,collapse = '","'),'")')
+      f_variable_5 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[5]')))
+      f_tabla <- eval(parse(text=paste0('tablas$',f_region,' %>% dplyr::filter(',f_variable_1,' %in% ',f_filtro1,')')))
+      f_choices <- eval(parse(text = paste0('as.character(unique(f_tabla$',f_variable_5,'))')))
+      updatePickerInput(            
+        session,
+        inputId = 'input_filtro5',
+        label = f_variable_5,
+        choices = f_choices[order(f_choices)],
+        selected = f_choices[order(f_choices)]
+      )
+    }
+  })
+
+  output$activa_filtro6 <- reactive({               # condicionante para que aparezca el filtro 6
+    f_region_parametros <- funcion_asigna_region_variables(input$input_filtro_zona, parametros, input)
+    length(f_region_parametros$filtros) >= 6
+  })
+  outputOptions(output, "activa_filtro6", suspendWhenHidden = FALSE)
+
+  observeEvent(input$input_filtro1,{                # actualización dinámica de filtro 6
+    if(input$input_filtro_zona == 'USA')f_region <- 'usa'
+    if(input$input_filtro_zona == 'Resto del mundo')f_region <- 'row'
+    if(input$input_filtro_zona == 'Doméstico')f_region <- 'domestico'
+    eval(parse(text = paste0('a <- (length(parametros$',f_region,'_filtros) >= 6)')))
+    if(a){
+      f_variable_1 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[1]')))
+      f_filtro1 <- paste0('c("',paste0(input$input_filtro1,collapse = '","'),'")')
+      f_variable_6 <- eval(parse(text = paste0('parametros$',f_region,'_filtros[6]')))
+      f_tabla <- eval(parse(text=paste0('tablas$',f_region,' %>% dplyr::filter(',f_variable_1,' %in% ',f_filtro1,')')))
+      f_choices <- eval(parse(text = paste0('as.character(unique(f_tabla$',f_variable_6,'))')))
+      updatePickerInput(            
+        session,
+        inputId = 'input_filtro6',
+        label = f_variable_6,
+        choices = f_choices[order(f_choices)],
+        selected = f_choices[order(f_choices)]
+      )
+    }
+  })
+ 
   observeEvent(input$input_filtro_zona,{                                       # actualización del filtro de fecha_variable dependiendo de la zona
     a <-excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)]
     b <- excel_parametros$usa_fechas[!is.na(excel_parametros$usa_fechas)][1]

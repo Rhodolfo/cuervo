@@ -32,6 +32,10 @@ dfB <- funcion_cargar_datos(parametros$row_carpeta,parametros$row_fechas,
   parametros$row_cantidades,parametros$row_filtros,parametros$row_pedido,parametros$row_fechas_benchmark,
   p_aux_carpetas=parametros$row_aux_carpetas,p_aux_x=parametros$row_aux_x,p_aux_y=parametros$row_aux_y)
 
+dfA <- funcion_cargar_datos(parametros$domestico_carpeta,parametros$domestico_fechas,
+  parametros$domestico_cantidades,parametros$domestico_filtros,parametros$domestico_pedido,parametros$domestico_fechas_benchmark,
+  p_aux_carpetas=parametros$domestico_aux_carpetas,p_aux_x=parametros$domestico_aux_x,p_aux_y=parametros$domestico_aux_y)
+
 
 
 parametros <- list()

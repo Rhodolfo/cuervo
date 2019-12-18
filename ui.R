@@ -85,6 +85,26 @@ sidebar <- dashboardSidebar(
                          options = pickerOptions(actionsBox = TRUE, size = 10, liveSearch = TRUE)
                        )
       ),
+      conditionalPanel('output.activa_filtro3',
+                       pickerInput(                   # filtro 3
+                         'input_filtro3',
+                         'filtro3',
+                         selected = 'ninguna',
+                         choices = 'ninguna',
+                         multiple = TRUE,
+                         options = pickerOptions(actionsBox = TRUE, size = 10, liveSearch = TRUE)
+                       )
+      ),
+      conditionalPanel('output.activa_filtro4',
+                       pickerInput(                   # filtro 4
+                         'input_filtro4',
+                         'filtro4',
+                         selected = 'ninguna',
+                         choices = 'ninguna',
+                         multiple = TRUE,
+                         options = pickerOptions(actionsBox = TRUE, size = 10, liveSearch = TRUE)
+                       )
+      ),
       pickerInput(                                    # filtro fecha variable
         'filtro_fecha_variable',
         'Fecha para filtrar',
